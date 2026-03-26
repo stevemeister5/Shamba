@@ -65,331 +65,348 @@
 
 ---
 
-## Phase 3: Livestock Management Module
+## Phase 3: Farm Setup & Initialization
 
-### Task 8: Create Animal Profile System
+### Task 8: Create Farm Setup Module
+- Build FarmSetupScreen with step-by-step wizard workflow
+- Implement farm mapping with GPS boundary drawing
+- Create building planner (shelters, storage, cheese room, water points)
+- Build task setup for initial infrastructure construction
+- Implement flock induction workflow (add initial animals)
+- Create crop planting initialization for first season
+- Add soil testing and plot preparation tasks
+- Generate initial farm setup checklist
+- **Commit:** `git add -A && git commit -m "Task 8: Create farm setup and initialization module"`
+
+### Task 9: Build Farm Mapping with ARCore
+- Integrate ARCore for augmented reality farm mapping
+- Create AR boundary marking with GPS coordinates
+- Implement 3D visualization of planned buildings
+- Build plot boundary overlay in AR view
+- Add infrastructure placement preview in AR
+- Create measurement tools for accurate plot sizing
+- **Commit:** `git add -A && git commit -m "Task 9: Integrate ARCore for farm mapping"`
+
+---
+
+## Phase 4: Livestock Management Module
+
+### Task 10: Create Animal Profile System
 - Build Animal entity and DAO
 - Create animal profile screen (add/edit/view)
 - Implement photo capture and storage
 - Build herd overview dashboard with filters
 - Add tag assignment for newborns (untagged entry support)
-- **Commit:** `git add -A && git commit -m "Task 8: Build animal profile system with herd overview"`
+- **Commit:** `git add -A && git commit -m "Task 10: Build animal profile system with herd overview"`
 
-### Task 9: Implement Health Records
+### Task 11: Implement Health Records
 - Create HealthRecord entity (vaccinations, deworming, treatments)
 - Build health record entry forms
 - Implement automated health alerts system
 - Create vaccination schedule view
 - Handle dead animal records (auto-close and archive)
-- **Commit:** `git add -A && git commit -m "Task 9: Implement health records with automated alerts"`
+- **Commit:** `git add -A && git commit -m "Task 11: Implement health records with automated alerts"`
 
-### Task 10: Build Reproduction Tracking
+### Task 12: Build Reproduction Tracking
 - Create ReproductionRecord entity
 - Implement heat detection logging
 - Build mating records (sire + dam pairing)
 - Create pregnancy tracking with expected dates
 - Add birth record entry (multiple kids support)
-- **Commit:** `git add -A && git commit -m "Task 10: Build reproduction and birth tracking system"`
+- **Commit:** `git add -A && git commit -m "Task 12: Build reproduction and birth tracking system"`
 
-### Task 11: Create Milk Production Logging
+### Task 13: Create Milk Production Logging
 - Build MilkProduction entity
 - Create daily AM/PM yield entry forms
 - Implement lactation curve chart
 - Build per-doe production history
 - Handle transitional period (pregnant + milking doe)
-- **Commit:** `git add -A && git commit -m "Task 11: Create milk production logging with charts"`
+- **Commit:** `git add -A && git commit -m "Task 13: Create milk production logging with charts"`
 
-### Task 12: Implement Growth Tracking & Analytics
+### Task 14: Implement Growth Tracking & Analytics
 - Create WeightEntry entity
 - Build weight tracking with growth charts
 - Calculate feed conversion ratio
 - Implement culling recommendation engine
-- **Commit:** `git add -A && git commit -m "Task 12: Implement growth tracking and culling recommendations"`
+- **Commit:** `git add -A && git commit -m "Task 14: Implement growth tracking and culling recommendations"`
 
 ---
 
-## Phase 4: Crop & Pasture Management Module
+## Phase 5: Crop & Pasture Management Module
 
-### Task 13: Build Field/Plot Registry
+### Task 15: Build Field/Plot Registry
 - Create Plot entity with GPS coordinates
 - Build 16-acre map view with plot boundaries
 - Implement plot editing (name, size, soil type, current use)
 - Add current crop assignment
-- **Commit:** `git add -A && git commit -m "Task 13: Build field registry with map view"`
+- **Commit:** `git add -A && git commit -m "Task 15: Build field registry with map view"`
 
-### Task 14: Create Crop Planting Records
+### Task 16: Create Crop Planting Records
 - Build CropPlanting entity
 - Create planting record entry forms
 - Implement growth stage tracking with reminders
 - Build input application log (fertilizer, pesticide, herbicide)
-- **Commit:** `git add -A && git commit -m "Task 14: Create crop planting and growth stage tracking"`
+- **Commit:** `git add -A && git commit -m "Task 16: Create crop planting and growth stage tracking"`
 
-### Task 15: Implement Harvest & Silage Module
+### Task 17: Implement Harvest & Silage Module
 - Create HarvestRecord entity
 - Build harvest entry with quality grading
 - Implement silage pit inventory tracking
 - Create silage fermentation monitoring
 - Handle multi-day harvest splits
 - Support intercropped plots
-- **Commit:** `git add -A && git commit -m "Task 15: Implement harvest and silage management"`
+- **Commit:** `git add -A && git commit -m "Task 17: Implement harvest and silage management"`
 
-### Task 16: Build Weather & Analytics
+### Task 18: Build Weather & Analytics
 - Create WeatherLog entity for manual entry
 - Integrate open weather API (Korogwe coordinates)
 - Build yield history charts
 - Implement season comparison analytics
 - Create crop rotation planner
-- **Commit:** `git add -A && git commit -m "Task 16: Add weather logging and yield analytics"`
+- **Commit:** `git add -A && git commit -m "Task 18: Add weather logging and yield analytics"`
 
 ---
 
-## Phase 5: Cheese & Value Addition Module
+## Phase 6: Cheese & Value Addition Module
 
-### Task 17: Create Milk Collection System
+### Task 19: Create Milk Collection System
 - Build MilkCollection entity
 - Create collection log with quality checks
 - Link to contributing does
 - Implement rejection logging (sour/contaminated milk)
-- **Commit:** `git add -A && git commit -m "Task 17: Build milk collection logging system"`
+- **Commit:** `git add -A && git commit -m "Task 19: Build milk collection logging system"`
 
-### Task 18: Build Cheese Production Tracking
+### Task 20: Build Cheese Production Tracking
 - Create CheeseBatch entity
 - Build batch record entry (milk volume, type, culture, rennet)
 - Implement aging tracking with location
 - Create spoilage/loss logging
-- **Commit:** `git add -A && git commit -m "Task 18: Implement cheese batch production tracking"`
+- **Commit:** `git add -A && git commit -m "Task 20: Implement cheese batch production tracking"`
 
-### Task 19: Create Cheese Inventory & Sales
+### Task 21: Create Cheese Inventory & Sales
 - Build packaging log functionality
 - Implement cost per batch calculator
 - Create inventory dashboard (on hand, aging, reserved)
 - Build sales log with payment tracking
 - Generate revenue vs. cost margin reports
-- **Commit:** `git add -A && git commit -m "Task 19: Build cheese inventory and sales tracking"`
+- **Commit:** `git add -A && git commit -m "Task 21: Build cheese inventory and sales tracking"`
 
 ---
 
-## Phase 6: Feed & Store Management Module
+## Phase 7: Feed & Store Management Module
 
-### Task 20: Build Feed Inventory System
+### Task 22: Build Feed Inventory System
 - Create FeedInventory entity
 - Build stock level tracking for all feed types
 - Implement daily feed allocation logging
 - Create feed requirement calculator
 - Add silage pit inventory with draw-down tracking
 - Implement fermentation warnings
-- **Commit:** `git add -A && git commit -m "Task 20: Build feed inventory and allocation system"`
+- **Commit:** `git add -A && git commit -m "Task 22: Build feed inventory and allocation system"`
 
-### Task 21: Create Store Management
+### Task 23: Create Store Management
 - Build StoreItem entity
 - Implement inventory tracking (seeds, fertilizers, chemicals, medicine)
 - Add expiry date monitoring
 - Create procurement logging
 - Implement reorder level alerts
-- **Commit:** `git add -A && git commit -m "Task 21: Create store inventory and procurement system"`
+- **Commit:** `git add -A && git commit -m "Task 23: Create store inventory and procurement system"`
 
 ---
 
-## Phase 7: Financial Management Module
+## Phase 8: Financial Management Module
 
-### Task 22: Build Income & Expense Tracking
+### Task 24: Build Income & Expense Tracking
 - Create Income and Expense entities
 - Build categorized entry forms
 - Implement petty cash log
 - Create transaction history view
-- **Commit:** `git add -A && git commit -m "Task 22: Build income and expense tracking"`
+- **Commit:** `git add -A && git commit -m "Task 24: Build income and expense tracking"`
 
-### Task 23: Implement P&L Reports
+### Task 25: Implement P&L Reports
 - Create profit & loss calculation engine
 - Build weekly/monthly/seasonal/annual reports
 - Implement enterprise-level P&L (goats, sheep, crops, cheese)
 - Create budget vs. actual comparison
 - Add PDF and CSV export functionality
-- **Commit:** `git add -A && git commit -m "Task 23: Implement P&L reports with export"`
+- **Commit:** `git add -A && git commit -m "Task 25: Implement P&L reports with export"`
 
-### Task 24: Build Credit & Loan Tracking
+### Task 26: Build Credit & Loan Tracking
 - Create Loan entity
 - Implement loan repayment schedule
 - Build outstanding payment tracker (animals sold on credit)
 - Add worker advance payment tracking
-- **Commit:** `git add -A && git commit -m "Task 24: Build credit and loan tracking system"`
+- **Commit:** `git add -A && git commit -m "Task 26: Build credit and loan tracking system"`
 
 ---
 
-## Phase 8: Labour Management Module
+## Phase 9: Labour Management Module
 
-### Task 25: Create Worker Management
+### Task 27: Create Worker Management
 - Build Worker entity
 - Create worker profile forms
 - Support seasonal worker date-bounded employment
 - Build worker list with role filters
-- **Commit:** `git add -A && git commit -m "Task 25: Create worker profile management"`
+- **Commit:** `git add -A && git commit -m "Task 27: Create worker profile management"`
 
-### Task 26: Implement Attendance & Tasks
+### Task 28: Implement Attendance & Tasks
 - Build AttendanceRecord entity
 - Create daily attendance logging
 - Implement task assignment system
 - Build daily work journal
 - Add task status tracking
-- **Commit:** `git add -A && git commit -m "Task 26: Implement attendance and task management"`
+- **Commit:** `git add -A && git commit -m "Task 28: Implement attendance and task management"`
 
-### Task 27: Build Payroll System
+### Task 29: Build Payroll System
 - Create payroll calculation engine
 - Build days worked × rate computation
 - Implement deduction tracking
 - Add advance payment integration
 - Generate payroll summaries
-- **Commit:** `git add -A && git commit -m "Task 27: Build payroll calculation system"`
+- **Commit:** `git add -A && git commit -m "Task 29: Build payroll calculation system"`
 
 ---
 
-## Phase 9: Calendar & Task Planner
+## Phase 10: Calendar & Task Planner
 
-### Task 28: Create Farm Calendar
+### Task 30: Create Farm Calendar
 - Build calendar view with all farm events
 - Integrate planting dates, harvest windows, vaccination schedules
 - Add cheese aging milestones and market days
 - Include loan repayment dates
-- **Commit:** `git add -A && git commit -m "Task 28: Create unified farm calendar"`
+- **Commit:** `git add -A && git commit -m "Task 30: Create unified farm calendar"`
 
-### Task 29: Implement Task Automation
+### Task 31: Implement Task Automation
 - Build recurring task templates (dipping, deworming, soil testing)
 - Create task generation from schedules
 - Implement push notification system
 - Build season planner with crop rotation
-- **Commit:** `git add -A && git commit -m "Task 29: Implement recurring tasks and notifications"`
+- **Commit:** `git add -A && git commit -m "Task 31: Implement recurring tasks and notifications"`
 
 ---
 
-## Phase 10: Dashboard & Analytics
+## Phase 11: Dashboard & Analytics
 
-### Task 30: Build Advanced Charts
+### Task 32: Build Advanced Charts
 - Implement milk trend charts (30/90 days)
 - Create revenue vs. expenses monthly chart
 - Build herd growth curve visualization
 - Add crop yield by season charts
-- **Commit:** `git add -A && git commit -m "Task 30: Build advanced analytics charts"`
+- **Commit:** `git add -A && git commit -m "Task 32: Build advanced analytics charts"`
 
-### Task 31: Create Alerts Engine
+### Task 33: Create Alerts Engine
 - Implement alert rules (animal not weighed, vaccination overdue, low feed, etc.)
 - Build alert priority system
 - Create alert notification delivery
 - Add alert dismissal and tracking
-- **Commit:** `git add -A && git commit -m "Task 31: Create comprehensive alerts engine"`
+- **Commit:** `git add -A && git commit -m "Task 33: Create comprehensive alerts engine"`
 
 ---
 
-## Phase 11: Land & Infrastructure
+## Phase 12: Land & Infrastructure
 
-### Task 32: Build Farm Map Module
+### Task 34: Build Farm Map Module
 - Create farm map with plot boundaries
 - Add animal shelters, water points, storage locations
 - Implement cheese room and compost pit markers
 - Build infrastructure condition logging
-- **Commit:** `git add -A && git commit -m "Task 32: Build farm map and infrastructure tracking"`
+- **Commit:** `git add -A && git commit -m "Task 34: Build farm map and infrastructure tracking"`
 
-### Task 33: Implement Maintenance Scheduling
-- Create maintenance task system
+### Task 35: Implement Maintenance Scheduling
+- Create maintenance task system with vehicle tracking
 - Build dipping tank cleaning schedule
 - Implement equipment servicing reminders
 - Add infrastructure repair tracking
-- **Commit:** `git add -A && git commit -m "Task 33: Implement maintenance scheduling"`
+- Create Vehicle entity for fleet management
+- Build VehiclePart entity for parts inventory
+- Track mileage, hours run, and service intervals
+- Implement parts reorder alerts
+- **Commit:** `git add -A && git commit -m "Task 35: Implement maintenance scheduling with vehicle tracking"`
 
 ---
 
-## Phase 12: Advanced Profit Optimization Features
+## Phase 13: Advanced Profit Optimization Features
 
-### Task 34: Build Least-Cost Ration (LCR) Solver ✅
+### Task 36: Build Least-Cost Ration (LCR) Solver ✅
 - Implement Pearson Square algorithm in Kotlin
 - Create linear programming solver for feed optimization
 - Build UI for entering supplement prices
 - Calculate DM and CP requirements
 - Display optimized feed mix recommendations
-- **Commit:** `git add -A && git commit -m "Task 34: Build Least-Cost Ration solver"`
+- **Commit:** `git add -A && git commit -m "Task 36: Build Least-Cost Ration solver"`
 - **Status:** ✅ Completed
 
-### Task 35: Implement Computer Vision Colorimeter ✅
+### Task 37: Implement Computer Vision Colorimeter ✅
 - Integrate OpenCV for Android
 - Build HSV color space analysis
 - Create maturity grading for crops and cheese
 - Implement "Harvest Window Alerts"
 - Generate QR invoices with maturity metadata
-- **Commit:** `git add -A && git commit -m "Task 35: Implement HSV colorimetric grading"`
+- **Commit:** `git add -A && git commit -m "Task 37: Implement HSV colorimetric grading"`
 - **Status:** ✅ Completed
 
-### Task 36: Build Evapotranspiration Water Optimizer ✅
+### Task 38: Build Evapotranspiration Water Optimizer ✅
 - Implement Penman-Monteith (FAO-56) formula
 - Create daily ET₀ calculation
 - Build irrigation decision logic
 - Implement "Pumping Block" feature
 - Add soil moisture threshold alerts
-- **Commit:** `git add -A && git commit -m "Task 36: Build water optimization module"`
+- **Commit:** `git add -A && git commit -m "Task 38: Build water optimization module"`
 - **Status:** ✅ Completed
 
-### Task 37: Create Digital Twin Plot Benchmarking ✅
+### Task 39: Create Digital Twin Plot Benchmarking ✅
 - Build plot performance tracking
 - Implement ROI calculation per plot
 - Create "Clone the Champion" feature
 - Generate success SOP from best-performing plots
 - Build $/m² profit heatmap overlay
-- **Commit:** `git add -A && git commit -m "Task 37: Build digital twin and profit heatmap"`
+- **Commit:** `git add -A && git commit -m "Task 39: Build digital twin and profit heatmap"`
 - **Status:** ✅ Completed
 
-### Task 38: Implement Acoustic Guard ✅
+### Task 40: Implement Acoustic Guard ✅
 - Integrate Qualcomm Sensing Hub
 - Build pest detection audio classifier
 - Create animal distress sound detection
 - Implement push notifications for detections
-- **Commit:** `git add -A && git commit -m "Task 38: Implement acoustic pest and distress detection"`
+- **Commit:** `git add -A && git commit -m "Task 40: Implement acoustic pest and distress detection"`
 - **Status:** ✅ Completed
 
-### Task 39: Configure NPU Delegation ✅
+### Task 41: Configure NPU Delegation ✅
 - Set up QNN delegate for Hexagon NPU
 - Configure INT4 quantization for ML models
 - Implement volatile RAM processing for vision
 - Optimize for 144Hz UI stability
-- **Commit:** `git add -A && git commit -m "Task 39: Configure NPU delegation and quantization"`
+- **Commit:** `git add -A && git commit -m "Task 41: Configure NPU delegation and quantization"`
 - **Status:** ✅ Completed
-
----
-
-## Phase 13: NPU Optimization & Performance
-
-### Task 40: Performance Testing & Optimization
-- Profile app performance on Xiaomi Pad 7
-- Optimize database queries
-- Reduce memory footprint
-- Test offline sync performance
-- Verify 144Hz UI fluidity
-- **Commit:** `git add -A && git commit -m "Task 40: Performance testing and optimization"`
 
 ---
 
 ## Phase 14: Localization & Final Polish
 
-### Task 41: Implement Swahili Localization
+### Task 42: Implement Swahili Localization
 - Create string resources for all UI text
 - Build language toggle functionality
 - Test Swahili translations
 - Ensure proper text rendering
-- **Commit:** `git add -A && git commit -m "Task 41: Implement Swahili localization"`
+- **Commit:** `git add -A && git commit -m "Task 42: Implement Swahili localization"`
 
-### Task 42: Final Integration Testing
+### Task 43: Final Integration Testing
 - Test all modules end-to-end
 - Verify offline/online sync
 - Test data export (PDF/CSV)
 - Validate backup and restore
 - Perform user acceptance testing
-- **Commit:** `git add -A && git commit -m "Task 42: Final integration testing and polish"`
+- **Commit:** `git add -A && git commit -m "Task 43: Final integration testing and polish"`
 
 ---
 
 ## Summary
-- **Total Tasks:** 42
-- **Estimated Duration:** 12-16 weeks
+- **Total Tasks:** 43
+- **Estimated Duration:** 14-18 weeks
 - **Key Milestones:**
   - Phase 1-2: Foundation (Week 1-2)
-  - Phase 3-4: Core Modules (Week 3-6)
-  - Phase 5-8: Business Modules (Week 7-12)
-  - Phase 9-11: Advanced Features (Week 13-14)
-  - Phase 12-14: Optimization & Polish (Week 15-16)
+  - Phase 3: Farm Setup (Week 2-3)
+  - Phase 4-5: Core Modules (Week 3-6)
+  - Phase 6-9: Business Modules (Week 7-12)
+  - Phase 10-12: Advanced Features (Week 13-15)
+  - Phase 13-14: Optimization & Polish (Week 16-18)

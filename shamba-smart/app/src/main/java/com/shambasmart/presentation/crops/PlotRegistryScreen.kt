@@ -12,11 +12,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.shambasmart.data.local.entity.Plot
+import com.shambasmart.presentation.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlotRegistryScreen(
+    navController: NavController = rememberNavController(),
     viewModel: CropsViewModel = hiltViewModel()
 ) {
     val plots by viewModel.allPlots.collectAsStateWithLifecycle()
@@ -35,11 +39,27 @@ fun PlotRegistryScreen(
                 text = "Field Registry",
                 style = MaterialTheme.typography.headlineMedium
             )
-            FloatingActionButton(
-                onClick = { showAddDialog = true },
-                modifier = Modifier.size(48.dp)
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Plot")
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                // Analytics Button
+                FilledTonalButton(
+                    onClick = { navController.navigate(Screen.PlotAnalytics.route) },
+                    modifier = Modifier.height(40.dp)
+                ) {
+                    Icon(
+                        Icons.Default.Analytics,
+                        contentDescription = "Analytics",
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Analytics")
+                }
+                // Add Plot Button
+                FloatingActionButton(
+                    onClick = { showAddDialog = true },
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Add Plot")
+                }
             }
         }
         Spacer(modifier = Modifier.height(16.dp))

@@ -35,4 +35,26 @@ interface PlotDao {
 
     @Query("SELECT SUM(sizeAcres) FROM plots")
     suspend fun getTotalAcres(): Double?
+
+    // Digital Twin Benchmarking queries
+    @Query("UPDATE plots SET performanceIndex = :performanceIndex, updatedAt = :updatedAt WHERE id = :id")
+    suspend fun updatePerformanceIndex(id: Long, performanceIndex: Double, updatedAt: Long = System.currentTimeMillis())
+
+    @Query("UPDATE plots SET healthScore = :healthScore, updatedAt = :updatedAt WHERE id = :id")
+    suspend fun updateHealthScore(id: Long, healthScore: Double, updatedAt: Long = System.currentTimeMillis())
+
+    @Query("UPDATE plots SET lastYieldKg = :yieldKg, updatedAt = :updatedAt WHERE id = :id")
+    suspend fun updateLastYield(id: Long, yieldKg: Double, updatedAt: Long = System.currentTimeMillis())
+
+    @Query("UPDATE plots SET baselineCropsPerM2 = :baseline, targetYieldKg = :target WHERE id = :id")
+    suspend fun setBenchmarks(id: Long, baseline: Double, target: Double)
+
+    @Query("UPDATE plots SET boundaryPoints = :points, updatedAt = :updatedAt WHERE id = :id")
+    suspend fun updateBoundaryPoints(id: Long, points: String, updatedAt: Long = System.currentTimeMillis())
+
+    @Query("UPDATE plots SET soilMoistureSensorId = :sensorId, updatedAt = :updatedAt WHERE id = :id")
+    suspend fun setSensorId(id: Long, sensorId: String, updatedAt: Long = System.currentTimeMillis())
+
+    @Query("SELECT * FROM plots WHERE performanceIndex < :threshold ORDER BY performanceIndex ASC")
+    fun getUnderperformingPlots(threshold: Double = 50.0): Flow<List<Plot>>
 }

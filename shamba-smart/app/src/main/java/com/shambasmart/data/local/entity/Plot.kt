@@ -16,6 +16,16 @@ data class Plot(
     val currentUse: String? = null,
     val currentCropId: Long? = null,
     val notes: String? = null,
+    // Digital Twin Benchmarking Fields
+    val soilMoistureSensorId: String? = null,
+    val baselineCropsPerM2: Double? = null,
+    val targetYieldKg: Double? = null,
+    // Performance Tracking
+    val lastYieldKg: Double? = null,
+    val performanceIndex: Double? = null,
+    val healthScore: Double? = null,
+    // GPS Boundary
+    val boundaryPoints: String? = null,
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis(),
     val isSynced: Boolean = false

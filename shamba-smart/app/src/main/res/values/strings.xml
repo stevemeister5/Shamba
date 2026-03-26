@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App Name -->
+    <string name="app_name">Shamba Smart</string>
+
+    <!-- Navigation -->
+    <string name="nav_dashboard">Dashboard</string>
+    <string name="nav_livestock">Livestock</string>
+    <string name="nav_crops">Crops</string>
+    <string name="nav_cheese">Cheese</string>
+    <string name="nav_feed">Feed</string>
+    <string name="nav_financial">Financial</string>
+    <string name="nav_labour">Labour</string>
+    <string name="nav_calendar">Calendar</string>
+    <string name="nav_infrastructure">Map</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_title">Farm Dashboard</string>
+    <string name="dashboard_todays_tasks">Today\'s Tasks</string>
+    <string name="dashboard_alerts">Alerts</string>
+    <string name="dashboard_quick_stats">Quick Stats</string>
+    <string name="dashboard_herd_size">Herd Size</string>
+    <string name="dashboard_milk_today">Milk Today</string>
+    <string name="dashboard_cheese_inventory">Cheese Inventory</string>
+    <string name="dashboard_cash_balance">Cash Balance</string>
+
+    <!-- Livestock -->
+    <string name="livestock_title">Livestock Management</string>
+    <string name="livestock_add_animal">Add Animal</string>
+    <string name="livestock_herd_overview">Herd Overview</string>
+    <string name="livestock_health_records">Health Records</string>
+    <string name="livestock_reproduction">Reproduction</string>
+    <string name="livestock_milk_production">Milk Production</string>
+    <string name="livestock_tag_id">Tag ID</string>
+    <string name="livestock_species">Species</string>
+    <string name="livestock_breed">Breed</string>
+    <string name="livestock_sex">Sex</string>
+    <string name="livestock_dob">Date of Birth</string>
+    <string name="livestock_weight">Weight (kg)</string>
+    <string name="livestock_goat">Goat</string>
+    <string name="livestock_sheep">Sheep</string>
+
+    <!-- Crops -->
+    <string name="crops_title">Crop Management</string>
+    <string name="crops_add_plot">Add Plot</string>
+    <string name="crops_planting_records">Planting Records</string>
+    <string name="crops_harvest">Harvest</string>
+    <string name="crops_weather">Weather</string>
+    <string name="crops_plot_name">Plot Name</string>
+    <string name="crops_size">Size (acres)</string>
+    <string name="crops_soil_type">Soil Type</string>
+    <string name="crops_current_crop">Current Crop</string>
+
+    <!-- Cheese -->
+    <string name="cheese_title">Cheese Production</string>
+    <string name="cheese_milk_collection">Milk Collection</string>
+    <string name="cheese_batch_records">Batch Records</string>
+    <string name="cheese_inventory">Inventory</string>
+    <string name="cheese_sales">Sales</string>
+
+    <!-- Feed -->
+    <string name="feed_title">Feed Management</string>
+    <string name="feed_inventory">Feed Inventory</string>
+    <string name="feed_daily_allocation">Daily Allocation</string>
+    <string name="feed_silage">Silage</string>
+    <string name="feed_store">Store</string>
+
+    <!-- Financial -->
+    <string name="financial_title">Financial Management</string>
+    <string name="financial_income">Income</string>
+    <string name="financial_expenses">Expenses</string>
+    <string name="financial_pl">Profit &amp; Loss</string>
+    <string name="financial_loans">Loans</string>
+
+    <!-- Labour -->
+    <string name="labour_title">Labour Management</string>
+    <string name="labour_workers">Workers</string>
+    <string name="labour_attendance">Attendance</string>
+    <string name="labour_tasks">Tasks</string>
+    <string name="labour_payroll">Payroll</string>
+
+    <!-- Calendar -->
+    <string name="calendar_title">Farm Calendar</string>
+    <string name="calendar_upcoming">Upcoming Events</string>
+    <string name="calendar_recurring">Recurring Tasks</string>
+
+    <!-- Infrastructure -->
+    <string name="infrastructure_title">Farm Map</string>
+    <string name="infrastructure_plots">Plots</string>
+    <string name="infrastructure_facilities">Facilities</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_farm_profile">Farm Profile</string>
+    <string name="settings_notifications">Notifications</string>
+    <string name="settings_backup">Backup &amp; Restore</string>
+    <string name="settings_about">About</string>
+
+    <!-- Common Actions -->
+    <string name="action_save">Save</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_edit">Edit</string>
+    <string name="action_add">Add</string>
+    <string name="action_search">Search</string>
+    <string name="action_filter">Filter</string>
+    <string name="action_export">Export</string>
+
+    <!-- Status -->
+    <string name="status_pending">Pending</string>
+    <string name="status_completed">Completed</string>
+    <string name="status_overdue">Overdue</string>
+    <string name="status_active">Active</string>
+    <string name="status_inactive">Inactive</string>
+
+    <!-- Alerts -->
+    <string name="alert_vaccination_due">Vaccination Due</string>
+    <string name="alert_deworming_due">Deworming Due</string>
+    <string name="alert_low_feed">Low Feed Stock</string>
+    <string name="alert_payment_overdue">Payment Overdue</string>
+    <string name="alert_animal_sick">Animal Needs Attention</string>
+
+    <!-- Errors -->
+    <string name="error_generic">Something went wrong</string>
+    <string name="error_network">Network error. Please check your connection.</string>
+    <string name="error_offline">You are offline. Data will sync when connected.</string>
+
+    <!-- Success Messages -->
+    <string name="success_saved">Saved successfully</string>
+    <string name="success_deleted">Deleted successfully</string>
+    <string name="success_synced">Data synced successfully</string>
+</resources>

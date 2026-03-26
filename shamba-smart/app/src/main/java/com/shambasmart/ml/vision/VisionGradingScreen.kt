@@ -3,12 +3,13 @@ package com.shambasmart.ml.vision
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.IIcons
+import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -38,6 +39,53 @@ fun VisionGradingScreen(
         )
         Spacer(modifier = Modifier.height(24.dp))
 
+        // Product Type Selection
+        Card(modifier = Modifier.fillMaxWidth()) {
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text(
+                    text = "Select Product Type",
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                // Crop types
+                Text("Crops:", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    ProductType.values().filter { !it.name.startsWith("CHEESE") }.forEach { type ->
+                        FilterChip(
+                            selected = uiState.selectedProduct == type,
+                            onClick = { viewModel.setProductType(type) },
+                            label = { Text(type.name.replace("_", " ")) }
+                        )
+                    }
+                }
+                
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                // Cheese types
+                Text("Cheese:", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+                Spacer(modifier = Modifier.height(4.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    ProductType.values().filter { it.name.startsWith("CHEESE") }.forEach { type ->
+                        FilterChip(
+                            selected = uiState.selectedProduct == type,
+                            onClick = { viewModel.setProductType(type) },
+                            label = { Text(type.name.replace("_", " ")) }
+                        )
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         // Camera Placeholder
         Card(
             modifier = Modifier
@@ -58,7 +106,7 @@ fun VisionGradingScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                     Text("Camera Preview")
                     Text(
-                        "Point at crop or cheese for grading",
+                        "Point at ${uiState.selectedProduct.name.replace("_", " ")} for grading",
                         style = MaterialTheme.typography.bodySmall
                     )
                 }
@@ -86,6 +134,41 @@ fun VisionGradingScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
+        // Harvest Window Alert
+        if (uiState.grade != null && uiState.isInHarvestWindow) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color(0xFF4CAF50).copy(alpha = 0.1f)
+                )
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        Icons.Default.CheckCircle,
+                        contentDescription = null,
+                        tint = Color(0xFF4CAF50),
+                        modifier = Modifier.size(32.dp)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column {
+                        Text(
+                            text = "✓ Harvest Window Active",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = Color(0xFF4CAF50)
+                        )
+                        Text(
+                            text = uiState.harvestStatus,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
         // Results Section
         if (uiState.grade != null) {
             Card(
@@ -94,6 +177,7 @@ fun VisionGradingScreen(
                     containerColor = when (uiState.grade) {
                         "A" -> MaterialTheme.colorScheme.primaryContainer
                         "B" -> MaterialTheme.colorScheme.secondaryContainer
+                        "C" -> MaterialTheme.colorScheme.tertiaryContainer
                         else -> MaterialTheme.colorScheme.errorContainer
                     }
                 )
@@ -107,28 +191,69 @@ fun VisionGradingScreen(
                         horizontalArrangement = Arrangement.SpaceEvenly,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
-                            text = "Grade: ${uiState.grade}",
-                            style = MaterialTheme.typography.headlineLarge,
-                            color = MaterialTheme.colorScheme.primary
-                        )
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = uiState.grade,
+                                style = MaterialTheme.typography.displayLarge,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Text(
+                                text = "Grade",
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                        }
+                        
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Text(
+                                text = "${String.format("%.0f", uiState.maturityScore)}%",
+                                style = MaterialTheme.typography.headlineMedium,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                            Text(
+                                text = "Maturity",
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                        }
+                        
                         Column {
                             Text(
-                                text = "Hue: ${String.format("%.0f", uiState.hue)}°",
+                                text = "H: ${String.format("%.0f", uiState.hue)}°",
                                 style = MaterialTheme.typography.bodyMedium
                             )
                             Text(
-                                text = "Saturation: ${String.format("%.0f", uiState.saturation * 100)}%",
+                                text = "S: ${String.format("%.0f", uiState.saturation * 100)}%",
                                 style = MaterialTheme.typography.bodyMedium
                             )
                             Text(
-                                text = "Value: ${String.format("%.0f", uiState.value * 100)}%",
+                                text = "V: ${String.format("%.0f", uiState.value * 100)}%",
                                 style = MaterialTheme.typography.bodyMedium
                             )
                         }
                     }
                     
                     Spacer(modifier = Modifier.height(12.dp))
+                    
+                    // Premium indicator
+                    if (uiState.premiumMultiplier > 1.0) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Default.Star,
+                                contentDescription = null,
+                                tint = Color(0xFFFFD700),
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = "+${((uiState.premiumMultiplier - 1) * 100).toInt()}% Price Premium",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = Color(0xFFFFD700)
+                            )
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                    
                     Text(
                         text = uiState.analysis,
                         style = MaterialTheme.typography.bodyMedium
@@ -149,6 +274,41 @@ fun VisionGradingScreen(
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Generate QR Invoice")
             }
+            
+            if (uiState.qrData != null) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer
+                    )
+                ) {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        Text(
+                            text = "QR Code Generated",
+                            style = MaterialTheme.typography.titleSmall
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "Contains: Grade, HSV values, maturity score, harvest window status, and digital signature",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        // Clear Button
+        if (uiState.grade != null) {
+            OutlinedButton(
+                onClick = { viewModel.clearResults() },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(Icons.Default.Refresh, contentDescription = null)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Analyze Another")
+            }
             Spacer(modifier = Modifier.height(16.dp))
         }
 
@@ -158,15 +318,19 @@ fun VisionGradingScreen(
                 Text("Profit Impact", style = MaterialTheme.typography.titleMedium)
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "• Grade A produce commands 25%+ price premium",
+                    text = "• Grade A produce commands 25-50% price premium",
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Text(
-                    text = "• Ensures quality consistency for buyers",
+                    text = "• Harvest window alerts prevent quality loss",
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Text(
-                    text = "• Digital grading certificate builds trust",
+                    text = "• Digital grading certificate builds buyer trust",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = "• QR invoices enable traceability and branding",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }
@@ -180,19 +344,27 @@ fun VisionGradingScreen(
                 Text("How It Works", style = MaterialTheme.typography.titleMedium)
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "• Captures image using Xiaomi Pad 7 camera",
+                    text = "1. Select product type (crop or cheese)",
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Text(
-                    text = "• Converts to HSV color space",
+                    text = "2. Capture image using Xiaomi Pad 7 camera",
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Text(
-                    text = "• Analyzes color against 'Peak Value' database",
+                    text = "3. Convert to HSV color space for analysis",
                     style = MaterialTheme.typography.bodyMedium
                 )
                 Text(
-                    text = "• Generates signed QR invoice with metadata",
+                    text = "4. Compare against optimal maturity profiles",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = "5. Generate grade and harvest window status",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    text = "6. Create signed QR invoice with metadata",
                     style = MaterialTheme.typography.bodyMedium
                 )
             }

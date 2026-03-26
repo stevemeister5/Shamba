@@ -21,6 +21,7 @@ import com.shambasmart.presentation.ml.vision.VisionGradingScreen
 import com.shambasmart.presentation.ml.water.WaterOptimizerScreen
 import com.shambasmart.presentation.ml.acoustic.AudioAlertScreen
 import com.shambasmart.presentation.ml.npu.NpuConfigScreen
+import com.shambasmart.presentation.alerts.AlertsScreen
 
 sealed class Screen(val route: String) {
     object Dashboard : Screen("dashboard")
@@ -39,6 +40,7 @@ sealed class Screen(val route: String) {
     object WaterOptimizer : Screen("water_optimizer")
     object AcousticGuard : Screen("acoustic_guard")
     object NpuConfig : Screen("npu_config")
+    object Alerts : Screen("alerts")
 }
 
 @Composable
@@ -102,6 +104,11 @@ fun ShambaNavGraph(
         }
         composable(Screen.NpuConfig.route) {
             NpuConfigScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+        composable(Screen.Alerts.route) {
+            AlertsScreen(
                 onNavigateBack = { navController.popBackStack() }
             )
         }

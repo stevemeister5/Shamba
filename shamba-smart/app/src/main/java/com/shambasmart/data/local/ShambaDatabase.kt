@@ -31,9 +31,10 @@ import com.shambasmart.data.local.converter.Converters
         Task::class,
         CalendarEvent::class,
         SyncStatus::class,
-        AudioEvent::class
+        AudioEvent::class,
+        MaintenanceTask::class
     ],
-    version = 2,
+    version = 3,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
@@ -56,4 +57,5 @@ abstract class ShambaDatabase : RoomDatabase() {
     abstract fun calendarDao(): CalendarDao
     abstract fun syncDao(): SyncDao
     abstract fun audioEventDao(): AudioEventDao
+    abstract fun maintenanceTaskDao(): MaintenanceTaskDao
 }

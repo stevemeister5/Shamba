@@ -23,6 +23,7 @@ import com.shambasmart.presentation.ml.acoustic.AudioAlertScreen
 import com.shambasmart.presentation.ml.npu.NpuConfigScreen
 import com.shambasmart.presentation.alerts.AlertsScreen
 import com.shambasmart.presentation.maintenance.MaintenanceScreen
+import com.shambasmart.presentation.setup.FarmSetupScreen
 
 sealed class Screen(val route: String) {
     object Dashboard : Screen("dashboard")
@@ -43,6 +44,7 @@ sealed class Screen(val route: String) {
     object NpuConfig : Screen("npu_config")
     object Alerts : Screen("alerts")
     object Maintenance : Screen("maintenance")
+    object FarmSetup : Screen("farm_setup")
 }
 
 @Composable
@@ -117,6 +119,12 @@ fun ShambaNavGraph(
         composable(Screen.Maintenance.route) {
             MaintenanceScreen(
                 onNavigateBack = { navController.popBackStack() }
+            )
+        }
+        composable(Screen.FarmSetup.route) {
+            FarmSetupScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onComplete = { navController.navigate(Screen.Dashboard.route) }
             )
         }
     }

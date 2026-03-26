@@ -264,6 +264,22 @@ app/
 - **Next Steps:**
   - Proceed to Task 6: Build Home Dashboard with live data
 
+#### Task 6: Create home dashboard with KPIs and alerts
+- **Status:** ✅ Completed
+- **Date:** 2026-03-27
+- **Commit:** 5336f64
+- **Changes:**
+  - Created DashboardViewModel with live herd size, goat/sheep counts, today's milk yield
+  - Updated DashboardScreen with alert section (pending tasks, low feed)
+  - KPI cards: Herd Size, Milk Today, Cheese, Tasks
+  - Live data from Room database via StateFlow
+  - Refresh button for manual data reload
+- **Notes:**
+  - Data flows: Room DB → DAO → ViewModel → UI (UDF pattern)
+  - Ready for Task 7: Implement Settings & User Management
+- **Next Steps:**
+  - Proceed to Task 7: Implement Settings & User Management
+
 ---
 
 ## Current Sprint / Focus

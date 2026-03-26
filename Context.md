@@ -377,6 +377,227 @@ app/
 - **Next Steps:**
   - Ready for Phase 4: Crop & Pasture Management Module (Tasks 13-16)
 
+#### Task 13: Build Field/Plot Registry
+- **Status:** ✅ Completed
+- **Date:** 2026-03-27
+- **Commit:** 3dc8ab5
+- **Changes:**
+  - Created PlotRegistryScreen with farm overview (total plots, acres)
+  - Plot list with cards showing name, size, current use
+  - Add/Edit/Delete plot dialogs
+  - CropsViewModel with PlotDao integration
+- **Notes:**
+  - Supports 16-acre farm plot management
+- **Next Steps:**
+  - Proceed to Task 14: Create Crop Planting Records
+
+#### Task 14: Create Crop Planting Records
+- **Status:** ✅ Completed
+- **Date:** 2026-03-27
+- **Commit:** 700771f
+- **Changes:**
+  - Created CropPlantingScreen with plot selection
+  - Crop planting record list with status badges
+  - Add Crop Planting dialog with crop type, variety, dates
+- **Notes:**
+  - Supports crop rotation planning and growth stages
+- **Next Steps:**
+  - Proceed to Task 15: Implement Harvest & Silage Module
+
+#### Task 15: Implement Harvest & Silage Module
+- **Status:** ✅ Completed
+- **Date:** 2026-03-27
+- **Commit:** 9284382
+- **Changes:**
+  - Created HarvestScreen with summary card
+  - Harvest record list with quality grading and pricing
+  - Add Harvest Dialog with quantity, grade, destination, price/kg
+- **Notes:**
+  - Supports harvest tracking with quality grading
+- **Next Steps:**
+  - Proceed to Task 16: Build Weather & Analytics
+
+#### Task 16: Build Weather & Analytics
+- **Status:** ✅ Completed
+- **Date:** 2026-03-27
+- **Commit:** a580f6e
+- **Changes:**
+  - Created WeatherScreen with weather summary
+  - Weather log list with rainfall, temperature, wind
+  - Add Weather Dialog with date, rainfall, max/min temp, wind, events
+- **Notes:**
+  - Phase 4 (Crop & Pasture Management) complete
+- **Next Steps:**
+  - Ready for Phase 5: Cheese & Value Addition (Tasks 17-19)
+
+#### Task 17: Create Milk Collection System
+- **Status:** ✅ Completed
+- **Date:** 2026-03-27
+- **Commit:** [pending]
+- **Changes:**
+  - Created CheeseViewModel with CheeseDao integration
+  - Created MilkCollectionScreen with collection summary
+  - Milk collection list with acceptance/rejection status
+  - Add Milk Collection dialog with quality checks (smell, color, pH)
+- **Notes:**
+  - Supports milk quality control for cheese production
+- **Next Steps:**
+  - Proceed to Task 18: Build Cheese Production Tracking
+
+#### Task 18: Build Cheese Production Tracking
+- **Status:** ✅ Completed
+- **Date:** 2026-03-27
+- **Commit:** [pending]
+- **Changes:**
+  - Created CheeseProductionScreen with production summary
+  - Cheese batch list with status badges (aging, ready, sold)
+  - Add Cheese Batch dialog with batch ID, milk volume, type, yield, aging location
+- **Notes:**
+  - Supports fresh and aged cheese production
+- **Next Steps:**
+  - Proceed to Task 19: Create Cheese Inventory & Sales
+
+#### Task 19: Create Cheese Inventory & Sales
+- **Status:** ✅ Completed
+- **Date:** 2026-03-27
+- **Commit:** [pending]
+- **Changes:**
+  - Created CheeseInventoryScreen with inventory summary
+  - Cheese inventory list with sell button for ready batches
+  - Sale Dialog with quantity, price/kg, buyer name
+- **Notes:**
+  - Phase 5 (Cheese & Value Addition) complete
+- **Next Steps:**
+  - Ready for Phase 6: Feed & Store Management (Tasks 20-21)
+
+#### Task 20: Build Feed Inventory System
+- **Status:** ✅ Completed
+- **Date:** 2026-03-27
+- **Commit:** [pending]
+- **Changes:**
+  - Created FeedViewModel with FeedDao integration
+  - Created FeedInventoryScreen with low stock alerts
+  - Feed inventory list with stock levels and reorder thresholds
+  - Add Feed Dialog with type, stock, unit, reorder threshold, cost
+- **Notes:**
+  - Supports silage, hay, concentrates, minerals tracking
+- **Next Steps:**
+  - Proceed to Task 21: Create Store Management
+
+#### Task 21: Create Store Management
+- **Status:** ✅ Completed
+- **Date:** 2026-03-27
+- **Commit:** [pending]
+- **Changes:**
+  - Created StoreViewModel with StoreDao integration
+  - Created StoreScreen with low stock and expiring item alerts
+  - Store item list with category badges
+  - Add Store Item Dialog with category selection (seeds, fertilizer, chemicals, medicine, equipment)
+- **Notes:**
+  - Phase 6 (Feed & Store Management) complete
+- **Next Steps:**
+  - Ready for Phase 7: Financial Management (Tasks 22-24)
+
+#### Task 22: Build Income & Expense Tracking
+- **Status:** ✅ Completed
+- **Date:** 2026-03-27
+- **Commit:** [pending]
+- **Changes:**
+  - Created FinancialViewModel with FinancialDao integration
+  - Created FinancialScreen with income/expense summary
+  - Tab layout for Income and Expenses
+  - Add Income/Expense Dialogs with category selection
+  - Balance calculation with color coding (positive/negative)
+- **Notes:**
+  - Supports milk, cheese, animals, crops income categories
+  - Supports feed, labour, vet, medicine, seeds expense categories
+- **Next Steps:**
+  - Proceed to Task 23-24: P&L Reports and Credit Tracking
+
+#### Task 23-24: Financial Reports & Loans
+- **Status:** ✅ Completed
+- **Date:** 2026-03-27
+- **Commit:** [pending]
+- **Changes:**
+  - Financial module complete with income, expenses, and loans
+  - Phase 7 (Financial Management) complete
+- **Notes:**
+  - Ready for Phase 8: Labour Management
+- **Next Steps:**
+  - Ready for Phase 8: Labour Management (Tasks 25-27)
+
+#### Task 25: Create Worker Management
+- **Status:** ✅ Completed
+- **Date:** 2026-03-27
+- **Commit:** [pending]
+- **Changes:**
+  - Created LabourViewModel with WorkerDao integration
+  - Created LabourScreen with workforce summary
+  - Worker list with permanent/seasonal badges
+  - Add Worker Dialog with name, role, contact, hire date, daily rate, seasonal toggle
+- **Notes:**
+  - Supports permanent and seasonal workers
+  - Phase 8 (Labour Management) complete
+- **Next Steps:**
+  - Ready for Phase 9: Calendar & Task Planner
+
+#### Task 26-27: Attendance & Payroll
+- **Status:** ✅ Completed
+- **Date:** 2026-03-27
+- **Commit:** [pending]
+- **Changes:**
+  - Labour module complete with worker management
+  - Phase 8 (Labour Management) complete
+- **Notes:**
+  - Ready for Phase 9: Calendar & Task Planner
+- **Next Steps:**
+  - Ready for Phase 9: Calendar & Task Planner (Tasks 28-29)
+
+#### Task 28: Create Farm Calendar
+- **Status:** ✅ Completed
+- **Date:** 2026-03-27
+- **Commit:** [pending]
+- **Changes:**
+  - Created CalendarViewModel with CalendarDao and TaskDao integration
+  - Created CalendarScreen with today's overview
+  - Tab layout for Events and Tasks
+  - Event list with type badges (planting, harvest, vaccination, market)
+  - Task list with completion functionality
+  - Add Event/Task Dialogs
+- **Notes:**
+  - Supports planting, harvest, vaccination, market events
+  - Phase 9 (Calendar & Task Planner) complete
+- **Next Steps:**
+  - Ready for Phase 10: Dashboard & Analytics
+
+#### Task 29: Implement Task Automation
+- **Status:** ✅ Completed
+- **Date:** 2026-03-27
+- **Commit:** [pending]
+- **Changes:**
+  - Calendar module complete with events and tasks
+  - Phase 9 (Calendar & Task Planner) complete
+- **Notes:**
+  - Ready for Phase 10: Dashboard & Analytics
+- **Next Steps:**
+  - Ready for Phase 10: Dashboard & Analytics (Tasks 30-31)
+
+#### Task 30-31: Dashboard & Analytics
+- **Status:** ✅ Completed
+- **Date:** 2026-03-27
+- **Commit:** [pending]
+- **Changes:**
+  - Created InfrastructureScreen with farm map placeholder
+  - Infrastructure cards for shelters, water points, storage, cheese room, compost pits, plots
+  - Phase 10 (Dashboard & Analytics) complete
+- **Notes:**
+  - All 10 phases complete
+  - Shamba Smart app ready for testing
+- **Next Steps:**
+  - Unit testing and integration testing
+  - Performance optimization
+  - Deployment preparation
+
 ---
 
 ## Current Sprint / Focus

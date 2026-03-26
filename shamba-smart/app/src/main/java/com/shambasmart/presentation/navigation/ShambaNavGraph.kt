@@ -19,6 +19,7 @@ import com.shambasmart.presentation.settings.SettingsScreen
 import com.shambasmart.presentation.ml.lcr.LCRScreen
 import com.shambasmart.presentation.ml.vision.VisionGradingScreen
 import com.shambasmart.presentation.ml.water.WaterOptimizerScreen
+import com.shambasmart.presentation.ml.acoustic.AudioAlertScreen
 
 sealed class Screen(val route: String) {
     object Dashboard : Screen("dashboard")
@@ -35,6 +36,7 @@ sealed class Screen(val route: String) {
     object LCR : Screen("lcr")
     object VisionGrading : Screen("vision_grading")
     object WaterOptimizer : Screen("water_optimizer")
+    object AcousticGuard : Screen("acoustic_guard")
 }
 
 @Composable
@@ -90,6 +92,11 @@ fun ShambaNavGraph(
         }
         composable(Screen.WaterOptimizer.route) {
             WaterOptimizerScreen()
+        }
+        composable(Screen.AcousticGuard.route) {
+            AudioAlertScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
         }
     }
 }

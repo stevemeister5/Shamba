@@ -24,6 +24,7 @@ import com.shambasmart.presentation.ml.npu.NpuConfigScreen
 import com.shambasmart.presentation.alerts.AlertsScreen
 import com.shambasmart.presentation.maintenance.MaintenanceScreen
 import com.shambasmart.presentation.setup.FarmSetupScreen
+import com.shambasmart.presentation.ar.ARBoundaryScreen
 
 sealed class Screen(val route: String) {
     object Dashboard : Screen("dashboard")
@@ -45,6 +46,7 @@ sealed class Screen(val route: String) {
     object Alerts : Screen("alerts")
     object Maintenance : Screen("maintenance")
     object FarmSetup : Screen("farm_setup")
+    object ARBoundary : Screen("ar_boundary")
 }
 
 @Composable
@@ -125,6 +127,16 @@ fun ShambaNavGraph(
             FarmSetupScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onComplete = { navController.navigate(Screen.Dashboard.route) }
+            )
+        }
+        composable(Screen.ARBoundary.route) {
+            ARBoundaryScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onSaveBoundary = { boundaryPoints ->
+                    // Save boundary points to database
+                    // Navigate back to farm setup or infrastructure
+                    navController.popBackStack()
+                }
             )
         }
     }

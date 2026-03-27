@@ -1,0 +1,23 @@
+# Temporary and backup files
+~
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+
+# Build files
+build/
+.gradle/
+local.properties
+
+# Keystore files
+*.jks
+*.keystore
+
+# Log files
+*.log

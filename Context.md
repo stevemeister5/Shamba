@@ -600,15 +600,104 @@ app/
 
 ---
 
+## Maarifa Knowledge Engine Integration
+
+### Overview
+Maarifa is the embedded, fully offline agricultural knowledge engine woven into every module of Shamba Smart. It is not a separate screen — it is a knowledge layer that surfaces relevant guidance exactly when and where it is needed, plus a dedicated Ask Maarifa panel accessible from any screen via a persistent floating tab.
+
+### Architecture (Three Layers)
+
+**Layer 1 — Prose Knowledge Store**
+- Plain English text chunks with lightweight metadata (topic tags, source, credibility)
+- Schema-free: any topic can be added by writing text
+- Stored in Room SQLite with BM25 keyword search + 384-dimension vector embeddings
+- `KnowledgeChunk` entity + `KnowledgeChunkDao`
+
+**Layer 2 — Operational Rules Store**
+- Small, explicitly structured store for computable rules
+- Rule types: withdrawal_period, dose_calculation, planting_window, growth_stage, gestation, vaccination_interval, oestrus_cycle, feed_requirement, notifiable_disease, diagnostic_rule
+- `OperationalRule` entity + `OperationalRuleDao` + `RuleEngine`
+
+**Layer 3 — Live Farm Data**
+- Reads from existing Room DB (animals, plots, treatments, harvests, milk records)
+- `ContextBridge` — injects farm context into every query
+- Never modifies farm data
+
+### Components Built
+
+| Component | File | Purpose |
+|-----------|------|---------|
+| SemanticChunker | `maarifa/chunker/SemanticChunker.kt` | Section-aware document chunking |
+| IntentClassifier | `maarifa/retrieval/IntentClassifier.kt` | Rule-based intent + entity extraction |
+| KnowledgeRetriever | `maarifa/retrieval/KnowledgeRetriever.kt` | BM25 + metadata weighted retrieval |
+| VectorSearchEngine | `maarifa/retrieval/VectorSearchEngine.kt` | ONNX all-MiniLM-L6-v2 embeddings |
+| ResponseAssembler | `maarifa/retrieval/ResponseAssembler.kt` | Consistency checking + answer assembly |
+| RuleEngine | `maarifa/rules/RuleEngine.kt` | Withdrawal, dose, gestation, planting calculations |
+| ContextBridge | `maarifa/contextbridge/ContextBridge.kt` | Live farm data injection |
+| KnowledgeIngestionPipeline | `maarifa/ingestion/KnowledgeIngestionPipeline.kt` | Quality gates + conflict detection |
+| MaarifaViewModel | `maarifa/MaarifaViewModel.kt` | Orchestrates full retrieval pipeline |
+| MaarifaModule | `maarifa/MaarifaModule.kt` | Hilt DI module |
+| MaarifaSidePanel | `maarifa/ui/MaarifaSidePanel.kt` | Ask/Browse/Saved tabs |
+| MaarifaFloatingTab | `maarifa/ui/MaarifaFloatingTab.kt` | Persistent right-edge button |
+| SymptomCheckerScreen | `maarifa/ui/SymptomCheckerScreen.kt` | 8-step diagnostic wizard |
+
+### Retrieval Pipeline
+
+1. **Intent Classification** — rule-based keyword matching → ranked intents
+2. **Entity Extraction** — species, crop, drug, symptoms, quantities
+3. **Context Injection** — live farm data (herd, weather, feed, season)
+4. **Pre-filter** — metadata filters reduce search space
+5. **Knowledge Retrieval** — BM25 + vector cosine + metadata weighted fusion
+6. **Rule Engine Overlay** — deterministic calculations (withdrawal, dose, planting)
+7. **Consistency Checking** — species matching, contradiction detection, notifiable disease scan
+8. **Response Assembly** — structured answer with 4-tier confidence model
+
+### Four-Tier Confidence Model
+
+| Tier | Label | Meaning |
+|------|-------|---------|
+| 1 | Calculated from verified rule | Highest — computed from operational rules |
+| 2 | Based on multiple sources | 3+ high-scoring sources agree |
+| 3 | Limited sources — verify | Few sources or ambiguous query |
+| 4 | Not in knowledge base | Honest failure — no reliable info |
+
+### Integration Points
+
+- **Dashboard**: Floating tab + side panel on every screen
+- **Livestock**: Context cards, symptom checker auto-fire, withdrawal tracking
+- **Crops**: Crop status cards, input guidance, planting recommendations
+- **Cheese**: Process guides, defect diagnosis, milk quality checks
+- **Feed**: Stock alerts, ration calculations, silage assessment
+- **Finance**: Drug price benchmarking, enterprise P&L benchmarks
+- **Labour**: Task knowledge cards, observation parsing
+- **Calendar**: Maarifa-generated events (vaccination, deworming, kidding dates)
+
+### Tech Stack Adaptation
+
+Original design spec referenced React Native/WatermelonDB/MiniSearch. Adapted to existing stack:
+- Kotlin + Jetpack Compose (UI)
+- Room Database + SQLCipher (storage + encryption)
+- Hilt DI (dependency injection)
+- ONNX Runtime (vector embeddings)
+- Material Design 3 (UI components)
+
 ## Current Sprint / Focus
 
-**Current Phase:** Not Started
-**Active Task:** None
-**Blockers:** None
+**Current Phase:** Maarifa Knowledge Engine Integration (Phase 1 — Core)
+**Active Task:** Implementation complete, ready for testing
+**Blockers:** ONNX model file needs to be bundled in assets/models/all_minilm_l6_v2.onnx
 
 ---
 
 ## Key Decisions Log
+
+| Date | Decision | Rationale |
+|------|----------|-----------|
+| 2026-03-27 | Adapt Maarifa to Kotlin/Compose/Room stack | Use existing tech stack per user directive |
+| 2026-03-27 | Schema-free knowledge storage | Infinitely extensible without schema migrations |
+| 2026-03-27 | Triple retrieval with weighted fusion | No single retrieval method trusted alone |
+| 2026-03-27 | Four-tier confidence model | Communicate reliability honestly to farmer |
+| 2026-03-27 | Context bridge reads but never writes | Maarifa is a knowledge layer, not a data modifier |
 
 | Date | Decision | Rationale |
 |------|----------|-----------|

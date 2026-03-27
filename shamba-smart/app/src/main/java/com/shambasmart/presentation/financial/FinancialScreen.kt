@@ -1,5 +1,8 @@
 package com.shambasmart.presentation.financial
 
+import com.shambasmart.maarifa.MaarifaViewModel
+import com.shambasmart.maarifa.ui.*
+
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items

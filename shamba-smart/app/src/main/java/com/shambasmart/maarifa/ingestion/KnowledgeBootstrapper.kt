@@ -35,7 +35,11 @@ class KnowledgeBootstrapper(
 
     private val knowledgeFiles = listOf(
         "knowledge_base/crops_maize.json",
+        "knowledge_base/crops_beans.json",
+        "knowledge_base/crops_cassava.json",
+        "knowledge_base/crops_vegetables.json",
         "knowledge_base/livestock_goats.json",
+        "knowledge_base/livestock_sheep.json",
         "knowledge_base/medicines.json",
         "knowledge_base/cheese.json",
         "knowledge_base/weather_korogwe.json"

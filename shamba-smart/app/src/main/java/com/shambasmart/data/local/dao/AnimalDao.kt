@@ -44,4 +44,11 @@ interface AnimalDao {
 
     @Query("SELECT * FROM animals WHERE isSynced = 0")
     suspend fun getUnsyncedAnimals(): List<Animal>
+
+    /**
+     * Watermark-based delta sync: get rows modified after a given timestamp.
+     * Used by SyncManager for efficient sync of only changed data.
+     */
+    @Query("SELECT * FROM animals WHERE last_updated > :timestamp")
+    suspend fun getRowsModifiedAfter(timestamp: Long): List<Animal>
 }

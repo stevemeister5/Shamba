@@ -98,9 +98,9 @@ dependencies {
     implementation("androidx.compose.animation:animation")
 
     // Compose Adaptive Layouts
-    implementation("androidx.compose.material3.adaptive:adaptive:1.0.0-alpha05")
-    implementation("androidx.compose.material3.adaptive:adaptive-layout:1.0.0-alpha05")
-    implementation("androidx.compose.material3.adaptive:adaptive-navigation:1.0.0-alpha05")
+    implementation("androidx.compose.material3.adaptive:adaptive:1.0.0")
+    implementation("androidx.compose.material3.adaptive:adaptive-layout:1.0.0")
+    implementation("androidx.compose.material3.adaptive:adaptive-navigation:1.0.0")
 
     // Navigation
     implementation("androidx.navigation:navigation-compose:2.7.6")
@@ -167,6 +167,8 @@ dependencies {
 
     // ONNX Runtime with NPU support
     implementation("com.microsoft.onnxruntime:onnxruntime-android:1.17.0")
+    // CameraX for enhanced camera capture (already present, ensuring version)
+    // Gson for JSON parsing (already present, ensuring version)
 
     // OSMDroid for interactive farm maps (no token required)
     implementation("org.osmdroid:osmdroid-android:6.1.18")

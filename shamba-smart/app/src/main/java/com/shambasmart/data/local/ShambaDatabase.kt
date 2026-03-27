@@ -10,6 +10,9 @@ import com.shambasmart.data.local.entity.*
 import com.shambasmart.data.local.entity.maarifa.KnowledgeChunk
 import com.shambasmart.data.local.entity.maarifa.OperationalRule
 import com.shambasmart.data.local.converter.Converters
+import com.shambasmart.data.local.view.DashboardView
+import com.shambasmart.data.local.view.PlotAnalyticsView
+import com.shambasmart.data.local.view.LivestockDashboardView
 
 @Database(
     entities = [
@@ -46,9 +49,15 @@ import com.shambasmart.data.local.converter.Converters
         // Map entities
         MapMarkerEntity::class,
         MapLayerEntity::class,
-        MapTileCacheEntity::class
+        MapTileCacheEntity::class,
+        // Pest Scouting entities
+        ScoutingReport::class,
+        // Database Views
+        DashboardView::class,
+        PlotAnalyticsView::class,
+        LivestockDashboardView::class
     ],
-    version = 7,
+    version = 9,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
@@ -81,4 +90,8 @@ abstract class ShambaDatabase : RoomDatabase() {
     abstract fun mapMarkerDao(): MapMarkerDao
     abstract fun mapLayerDao(): MapLayerDao
     abstract fun mapTileCacheDao(): MapTileCacheDao
+    // Scouting DAO
+    abstract fun scoutingReportDao(): ScoutingReportDao
+    // Dashboard View DAO
+    abstract fun dashboardViewDao(): DashboardViewDao
 }

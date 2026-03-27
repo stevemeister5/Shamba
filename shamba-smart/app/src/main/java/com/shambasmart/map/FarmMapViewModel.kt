@@ -9,6 +9,8 @@ import androidx.lifecycle.viewModelScope
 import com.google.android.gms.location.*
 import com.shambasmart.data.local.dao.MapLayerDao
 import com.shambasmart.data.local.dao.MapMarkerDao
+import com.shambasmart.data.local.dao.ScoutingReportDao
+import com.shambasmart.data.local.dao.ScoutingHeatmapPoint
 import com.shambasmart.data.local.entity.LatLng
 import com.shambasmart.data.local.entity.MapLayerEntity
 import com.shambasmart.data.local.entity.MapMarkerEntity
@@ -54,6 +56,7 @@ class FarmMapViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val mapMarkerDao: MapMarkerDao,
     private val mapLayerDao: MapLayerDao,
+    private val scoutingReportDao: ScoutingReportDao,
     private val fusedLocationClient: FusedLocationProviderClient
 ) : ViewModel() {
 
@@ -330,6 +333,18 @@ class FarmMapViewModel @Inject constructor(
 
     fun getMarkerByLinkedEntity(entityType: String, entityId: Long): Flow<MapMarkerEntity?> {
         return mapMarkerDao.getMarkerByLinkedEntityFlow(entityType, entityId)
+    }
+
+    /**
+     * Gets pest scouting heatmap data for the pest heatmap overlay.
+     * @return List of ScoutingHeatmapPoint for rendering
+     */
+    suspend fun getPestHeatmapData(): List<ScoutingHeatmapPoint> {
+        return try {
+            scoutingReportDao.getHeatmapData()
+        } catch (e: Exception) {
+            emptyList()
+        }
     }
 
     private fun calculatePolygonArea(points: List<LatLng>): Double {

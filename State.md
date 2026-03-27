@@ -39,8 +39,8 @@
 | **UI Framework** | Jetpack Compose with Adaptive Layouts |
 | **Database** | Room + SQLCipher (encrypted) |
 | **Architecture** | Single Source of Truth (SSOT) with Unidirectional Data Flow (UDF) |
-| **Version** | 1.0.0 |
-| **Version Code** | 1 |
+| **Version** | 1.1.0 |
+| **Version Code** | 2 |
 | **Min SDK** | Android 10 (API 29) |
 | **Target SDK** | Android 14 (API 34) |
 | **Compile SDK** | 34 |
@@ -862,6 +862,7 @@ app/src/
 | Version | Date | Changes |
 |---------|------|---------|
 | 1.0.0 | 2026-03-27 | Initial release with core modules |
+| 1.1.0 | 2026-03-27 | East Africa Pest-Guard upgrade: Hardware-backed security, watermark delta sync, ONNX pest detection (8 pests), ScoutingReport entity, pest heatmap, Maarifa knowledge mapping, enhanced CameraX, ML model management |
 
 ---
 

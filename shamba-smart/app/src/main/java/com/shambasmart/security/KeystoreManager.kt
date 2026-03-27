@@ -92,6 +92,48 @@ class KeystoreManager @Inject constructor(
             .remove("encrypted_db_passphrase")
             .apply()
     }
+
+    /**
+     * Rotates the encryption key by generating a new passphrase
+     * and re-encrypting it with the hardware key.
+     * @return The new passphrase for database re-encryption
+     */
+    fun rotateKey(): ByteArray {
+        // Generate new passphrase
+        val newPassphrase = generatePassphrase()
+        
+        // Store new passphrase encrypted with hardware key
+        val encryptedPassphrase = hardwareKeyManager.encrypt(newPassphrase)
+        context.getSharedPreferences("shamba_security", Context.MODE_PRIVATE)
+            .edit()
+            .putString("encrypted_db_passphrase", encryptedPassphrase.toBase64())
+            .putLong("key_rotated_at", System.currentTimeMillis())
+            .apply()
+        
+        return newPassphrase
+    }
+
+    /**
+     * Verifies the stored key can be decrypted correctly.
+     * @return true if key is valid, false otherwise
+     */
+    fun verifyKey(): Boolean {
+        return try {
+            val passphrase = getStoredPassphrase()
+            passphrase != null && passphrase.size == 32
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    /**
+     * Gets the timestamp of the last key rotation.
+     * @return Timestamp in milliseconds, or 0 if never rotated
+     */
+    fun getKeyRotationTimestamp(): Long {
+        return context.getSharedPreferences("shamba_security", Context.MODE_PRIVATE)
+            .getLong("key_rotated_at", 0L)
+    }
 }
 
 private fun ByteArray.toBase64(): String {

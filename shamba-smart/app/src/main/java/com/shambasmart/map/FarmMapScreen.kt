@@ -19,6 +19,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.shambasmart.map.drawing.PolygonDrawingOverlay
 import com.shambasmart.map.heatmap.HeatmapRenderer
+import com.shambasmart.map.heatmap.PestHeatmapOverlay
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView

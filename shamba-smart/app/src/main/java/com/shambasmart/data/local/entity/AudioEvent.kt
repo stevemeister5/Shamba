@@ -1,7 +1,9 @@
 package com.shambasmart.data.local.entity
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.util.UUID
 
 @Entity(tableName = "audio_event_log")
 data class AudioEvent(
@@ -17,7 +19,14 @@ data class AudioEvent(
     val healthRecordId: Long? = null, // Linked health record
     val isAnomaly: Boolean = false,
     val isSynced: Boolean = false,
-    val notes: String? = null
+    val notes: String? = null,
+    // Revision-based delta sync fields
+    @ColumnInfo(name = "revision_id")
+    val revisionId: String = UUID.randomUUID().toString(),
+    @ColumnInfo(name = "last_modified_by")
+    val lastModifiedBy: String = "",
+    @ColumnInfo(name = "last_updated")
+    val lastUpdated: Long = System.currentTimeMillis()
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

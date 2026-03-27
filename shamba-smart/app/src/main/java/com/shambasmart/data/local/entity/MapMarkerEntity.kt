@@ -23,23 +23,30 @@ data class MapMarkerEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     val name: String,
-    val markerType: String, // MapMarkerType.name
-    val category: String, // MarkerCategory.name
+    val markerType: String,
+    val category: String,
     val latitude: Double,
     val longitude: Double,
     val altitude: Double? = null,
-    val icon: String, // Emoji icon
-    val color: String, // Hex color
+    val icon: String,
+    val color: String,
     val description: String? = null,
-    val linkedEntityType: String? = null, // "plot", "animal", "feed_inventory", "cheese_batch", etc.
+    val linkedEntityType: String? = null,
     val linkedEntityId: Long? = null,
-    val areaSquareMeters: Double? = null, // For polygon markers (plots, pens)
-    val boundaryPoints: List<LatLng>? = null, // For polygon markers
-    val photos: List<String> = emptyList(), // Photo file paths
-    val metadata: Map<String, String> = emptyMap(), // Custom key-value data
+    val areaSquareMeters: Double? = null,
+    val boundaryPoints: List<LatLng>? = null,
+    val photos: List<String> = emptyList(),
+    val metadata: Map<String, String> = emptyMap(),
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis(),
-    val isSynced: Boolean = false
+    val isSynced: Boolean = false,
+    // Revision-based delta sync fields
+    @ColumnInfo(name = "revision_id")
+    val revisionId: String = UUID.randomUUID().toString(),
+    @ColumnInfo(name = "last_modified_by")
+    val lastModifiedBy: String = "",
+    @ColumnInfo(name = "last_updated")
+    val lastUpdated: Long = System.currentTimeMillis()
 )
 
 /**

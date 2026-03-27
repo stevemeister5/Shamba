@@ -1,6 +1,7 @@
 package com.shambasmart.presentation.alerts
 
-import androidx.compose.foundation.background
+import androidx.compose.animation.*
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -8,6 +9,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,6 +23,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.shambasmart.domain.model.Alert
 import com.shambasmart.domain.model.AlertPriority
 import com.shambasmart.domain.model.AlertType
+import com.shambasmart.presentation.common.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,111 +34,140 @@ fun AlertsScreen(
     val alerts by viewModel.alerts.collectAsStateWithLifecycle()
     val isLoading by viewModel.isLoading.collectAsStateWithLifecycle()
 
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Column {
-                        Text(
-                            text = "Alerts",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = "${alerts.count { !it.isDismissed }} active alerts",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                    }
-                },
-                actions = {
-                    IconButton(onClick = { viewModel.dismissAllAlerts() }) {
-                        Icon(Icons.Default.DoneAll, contentDescription = "Dismiss All")
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
+    Box(modifier = Modifier.fillMaxSize().background(SurfaceBase)) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(24.dp)
+        ) {
+            // Header
+            AlertsHeader(
+                activeAlertsCount = alerts.count { !it.isDismissed },
+                onNavigateBack = onNavigateBack,
+                onDismissAll = { viewModel.dismissAllAlerts() }
             )
-        }
-    ) { padding ->
-        if (isLoading) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentAlignment = Alignment.Center
-            ) {
-                CircularProgressIndicator()
-            }
-        } else if (alerts.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(
-                        Icons.Default.CheckCircle,
-                        contentDescription = null,
-                        modifier = Modifier.size(64.dp),
-                        tint = Color(0xFF4CAF50)
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = "No alerts",
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = "All caught up!",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+            
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            if (isLoading) {
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(
+                        color = Green400
                     )
                 }
-            }
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                item { Spacer(modifier = Modifier.height(8.dp)) }
+            } else if (alerts.isEmpty()) {
+                EmptyAlertsState()
+            } else {
+                // Active Alerts
+                val activeAlerts = alerts.filter { !it.isDismissed }
+                val dismissedAlerts = alerts.filter { it.isDismissed }
                 
-                items(alerts.filter { !it.isDismissed }) { alert ->
-                    AlertCard(
-                        alert = alert,
-                        onDismiss = { viewModel.dismissAlert(alert.id) }
-                    )
-                }
-                
-                if (alerts.any { it.isDismissed }) {
-                    item {
-                        Text(
-                            text = "Dismissed Alerts",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(vertical = 8.dp)
-                        )
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    if (activeAlerts.isNotEmpty()) {
+                        item {
+                            Text(
+                                text = "ACTIVE ALERTS",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Neutral600
+                            )
+                        }
+                        
+                        items(activeAlerts) { alert ->
+                            AlertCard(
+                                alert = alert,
+                                onDismiss = { viewModel.dismissAlert(alert.id) }
+                            )
+                        }
                     }
                     
-                    items(alerts.filter { it.isDismissed }) { alert ->
-                        AlertCard(
-                            alert = alert,
-                            onDismiss = null
-                        )
+                    if (dismissedAlerts.isNotEmpty()) {
+                        item {
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = "DISMISSED ALERTS",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = Neutral600
+                            )
+                        }
+                        
+                        items(dismissedAlerts) { alert ->
+                            AlertCard(
+                                alert = alert,
+                                onDismiss = null
+                            )
+                        }
                     }
                 }
-                
-                item { Spacer(modifier = Modifier.height(32.dp)) }
+            }
+        }
+    }
+}
+
+@Composable
+private fun AlertsHeader(
+    activeAlertsCount: Int,
+    onNavigateBack: () -> Unit,
+    onDismissAll: () -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            IconButton(
+                onClick = onNavigateBack,
+                modifier = Modifier.size(40.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.ArrowBack,
+                    contentDescription = "Back",
+                    tint = Neutral800
+                )
+            }
+            
+            Column {
+                Text(
+                    text = "Alerts",
+                    style = MaterialTheme.typography.headlineLarge,
+                    color = Neutral950
+                )
+                Text(
+                    text = "$activeAlertsCount active alert(s)",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Neutral600
+                )
+            }
+        }
+        
+        if (activeAlertsCount > 0) {
+            OutlinedButton(
+                onClick = onDismissAll,
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = Neutral800
+                ),
+                border = BorderStroke(1.dp, Neutral300),
+                shape = RoundedCornerShape(10.dp),
+                modifier = Modifier.height(40.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.DoneAll,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Dismiss All",
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+                )
             }
         }
     }
@@ -146,37 +178,47 @@ private fun AlertCard(
     alert: Alert,
     onDismiss: (() -> Unit)?
 ) {
-    val backgroundColor = when (alert.priority) {
-        AlertPriority.CRITICAL -> MaterialTheme.colorScheme.errorContainer
-        AlertPriority.HIGH -> Color(0xFFFFF3E0) // Orange light
-        AlertPriority.MEDIUM -> Color(0xFFFFF8E1) // Yellow light
-        AlertPriority.LOW -> MaterialTheme.colorScheme.surface
-    }
-    
-    val iconColor = when (alert.priority) {
-        AlertPriority.CRITICAL -> MaterialTheme.colorScheme.error
-        AlertPriority.HIGH -> Color(0xFFFF9800) // Orange
-        AlertPriority.MEDIUM -> Color(0xFFFFC107) // Yellow
-        AlertPriority.LOW -> MaterialTheme.colorScheme.primary
+    val (backgroundColor, borderColor, iconColor) = when (alert.priority) {
+        AlertPriority.CRITICAL -> Triple(
+            Red400.copy(alpha = 0.05f),
+            Red400.copy(alpha = 0.25f),
+            Red300
+        )
+        AlertPriority.HIGH -> Triple(
+            Amber400.copy(alpha = 0.04f),
+            Amber400.copy(alpha = 0.2f),
+            Amber300
+        )
+        AlertPriority.MEDIUM -> Triple(
+            Amber400.copy(alpha = 0.03f),
+            Amber400.copy(alpha = 0.15f),
+            Amber400
+        )
+        AlertPriority.LOW -> Triple(
+            Color(0xFF42A5F5).copy(alpha = 0.04f),
+            Color(0xFF42A5F5).copy(alpha = 0.2f),
+            Color(0xFF42A5F5)
+        )
     }
     
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = backgroundColor),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        border = BorderStroke(1.dp, borderColor),
+        shape = RoundedCornerShape(14.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
+                .padding(20.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Priority Icon
             Box(
                 modifier = Modifier
-                    .size(40.dp)
+                    .size(48.dp)
                     .clip(CircleShape)
-                    .background(iconColor.copy(alpha = 0.2f)),
+                    .background(iconColor.copy(alpha = 0.15f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -187,7 +229,7 @@ private fun AlertCard(
                 )
             }
             
-            Spacer(modifier = Modifier.width(12.dp))
+            Spacer(modifier = Modifier.width(16.dp))
             
             Column(modifier = Modifier.weight(1f)) {
                 Row(
@@ -197,49 +239,54 @@ private fun AlertCard(
                 ) {
                     Text(
                         text = alert.title,
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.Bold
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = Neutral950
                     )
                     
                     // Priority Badge
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(4.dp))
-                            .background(iconColor.copy(alpha = 0.2f))
-                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    Surface(
+                        color = iconColor.copy(alpha = 0.15f),
+                        border = BorderStroke(0.5.dp, iconColor.copy(alpha = 0.3f)),
+                        shape = RoundedCornerShape(6.dp)
                     ) {
                         Text(
                             text = alert.priority.name,
-                            style = MaterialTheme.typography.labelSmall,
+                            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
                             color = iconColor,
-                            fontWeight = FontWeight.Bold
+                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                         )
                     }
                 }
                 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(8.dp))
                 
                 Text(
                     text = alert.message,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = Neutral800,
+                    lineHeight = 22.sp
                 )
                 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(8.dp))
                 
                 Text(
                     text = formatTimestamp(alert.createdAt),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Neutral600
                 )
             }
             
             if (onDismiss != null) {
-                IconButton(onClick = onDismiss) {
+                Spacer(modifier = Modifier.width(12.dp))
+                IconButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.size(36.dp)
+                ) {
                     Icon(
-                        Icons.Default.Close,
+                        imageVector = Icons.Outlined.Close,
                         contentDescription = "Dismiss",
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(18.dp),
+                        tint = Neutral600
                     )
                 }
             }
@@ -247,18 +294,58 @@ private fun AlertCard(
     }
 }
 
+@Composable
+private fun EmptyAlertsState() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(CircleShape)
+                    .background(Green900),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.CheckCircle,
+                    contentDescription = null,
+                    modifier = Modifier.size(40.dp),
+                    tint = Green400
+                )
+            }
+            
+            Text(
+                text = "All Clear!",
+                style = MaterialTheme.typography.headlineMedium,
+                color = Neutral950
+            )
+            
+            Text(
+                text = "No active alerts. Your farm is running smoothly.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Neutral600
+            )
+        }
+    }
+}
+
 private fun getAlertIcon(type: AlertType): androidx.compose.ui.graphics.vector.ImageVector {
     return when (type) {
-        AlertType.VACCINATION_OVERDUE -> Icons.Default.MedicalServices
-        AlertType.ANIMAL_NOT_WEIGHED -> Icons.Default.MonitorWeight
-        AlertType.LOW_FEED_STOCK -> Icons.Default.Inventory
-        AlertType.HARVEST_READY -> Icons.Default.Grass
-        AlertType.CHEESE_AGING_COMPLETE -> Icons.Default.Cheese
-        AlertType.LOAN_REPAYMENT_DUE -> Icons.Default.Payment
-        AlertType.MAINTENANCE_DUE -> Icons.Default.Build
-        AlertType.WEATHER_WARNING -> Icons.Default.Cloud
-        AlertType.FINANCIAL_THRESHOLD -> Icons.Default.AttachMoney
-        AlertType.TASK_OVERDUE -> Icons.Default.AssignmentLate
+        AlertType.VACCINATION_OVERDUE -> Icons.Outlined.MedicalServices
+        AlertType.ANIMAL_NOT_WEIGHED -> Icons.Outlined.MonitorWeight
+        AlertType.LOW_FEED_STOCK -> Icons.Outlined.Inventory
+        AlertType.HARVEST_READY -> Icons.Outlined.Grass
+        AlertType.CHEESE_AGING_COMPLETE -> Icons.Outlined.LunchDining
+        AlertType.LOAN_REPAYMENT_DUE -> Icons.Outlined.Payment
+        AlertType.MAINTENANCE_DUE -> Icons.Outlined.Build
+        AlertType.WEATHER_WARNING -> Icons.Outlined.Cloud
+        AlertType.FINANCIAL_THRESHOLD -> Icons.Outlined.AttachMoney
+        AlertType.TASK_OVERDUE -> Icons.Outlined.AssignmentLate
     }
 }
 

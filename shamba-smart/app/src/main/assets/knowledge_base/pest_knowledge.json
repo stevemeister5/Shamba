@@ -1,0 +1,279 @@
+{
+  "fall_armyworm": {
+    "pestClass": "fall_armyworm",
+    "displayName": "Fall Armyworm (Spodoptera frugiperda)",
+    "description": "A devastating pest of maize and other cereals in East Africa. Larvae feed on leaves, causing windowpane damage and characteristic ragged holes. Can cause 20-100% yield loss if untreated.",
+    "lowManagement": "Monitor field every 3 days. Document egg masses and young larvae. Maintain field hygiene by removing crop residues. Encourage natural enemies (parasitoid wasps, predatory beetles).",
+    "moderateManagement": "Apply biological control agents (Bacillus thuringiensis var. kurstaki). Use neem-based botanical insecticides. Consider spot treatment of affected areas. Increase scouting to daily monitoring.",
+    "criticalManagement": "Apply approved synthetic insecticides (Emamectin benzoate, Spinetoram) following label instructions. Treat entire field. Implement 7-day re-scouting. Consider crop rotation. Notify extension officer for area-wide management.",
+    "pesticides": [
+      {
+        "name": "Emamectin benzoate 5% SG",
+        "activeIngredient": "Emamectin benzoate",
+        "doseRate": "50g/200L water per hectare",
+        "phi": 7,
+        "maxApplications": 3,
+        "notes": "Apply when larvae are small (1st-2nd instar). Best applied in early morning or late evening."
+      },
+      {
+        "name": "Spinetoram 12% SC",
+        "activeIngredient": "Spinetoram",
+        "doseRate": "100ml/200L water per hectare",
+        "phi": 7,
+        "maxApplications": 3,
+        "notes": "Translaminar action. Effective against resistant populations."
+      },
+      {
+        "name": "Chlorantraniliprole 20% SC",
+        "activeIngredient": "Chlorantraniliprole",
+        "doseRate": "150ml/200L water per hectare",
+        "phi": 14,
+        "maxApplications": 2,
+        "notes": "Long residual activity. Apply at early infestation."
+      }
+    ],
+    "biologicalControls": [
+      "Bacillus thuringiensis var. kurstaki (Bt) - spray at 1-2kg/ha",
+      "Trichogramma egg parasitoids - release 50,000-100,000 per hectare",
+      "Telenomus remus egg parasitoid",
+      "Predatory earwigs (Forficula auricularia)",
+      "Nuclear polyhedrosis virus (NPV) - for heavy infestations"
+    ]
+  },
+  "stalk_borer": {
+    "pestClass": "stalk_borer",
+    "displayName": "Maize Stalk Borer (Busseola fusca / Chilo partellus)",
+    "description": "Larvae bore into maize stems and cobs, causing 'deadheart' symptoms. Infested plants show wilting of central leaves. Can cause 30-80% yield loss in severe infestations.",
+    "lowManagement": "Monitor for egg masses on lower leaf surfaces. Remove and destroy infested plants (deadhearts). Maintain field sanitation. Avoid late planting which increases infestation risk.",
+    "moderateManagement": "Apply Trichogramma egg parasitoids. Use neem seed kernel extract (NSKE) as botanical spray. Push-pull technology with Napier grass borders and Desmodium intercrops.",
+    "criticalManagement": "Apply Chlorantraniliprole or Lambda-cyhalothrin to whorl. Split application recommended. Implement area-wide management. Consider resistant varieties for next season.",
+    "pesticides": [
+      {
+        "name": "Chlorantraniliprole 20% SC",
+        "activeIngredient": "Chlorantraniliprole",
+        "doseRate": "150ml/200L water per hectare",
+        "phi": 14,
+        "maxApplications": 2,
+        "notes": "Apply into whorl when 50% of plants show fresh damage."
+      },
+      {
+        "name": "Lambda-cyhalothrin 5% EC",
+        "activeIngredient": "Lambda-cyhalothrin",
+        "doseRate": "100ml/200L water per hectare",
+        "phi": 7,
+        "maxApplications": 3,
+        "notes": "Contact and stomach poison. Apply early morning."
+      }
+    ],
+    "biologicalControls": [
+      "Trichogramma chilonis egg parasitoid",
+      "Cotesia flavipes larval parasitoid",
+      "Push-pull system (Napier grass + Desmodium)",
+      "Bacillus thuringiensis var. kurstaki"
+    ]
+  },
+  "maize_streak_virus": {
+    "pestClass": "maize_streak_virus",
+    "displayName": "Maize Streak Virus (MSV)",
+    "description": "Transmitted by leafhoppers (Cicadulina mbila). Symptoms include streaking of leaves (parallel chlorotic lines), stunting, and poor ear fill. Can cause total crop failure in susceptible varieties.",
+    "lowManagement": "Monitor for leafhopper vectors. Remove infected plants immediately. Use reflective mulches to repel vectors. Plant early to avoid peak vector populations.",
+    "moderateManagement": "Apply systemic insecticides to control leafhoppers (Imidacloprid seed treatment). Rogue out infected plants. Maintain weed-free field margins. Consider resistant varieties.",
+    "criticalManagement": "Destroy severely infected fields. Apply systemic insecticides. Implement area-wide vector management. Plant resistant varieties (e.g., WE2109, SC Duma 43). Delay replanting by 2 weeks.",
+    "pesticides": [
+      {
+        "name": "Imidacloprid 600 FS (Seed treatment)",
+        "activeIngredient": "Imidacloprid",
+        "doseRate": "10ml/kg seed",
+        "phi": 0,
+        "maxApplications": 1,
+        "notes": "Seed treatment provides 3-4 weeks protection."
+      },
+      {
+        "name": "Thiamethoxam 25% WG",
+        "activeIngredient": "Thiamethoxam",
+        "doseRate": "100g/200L water per hectare",
+        "phi": 21,
+        "maxApplications": 2,
+        "notes": "Systemic action. Apply at first sign of leafhoppers."
+      }
+    ],
+    "biologicalControls": [
+      "Resistant maize varieties (WE2109, SC Duma 43, TMV 1)",
+      "Reflective mulches to deter leafhoppers",
+      "Trap crops (sorghum borders)",
+      "Encourage natural enemies (spiders, predatory bugs)"
+    ]
+  },
+  "bean_fly": {
+    "pestClass": "bean_fly",
+    "displayName": "Bean Fly (Ophiomyia sp.)",
+    "description": "Larvae tunnel into bean stems near soil level, causing swelling and stem splitting. Plants wilt and may die. Most damaging during early growth stages. Can cause 50-100% plant mortality.",
+    "lowManagement": "Plant at recommended spacing to reduce humidity. Avoid overhead irrigation. Monitor for adult flies using yellow sticky traps. Remove and destroy infested plants.",
+    "moderateManagement": "Apply neem-based insecticides to seedlings. Use systemic seed treatment (Imidacloprid). Intercrop with non-host crops (maize, sorghum). Apply diatomaceous earth around stems.",
+    "criticalManagement": "Apply systemic insecticides (Thiamethoxam, Cyantraniliprole). Reseed destroyed areas with treated seed. Implement area-wide management. Consider resistant varieties.",
+    "pesticides": [
+      {
+        "name": "Thiamethoxam 25% WG",
+        "activeIngredient": "Thiamethoxam",
+        "doseRate": "50g/100L water per hectare",
+        "phi": 21,
+        "maxApplications": 2,
+        "notes": "Systemic. Apply at first true leaf stage."
+      },
+      {
+        "name": "Cyantraniliprole 20% SC",
+        "activeIngredient": "Cyantraniliprole",
+        "doseRate": "150ml/200L water per hectare",
+        "phi": 7,
+        "maxApplications": 3,
+        "notes": "Translaminar and systemic. Effective against resistant populations."
+      }
+    ],
+    "biologicalControls": [
+      "Nematodes (Steinernema feltiae) - apply to soil",
+      "Parasitoid wasps (Gronotoma sp.)",
+      "Intercropping with maize or sorghum",
+      "Seed treatment with Beauveria bassiana"
+    ]
+  },
+  "aphids": {
+    "pestClass": "aphids",
+    "displayName": "Aphids (Aphis spp. / Rhopalosiphum spp.)",
+    "description": "Sap-sucking insects that colonize leaves and stems. Cause yellowing, curling, and stunting. Produce honeydew that promotes sooty mold. Can transmit viral diseases. Common on beans, maize, and vegetables.",
+    "lowManagement": "Monitor undersides of leaves. Use strong water spray to dislodge colonies. Encourage natural enemies (ladybirds, lacewings, hoverflies). Plant trap crops (nasturtium).",
+    "moderateManagement": "Apply neem oil or insecticidal soap. Release ladybird beetles or lacewing larvae. Use reflective mulches. Remove heavily infested leaves.",
+    "criticalManagement": "Apply systemic insecticides (Imidacloprid, Thiamethoxam). Implement area-wide management. Consider biological control augmentation. Check for resistance.",
+    "pesticides": [
+      {
+        "name": "Imidacloprid 17.8% SL",
+        "activeIngredient": "Imidacloprid",
+        "doseRate": "100ml/200L water per hectare",
+        "phi": 7,
+        "maxApplications": 3,
+        "notes": "Systemic action. Avoid spraying during flowering to protect pollinators."
+      },
+      {
+        "name": "Thiamethoxam 25% WG",
+        "activeIngredient": "Thiamethoxam",
+        "doseRate": "100g/200L water per hectare",
+        "phi": 21,
+        "maxApplications": 2,
+        "notes": "Systemic. Apply as foliar spray or drench."
+      }
+    ],
+    "biologicalControls": [
+      "Ladybird beetles (Adalia bipunctata, Coccinella septempunctata)",
+      "Lacewing larvae (Chrysoperla carnea)",
+      "Hoverfly larvae (Syrphidae)",
+      "Parasitoid wasps (Aphidius spp.)",
+      "Beauveria bassiana fungal biopesticide",
+      "Neem oil (Azadirachta indica)"
+    ]
+  },
+  "blight": {
+    "pestClass": "blight",
+    "displayName": "Bacterial/Fungal Blight (Xanthomonas / Colletotrichum / Pythium)",
+    "description": "A group of diseases affecting beans and vegetables. Symptoms include water-soaked lesions, leaf spots, stem cankers, and wilting. Spread by rain splash, contaminated seed, and tools.",
+    "lowManagement": "Use certified disease-free seed. Practice crop rotation (3-4 years). Avoid overhead irrigation. Remove infected plant debris. Maintain good field drainage.",
+    "moderateManagement": "Apply copper-based bactericides (Copper hydroxide). Use resistant varieties. Increase plant spacing for air circulation. Apply Trichoderma-based biocontrol agents.",
+    "criticalManagement": "Apply copper + Mancozeb combination. Destroy severely infected fields. Implement area-wide disease management. Quarantine infected areas. Use resistant varieties for replanting.",
+    "pesticides": [
+      {
+        "name": "Copper hydroxide 77% WP",
+        "activeIngredient": "Copper hydroxide",
+        "doseRate": "2.5kg/ha in 500L water",
+        "phi": 7,
+        "maxApplications": 6,
+        "notes": "Preventive. Apply every 7-10 days in wet weather."
+      },
+      {
+        "name": "Mancozeb 80% WP + Copper",
+        "activeIngredient": "Mancozeb + Copper",
+        "doseRate": "2kg/ha + 2kg/ha in 500L water",
+        "phi": 14,
+        "maxApplications": 4,
+        "notes": "Combination for bacterial and fungal blight."
+      }
+    ],
+    "biologicalControls": [
+      "Trichoderma harzianum - seed treatment and soil drench",
+      "Bacillus subtilis foliar spray",
+      "Pseudomonas fluorescens biocontrol",
+      "Resistant varieties (e.g., KAT B1, KAT B9 for beans)"
+    ]
+  },
+  "desert_locusts": {
+    "pestClass": "desert_locusts",
+    "displayName": "Desert Locust (Schistocerca gregaria)",
+    "description": "Migratory swarms can devastate crops over large areas. Adults and nymphs (hoppers) consume all green vegetation. A swarm can eat as much as 35,000 people in a day. Major threat in East Africa.",
+    "lowManagement": "Report sightings to FAO Desert Locust Watch. Monitor breeding areas. Protect key crops with netting. Harvest early if possible.",
+    "moderateManagement": "Apply biopesticide (Metarhizium acridum) to hopper bands. Use ultra-low volume (ULV) spraying of approved insecticides. Implement ground control operations. Coordinate with national locust control centers.",
+    "criticalManagement": "Aerial spraying of Fenitrothion or Malathion (ULV). Coordinate with FAO and national authorities. Protect food storage. Emergency crop insurance claims. Replant resilient varieties.",
+    "pesticides": [
+      {
+        "name": "Fenitrothion 96% ULV",
+        "activeIngredient": "Fenitrothion",
+        "doseRate": "0.5-1.0 L/ha (aerial ULV)",
+        "phi": 14,
+        "maxApplications": 2,
+        "notes": "For aerial application against adult swarms. Coordinate with authorities."
+      },
+      {
+        "name": "Malathion 96% ULV",
+        "activeIngredient": "Malathion",
+        "doseRate": "0.5-1.0 L/ha (aerial ULV)",
+        "phi": 7,
+        "maxApplications": 3,
+        "notes": "Aerial application. Less persistent than Fenitrothion."
+      }
+    ],
+    "biologicalControls": [
+      "Metarhizium acridum (Green Muscle) - fungal biopesticide for hoppers",
+      "Parasitoid wasps and flies",
+      "Predatory birds (quelea, starlings)",
+      "Early detection and hopper band destruction"
+    ]
+  },
+  "leafminer": {
+    "pestClass": "leafminer",
+    "displayName": "Tomato Leafminer (Tuta absoluta)",
+    "description": "Larvae create serpentine mines in leaves, stems, and fruits of tomatoes and other solanaceous crops. Can cause 100% yield loss. Also attacks potatoes, eggplant, and peppers.",
+    "lowManagement": "Use pheromone traps for monitoring and mass trapping. Remove and destroy infested leaves. Use insect-proof netting on greenhouses. Maintain field hygiene.",
+    "moderateManagement": "Apply neem-based insecticides. Release Trichogramma parasitoids. Use Bacillus thuringiensis var. kurstaki. Apply diatomaceous earth. Intercrop with non-host crops.",
+    "criticalManagement": "Apply Spinosad or Chlorantraniliprole. Implement area-wide management. Destroy heavily infested crops. Use resistant varieties. Consider biological control augmentation.",
+    "pesticides": [
+      {
+        "name": "Spinosad 24% SC",
+        "activeIngredient": "Spinosad",
+        "doseRate": "100ml/200L water per hectare",
+        "phi": 3,
+        "maxApplications": 6,
+        "notes": "Effective against larvae. Safe for beneficial insects when dry."
+      },
+      {
+        "name": "Chlorantraniliprole 20% SC",
+        "activeIngredient": "Chlorantraniliprole",
+        "doseRate": "150ml/200L water per hectare",
+        "phi": 14,
+        "maxApplications": 3,
+        "notes": "Systemic and translaminar. Long residual."
+      },
+      {
+        "name": "Abamectin 1.8% EC",
+        "activeIngredient": "Abamectin",
+        "doseRate": "200ml/200L water per hectare",
+        "phi": 7,
+        "maxApplications": 4,
+        "notes": "Translaminar. Effective against mining larvae."
+      }
+    ],
+    "biologicalControls": [
+      "Trichogramma achaeae egg parasitoid",
+      "Necremnus artynes larval parasitoid",
+      "Macrolophus pygmaeus predatory bug",
+      "Bacillus thuringiensis var. kurstaki",
+      "Beauveria bassiana fungal biopesticide",
+      "Pheromone traps (TUA lure) for mass trapping"
+    ]
+  }
+}

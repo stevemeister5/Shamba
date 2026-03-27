@@ -28,6 +28,7 @@ import com.shambasmart.presentation.maintenance.MaintenanceScreen
 import com.shambasmart.presentation.setup.FarmSetupScreen
 import com.shambasmart.presentation.gps.GPSBoundaryScreen
 import com.shambasmart.map.FarmMapScreen
+import com.shambasmart.presentation.crops.ScoutingCaptureScreen
 
 sealed class Screen(val route: String) {
     object Dashboard : Screen("dashboard")
@@ -53,6 +54,7 @@ sealed class Screen(val route: String) {
         fun createRoute(plotId: Long, plotName: String) = "gps_boundary/$plotId/$plotName"
     }
     object FarmMap : Screen("farm_map")
+    object ScoutingCapture : Screen("scouting_capture")
 }
 
 @Composable
@@ -149,6 +151,12 @@ fun ShambaNavGraph(
         composable(Screen.FarmMap.route) {
             FarmMapScreen(
                 onNavigateBack = { navController.popBackStack() }
+            )
+        }
+        composable(Screen.ScoutingCapture.route) {
+            ScoutingCaptureScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToMap = { navController.navigate(Screen.FarmMap.route) }
             )
         }
     }

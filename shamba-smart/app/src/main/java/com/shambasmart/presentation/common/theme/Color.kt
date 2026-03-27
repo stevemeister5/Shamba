@@ -2,63 +2,122 @@ package com.shambasmart.presentation.common.theme
 
 import androidx.compose.ui.graphics.Color
 
-// Green palette (primary - representing agriculture/growth)
-val Green10 = Color(0xFF002114)
-val Green20 = Color(0xFF003D29)
-val Green30 = Color(0xFF005840)
-val Green40 = Color(0xFF007B5C)
-val Green80 = Color(0xFF6DDBAF)
-val Green90 = Color(0xFF8CFFC8)
-val Green100 = Color(0xFFFFFFFF)
+// Base Surfaces — Organic Dark Precision
+val SurfaceBase = Color(0xFF0D1210)      // Deep forest black, slightly warm
+val SurfaceRaised = Color(0xFF141A17)    // Cards and panels
+val SurfaceElevated = Color(0xFF1C2420)  // Modals, dropdowns, overlays
+val SurfaceOverlay = Color(0xFF232E29)   // Hover states, selected rows
+val SurfaceSunken = Color(0xFF0A0F0D)    // Input fields, inset wells
 
-// Dark Green palette (secondary)
-val DarkGreen10 = Color(0xFF002018)
-val DarkGreen20 = Color(0xFF00382C)
-val DarkGreen30 = Color(0xFF005040)
-val DarkGreen40 = Color(0xFF1D6B53)
-val DarkGreen80 = Color(0xFFA3D4BD)
-val DarkGreen90 = Color(0xFFC2F0D8)
-val DarkGreen100 = Color(0xFFFFFFFF)
+// Primary Brand — Forest Green Ramp
+val Green950 = Color(0xFF051208)
+val Green900 = Color(0xFF0A2114)
+val Green800 = Color(0xFF0F3320)
+val Green700 = Color(0xFF1A5C35)
+val Green600 = Color(0xFF237A45)
+val Green500 = Color(0xFF2E9E58)   // Primary action colour
+val Green400 = Color(0xFF42C06E)   // Interactive highlights
+val Green300 = Color(0xFF6DD68F)   // Success states
+val Green200 = Color(0xFFA3E8BB)   // Light accents
+val Green100 = Color(0xFFD4F5E2)   // Text on dark green
+val Green50 = Color(0xFFEDFBF3)    // Lightest tint
 
-// Brown palette (tertiary - representing earth/soil)
-val Brown10 = Color(0xFF2E1500)
-val Brown20 = Color(0xFF4D2800)
-val Brown30 = Color(0xFF6D3C00)
-val Brown40 = Color(0xFF8F5100)
-val Brown80 = Color(0xFFFFB87A)
-val Brown90 = Color(0xFFFFDCBE)
-val Brown100 = Color(0xFFFFFFFF)
+// Warm Accent — Korogwe Earth Ramp
+val Earth900 = Color(0xFF2A1505)
+val Earth800 = Color(0xFF4A2508)
+val Earth700 = Color(0xFF7A3F0D)
+val Earth600 = Color(0xFFA85A16)
+val Earth500 = Color(0xFFD4751F)   // Primary warm accent
+val Earth400 = Color(0xFFE8922E)   // Alerts, harvest indicators
+val Earth300 = Color(0xFFF2B06A)   // Secondary warm
+val Earth200 = Color(0xFFF8D4A8)   // Light warm
+val Earth100 = Color(0xFFFDF0E0)   // Warmest tint
 
-// Red palette (error)
-val Red10 = Color(0xFF410002)
-val Red20 = Color(0xFF690005)
-val Red30 = Color(0xFF93000A)
-val Red40 = Color(0xFFBA1A1A)
-val Red80 = Color(0xFFFFB4AB)
-val Red90 = Color(0xFFFFDAD6)
+// Teal — Data and Milk
+val Teal600 = Color(0xFF0D6B62)
+val Teal500 = Color(0xFF0E8F82)
+val Teal400 = Color(0xFF12B5A5)
+val Teal300 = Color(0xFF3DCEC0)
+val Teal200 = Color(0xFF87E4DC)
+val Teal100 = Color(0xFFC8F5F1)
+
+// Amber — Warnings and Gold
+val Amber600 = Color(0xFF92600A)
+val Amber500 = Color(0xFFC4820E)
+val Amber400 = Color(0xFFF0A820)
+val Amber300 = Color(0xFFF7C55A)
+val Amber200 = Color(0xFFFADA96)
+val Amber100 = Color(0xFFFEF3D0)
+
+// Red — Alerts and Danger
+val Red600 = Color(0xFF8B1C1C)
+val Red500 = Color(0xFFB52626)
+val Red400 = Color(0xFFDE3535)
+val Red300 = Color(0xFFF06666)
+val Red200 = Color(0xFFF8AAAA)
+val Red100 = Color(0xFFFDDEDE)
+
+// Neutral — Text and Structure
+val Neutral950 = Color(0xFFF8FAF9)   // Primary text (warm white, not pure)
+val Neutral800 = Color(0xFFC4CEC9)   // Secondary text
+val Neutral600 = Color(0xFF8A9E96)   // Tertiary text, placeholders
+val Neutral400 = Color(0xFF4A5C55)   // Disabled, muted
+val Neutral300 = Color(0xFF2E3D37)   // Borders, dividers
+val Neutral200 = Color(0xFF202C27)   // Subtle borders
+val Neutral100 = Color(0xFF171F1C)   // Hairline borders
+
+// Legacy compatibility (map old colors to new system)
+val Green10 = Green900
+val Green20 = Green800
+val Green30 = Green700
+val Green40 = Green600
+val Green80 = Green300
+val Green90 = Green200
+val Green100 = Green50
+
+val DarkGreen10 = Green900
+val DarkGreen20 = Green800
+val DarkGreen30 = Green700
+val DarkGreen40 = Green600
+val DarkGreen80 = Green300
+val DarkGreen90 = Green200
+val DarkGreen100 = Green50
+
+val Brown10 = Earth900
+val Brown20 = Earth800
+val Brown30 = Earth700
+val Brown40 = Earth600
+val Brown80 = Earth300
+val Brown90 = Earth200
+val Brown100 = Earth100
+
+val Red10 = Red600
+val Red20 = Red500
+val Red30 = Red400
+val Red40 = Red400
+val Red80 = Red200
+val Red90 = Red100
 val Red100 = Color(0xFFFFFFFF)
 
-// Green Gray palette (neutral)
-val GreenGray10 = Color(0xFF0E1F18)
-val GreenGray20 = Color(0xFF23332C)
-val GreenGray30 = Color(0xFF394941)
-val GreenGray50 = Color(0xFF667B71)
-val GreenGray60 = Color(0xFF7F958A)
-val GreenGray80 = Color(0xFFB4CAC0)
-val GreenGray90 = Color(0xFFD0E6DB)
-val GreenGray99 = Color(0xFFF2FFF7)
+val GreenGray10 = SurfaceBase
+val GreenGray20 = Neutral100
+val GreenGray30 = Neutral200
+val GreenGray50 = Neutral400
+val GreenGray60 = Neutral600
+val GreenGray80 = Neutral800
+val GreenGray90 = Neutral950
+val GreenGray99 = Neutral950
 
-// Dark Green Gray palette (neutral dark)
-val DarkGreenGray10 = Color(0xFF0D1F17)
-val DarkGreenGray90 = Color(0xFFD0E6DB)
+val DarkGreenGray10 = SurfaceBase
+val DarkGreenGray90 = Neutral800
 
-// Additional farm-themed colors
+// Farm-themed colors (updated to match new palette)
 val MilkWhite = Color(0xFFFFF8F0)
-val SilageYellow = Color(0xFFFFD54F)
-val GrassGreen = Color(0xFF4CAF50)
-val WaterBlue = Color(0xFF2196F3)
-val SoilBrown = Color(0xFF795548)
-val TomatoRed = Color(0xFFF44336)
+val SilageYellow = Amber400
+val GrassGreen = Green500
+val WaterBlue = Teal400
+val SoilBrown = Earth600
+val TomatoRed = Red400
 val OnionPurple = Color(0xFF9C27B0)
-val MaizeYellow = Color(0xFFFFEB3B)
-val CassavaBeige = Color(0xFFD7CCC8)
+val MaizeYellow = Amber300
+val CassavaBeige = Earth200

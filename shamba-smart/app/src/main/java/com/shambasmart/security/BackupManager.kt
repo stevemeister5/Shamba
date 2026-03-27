@@ -2,11 +2,13 @@ package com.shambasmart.security
 
 import android.content.Context
 import android.os.Environment
+import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
+import java.security.MessageDigest
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -174,6 +176,73 @@ class BackupManager @Inject constructor(
                 }
                 entry = zipIn.nextEntry
             }
+        }
+    }
+
+    /**
+     * Cleans old backups, keeping only backups from the last N days.
+     * @param maxAgeDays Maximum age of backups to keep
+     */
+    suspend fun cleanOldBackups(maxAgeDays: Int = 7) = withContext(Dispatchers.IO) {
+        val cutoffTime = System.currentTimeMillis() - (maxAgeDays * 24 * 60 * 60 * 1000L)
+        val backupDir = getBackupDirectory()
+        if (!backupDir.exists()) return@withContext
+
+        backupDir.listFiles()?.forEach { file ->
+            if (file.isFile && file.name.endsWith(BACKUP_EXTENSION) && file.lastModified() < cutoffTime) {
+                file.delete()
+            }
+        }
+    }
+
+    /**
+     * Calculates SHA-256 checksum of a file.
+     * @param file The file to calculate checksum for
+     * @return Hex string of the checksum
+     */
+    fun calculateChecksum(file: File): String {
+        val digest = MessageDigest.getInstance("SHA-256")
+        FileInputStream(file).use { fis ->
+            val buffer = ByteArray(8192)
+            var bytesRead: Int
+            while (fis.read(buffer).also { bytesRead = it } != -1) {
+                digest.update(buffer, 0, bytesRead)
+            }
+        }
+        return digest.digest().joinToString("") { "%02x".format(it) }
+    }
+
+    /**
+     * Saves backup metadata to a JSON file alongside the backup.
+     * @param metadata The backup metadata to save
+     */
+    suspend fun saveBackupMetadata(metadata: BackupMetadata) = withContext(Dispatchers.IO) {
+        try {
+            val backupDir = getBackupDirectory()
+            val metadataFile = File(backupDir, "${metadata.fileName}.metadata.json")
+            val gson = Gson()
+            metadataFile.writeText(gson.toJson(metadata))
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    /**
+     * Loads backup metadata from a JSON file.
+     * @param backupFile The backup file to load metadata for
+     * @return BackupMetadata or null if not found
+     */
+    suspend fun loadBackupMetadata(backupFile: File): BackupMetadata? = withContext(Dispatchers.IO) {
+        try {
+            val metadataFile = File(backupFile.parent, "${backupFile.name}.metadata.json")
+            if (metadataFile.exists()) {
+                val gson = Gson()
+                gson.fromJson(metadataFile.readText(), BackupMetadata::class.java)
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            null
         }
     }
 }

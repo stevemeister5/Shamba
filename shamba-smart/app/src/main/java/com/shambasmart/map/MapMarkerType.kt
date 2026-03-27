@@ -96,5 +96,6 @@ enum class HeatmapType(
     CROP_HEALTH("Crop Health", "Health score by plot", "#FFF44336", "#FF4CAF50"),
     WATER_USAGE("Water Usage", "Water consumption by plot", "#FFE3F2FD", "#FF1565C0"),
     FEED_CONSUMPTION("Feed Consumption", "Feed usage by pen", "#FFFFF3E0", "#FFE65100"),
-    REVENUE_PER_ACRE("Revenue/Acre", "Income per acre by plot", "#FFE8F5E9", "#FF2E7D32")
+    REVENUE_PER_ACRE("Revenue/Acre", "Income per acre by plot", "#FFE8F5E9", "#FF2E7D32"),
+    PEST_SCOUTING("Pest Scouting", "Pest detection severity by location", "#FF4CAF50", "#FFF44336")
 }

@@ -118,6 +118,9 @@ dependencies {
     // SQLCipher for encrypted database
     implementation("net.zetetic:android-database-sqlcipher:4.5.4")
     implementation("androidx.sqlite:sqlite-ktx:2.4.0")
+    
+    // Security - Android Keystore
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
 
     // WorkManager for background sync
     implementation("androidx.work:work-runtime-ktx:2.9.0")
@@ -153,8 +156,23 @@ dependencies {
     // PDF Generation
     implementation("com.itextpdf:itext7-core:8.0.2")
 
-    // OpenCV for computer vision (stub - actual integration in ML module)
-    // implementation("org.opencv:opencv:4.9.0")
+    // CameraX for camera capture
+    implementation("androidx.camera:camera-core:1.3.1")
+    implementation("androidx.camera:camera-camera2:1.3.1")
+    implementation("androidx.camera:camera-lifecycle:1.3.1")
+    implementation("androidx.camera:camera-view:1.3.1")
+
+    // OpenCV for computer vision (HSV analysis)
+    implementation("org.opencv:opencv:4.9.0")
+
+    // OSMDroid for interactive farm maps (no token required)
+    implementation("org.osmdroid:osmdroid-android:6.1.18")
+    implementation("org.osmdroid:osmdroid-wms:6.1.18")
+    implementation("org.osmdroid:osmdroid-mapsforge:6.1.18")
+    // OSMDroid heatmap overlay
+    implementation("com.github.MKergall:osmbonuspack:6.9.0")
+    // Google Location Services for GPS tracking
+    implementation("com.google.android.gms:play-services-location:21.1.0")
 
     // Testing
     testImplementation("junit:junit:4.13.2")

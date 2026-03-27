@@ -6,6 +6,8 @@ import com.shambasmart.data.local.ShambaDatabase
 import com.shambasmart.data.local.dao.*
 import com.shambasmart.data.local.dao.maarifa.KnowledgeChunkDao
 import com.shambasmart.data.local.dao.maarifa.OperationalRuleDao
+import com.shambasmart.security.EncryptionHelper
+import com.shambasmart.security.KeystoreManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -20,8 +22,26 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideDatabase(@ApplicationContext context: Context): ShambaDatabase {
-        val passphrase = "ShambaSmart2026".toByteArray()
+    fun provideDatabase(
+        @ApplicationContext context: Context,
+        keystoreManager: KeystoreManager,
+        encryptionHelper: EncryptionHelper
+    ): ShambaDatabase {
+        // Get or create secure passphrase using Android Keystore
+        val passphrase = if (keystoreManager.keyExists()) {
+            // Retrieve existing passphrase from encrypted storage
+            val encryptedPassphrase = getEncryptedPassphrase(context)
+            if (encryptedPassphrase != null) {
+                encryptionHelper.decryptToBytes(encryptedPassphrase)
+            } else {
+                // Fallback: generate new passphrase and store it
+                generateAndStorePassphrase(context, encryptionHelper)
+            }
+        } else {
+            // First run or key was reset: generate new passphrase
+            generateAndStorePassphrase(context, encryptionHelper)
+        }
+
         val factory = SupportFactory(passphrase)
 
         return Room.databaseBuilder(
@@ -32,6 +52,31 @@ object DatabaseModule {
             .openHelperFactory(factory)
             .fallbackToDestructiveMigration()
             .build()
+    }
+
+    /**
+     * Retrieves the encrypted passphrase from secure storage.
+     */
+    private fun getEncryptedPassphrase(context: Context): String? {
+        val prefs = context.getSharedPreferences("shamba_security", Context.MODE_PRIVATE)
+        return prefs.getString("encrypted_db_passphrase", null)
+    }
+
+    /**
+     * Generates a new passphrase, encrypts it, and stores it securely.
+     */
+    private fun generateAndStorePassphrase(
+        context: Context,
+        encryptionHelper: EncryptionHelper
+    ): ByteArray {
+        val newPassphrase = encryptionHelper.generateSecurePassphrase()
+        val encryptedPassphrase = encryptionHelper.encryptBytes(newPassphrase)
+
+        // Store encrypted passphrase in SharedPreferences
+        val prefs = context.getSharedPreferences("shamba_security", Context.MODE_PRIVATE)
+        prefs.edit().putString("encrypted_db_passphrase", encryptedPassphrase).apply()
+
+        return newPassphrase
     }
 
     @Provides

@@ -98,3 +98,27 @@ desktop.ini
 # macOS
 .AppleDouble
 .LSOverride
+
+# ONNX Model files (large binary files - download separately)
+*.onnx
+
+# ML/AI model export directories
+onnx_export/
+model_cache/
+
+# Python virtual environments and cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+
+# Large binary assets (if not tracked in Git LFS)
+*.bin
+*.h5
+*.pt
+*.pth
+*.tflite

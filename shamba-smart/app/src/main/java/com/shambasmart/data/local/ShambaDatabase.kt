@@ -39,9 +39,16 @@ import com.shambasmart.data.local.converter.Converters
         MaintenanceTask::class,
         // Maarifa Knowledge Engine entities
         KnowledgeChunk::class,
-        OperationalRule::class
+        OperationalRule::class,
+        // GPS Boundary entities
+        FarmBoundary::class,
+        BoundaryPointEntity::class,
+        // Map entities
+        MapMarkerEntity::class,
+        MapLayerEntity::class,
+        MapTileCacheEntity::class
     ],
-    version = 4,
+    version = 6,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
@@ -68,4 +75,10 @@ abstract class ShambaDatabase : RoomDatabase() {
     // Maarifa DAOs
     abstract fun knowledgeChunkDao(): KnowledgeChunkDao
     abstract fun operationalRuleDao(): OperationalRuleDao
+    // GPS Boundary DAO
+    abstract fun boundaryDao(): BoundaryDao
+    // Map DAOs
+    abstract fun mapMarkerDao(): MapMarkerDao
+    abstract fun mapLayerDao(): MapLayerDao
+    abstract fun mapTileCacheDao(): MapTileCacheDao
 }

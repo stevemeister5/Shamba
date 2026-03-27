@@ -1,5 +1,11 @@
 package com.shambasmart.ml.vision
 
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.camera.view.PreviewView
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -10,7 +16,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
@@ -20,6 +30,32 @@ fun VisionGradingScreen(
     viewModel: VisionGradingViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    var hasCameraPermission by remember {
+        mutableStateOf(
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED
+        )
+    }
+
+    val cameraPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        hasCameraPermission = isGranted
+        if (isGranted) {
+            // Permission granted, camera will be set up in the preview
+        }
+    }
+
+    // Determine if current product uses HSV or time-based grading
+    val usesHSV = uiState.selectedProduct in listOf(
+        ProductType.TOMATO, ProductType.ONION, ProductType.KALE,
+        ProductType.CHEESE_FRESH, ProductType.CHEESE_AGED
+    )
 
     Column(
         modifier = Modifier
@@ -33,7 +69,8 @@ fun VisionGradingScreen(
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "HSV Colorimetric Analysis for Quality Grading",
+            text = if (usesHSV) "HSV Colorimetric Analysis for Quality Grading" 
+                   else "Time-Based Maturity Calculation",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -81,54 +118,171 @@ fun VisionGradingScreen(
                         )
                     }
                 }
-            }
-        }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Camera Placeholder
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(250.dp)
-        ) {
-            Box(
-                modifier = Modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(
-                        Icons.Default.CameraAlt,
-                        contentDescription = null,
-                        modifier = Modifier.size(64.dp),
-                        tint = MaterialTheme.colorScheme.primary
+                // Grading method indicator
+                Spacer(modifier = Modifier.height(12.dp))
+                Card(
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (usesHSV) 
+                            MaterialTheme.colorScheme.primaryContainer 
+                        else 
+                            MaterialTheme.colorScheme.secondaryContainer
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text("Camera Preview")
-                    Text(
-                        "Point at ${uiState.selectedProduct.name.replace("_", " ")} for grading",
-                        style = MaterialTheme.typography.bodySmall
-                    )
+                ) {
+                    Row(
+                        modifier = Modifier.padding(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            if (usesHSV) Icons.Default.CameraAlt else Icons.Default.Schedule,
+                            contentDescription = null,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = if (usesHSV) "Grading Method: HSV Color Analysis" 
+                                   else "Grading Method: Time-Based Maturity",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
                 }
             }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Capture Button
+        // Camera Preview or Placeholder
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(250.dp)
+        ) {
+            if (usesHSV) {
+                // HSV products - show camera
+                if (!hasCameraPermission) {
+                    // Request camera permission
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            Icons.Default.CameraAlt,
+                            contentDescription = null,
+                            modifier = Modifier.size(64.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("Camera permission required")
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Button(
+                            onClick = { cameraPermissionLauncher.launch(Manifest.permission.CAMERA) }
+                        ) {
+                            Text("Grant Permission")
+                        }
+                    }
+                } else {
+                    // Camera preview
+                    Box(modifier = Modifier.fillMaxSize()) {
+                        AndroidView(
+                            factory = { ctx ->
+                                PreviewView(ctx).apply {
+                                    viewModel.setupCamera(lifecycleOwner, this)
+                                }
+                            },
+                            modifier = Modifier.fillMaxSize()
+                        )
+
+                        // Camera status overlay
+                        if (!uiState.isCameraReady) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color.Black.copy(alpha = 0.7f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    CircularProgressIndicator(color = Color.White)
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text("Initializing camera...", color = Color.White)
+                                }
+                            }
+                        }
+
+                        // Camera error overlay
+                        if (uiState.cameraError != null) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color.Black.copy(alpha = 0.7f)),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                    Icon(
+                                        Icons.Default.Error,
+                                        contentDescription = null,
+                                        tint = Color.Red,
+                                        modifier = Modifier.size(48.dp)
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(
+                                        uiState.cameraError ?: "Camera error",
+                                        color = Color.White
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Button(onClick = { viewModel.clearCameraError() }) {
+                                        Text("Dismiss")
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                // Time-based products - show placeholder
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Icon(
+                            Icons.Default.Schedule,
+                            contentDescription = null,
+                            modifier = Modifier.size(64.dp),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("Time-Based Grading")
+                        Text(
+                            "Maturity calculated from planting date",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Capture/Analyze Button
         Button(
             onClick = { viewModel.captureAndAnalyze() },
             modifier = Modifier.fillMaxWidth(),
-            enabled = !uiState.isAnalyzing
+            enabled = !uiState.isAnalyzing && (if (usesHSV) uiState.isCameraReady else true)
         ) {
             if (uiState.isAnalyzing) {
                 CircularProgressIndicator(modifier = Modifier.size(24.dp))
                 Spacer(modifier = Modifier.width(8.dp))
                 Text("Analyzing...")
             } else {
-                Icon(Icons.Default.Camera, contentDescription = null)
+                Icon(
+                    if (usesHSV) Icons.Default.Camera else Icons.Default.Calculate,
+                    contentDescription = null
+                )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Capture & Grade")
+                Text(if (usesHSV) "Capture & Grade" else "Calculate Maturity")
             }
         }
 
@@ -215,26 +369,45 @@ fun VisionGradingScreen(
                             )
                         }
                         
-                        Column {
-                            Text(
-                                text = "H: ${String.format("%.0f", uiState.hue)}°",
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                            Text(
-                                text = "S: ${String.format("%.0f", uiState.saturation * 100)}%",
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                            Text(
-                                text = "V: ${String.format("%.0f", uiState.value * 100)}%",
-                                style = MaterialTheme.typography.bodyMedium
-                            )
+                        if (usesHSV) {
+                            Column {
+                                Text(
+                                    text = "H: ${String.format("%.0f", uiState.hue)}°",
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                                Text(
+                                    text = "S: ${String.format("%.0f", uiState.saturation * 100)}%",
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                                Text(
+                                    text = "V: ${String.format("%.0f", uiState.value * 100)}%",
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
                         }
                     }
                     
                     Spacer(modifier = Modifier.height(12.dp))
                     
+                    // Grading method badge
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            if (usesHSV) Icons.Default.CameraAlt else Icons.Default.Schedule,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = uiState.gradingMethod ?: if (usesHSV) "HSV_ANALYSIS" else "TIME_BASED",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    
                     // Premium indicator
                     if (uiState.premiumMultiplier > 1.0) {
+                        Spacer(modifier = Modifier.height(8.dp))
                         Row(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -251,8 +424,9 @@ fun VisionGradingScreen(
                                 color = Color(0xFFFFD700)
                             )
                         }
-                        Spacer(modifier = Modifier.height(8.dp))
                     }
+                    
+                    Spacer(modifier = Modifier.height(12.dp))
                     
                     Text(
                         text = uiState.analysis,
@@ -290,7 +464,7 @@ fun VisionGradingScreen(
                         )
                         Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Contains: Grade, HSV values, maturity score, harvest window status, and digital signature",
+                            text = "Contains: Grade, ${if (usesHSV) "HSV values, " else ""}maturity score, harvest window status, and digital signature",
                             style = MaterialTheme.typography.bodySmall
                         )
                     }
@@ -343,30 +517,57 @@ fun VisionGradingScreen(
             Column(modifier = Modifier.padding(16.dp)) {
                 Text("How It Works", style = MaterialTheme.typography.titleMedium)
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = "1. Select product type (crop or cheese)",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Text(
-                    text = "2. Capture image using Xiaomi Pad 7 camera",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Text(
-                    text = "3. Convert to HSV color space for analysis",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Text(
-                    text = "4. Compare against optimal maturity profiles",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Text(
-                    text = "5. Generate grade and harvest window status",
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Text(
-                    text = "6. Create signed QR invoice with metadata",
-                    style = MaterialTheme.typography.bodyMedium
-                )
+                if (usesHSV) {
+                    Text(
+                        text = "1. Select product type (crop or cheese)",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        text = "2. Capture image using Xiaomi Pad 7 camera",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        text = "3. Convert to HSV color space for analysis",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        text = "4. Compare against optimal maturity profiles",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        text = "5. Generate grade and harvest window status",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        text = "6. Create signed QR invoice with metadata",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                } else {
+                    Text(
+                        text = "1. Select product type (maize, beans, cassava)",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        text = "2. Log planting date in Crop Management module",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        text = "3. System calculates days since planting",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        text = "4. Compare against crop-specific maturity days",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        text = "5. Generate grade based on maturity percentage",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        text = "6. Create signed QR invoice with metadata",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
             }
         }
     }

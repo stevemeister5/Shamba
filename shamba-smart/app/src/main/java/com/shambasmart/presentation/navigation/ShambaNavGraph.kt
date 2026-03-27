@@ -3,8 +3,10 @@ package com.shambasmart.presentation.navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.shambasmart.presentation.dashboard.DashboardScreen
 import com.shambasmart.presentation.livestock.LivestockScreen
 import com.shambasmart.presentation.crops.CropsScreen
@@ -24,7 +26,8 @@ import com.shambasmart.presentation.ml.npu.NpuConfigScreen
 import com.shambasmart.presentation.alerts.AlertsScreen
 import com.shambasmart.presentation.maintenance.MaintenanceScreen
 import com.shambasmart.presentation.setup.FarmSetupScreen
-import com.shambasmart.presentation.ar.ARBoundaryScreen
+import com.shambasmart.presentation.gps.GPSBoundaryScreen
+import com.shambasmart.map.FarmMapScreen
 
 sealed class Screen(val route: String) {
     object Dashboard : Screen("dashboard")
@@ -46,7 +49,10 @@ sealed class Screen(val route: String) {
     object Alerts : Screen("alerts")
     object Maintenance : Screen("maintenance")
     object FarmSetup : Screen("farm_setup")
-    object ARBoundary : Screen("ar_boundary")
+    object GPSBoundary : Screen("gps_boundary/{plotId}/{plotName}") {
+        fun createRoute(plotId: Long, plotName: String) = "gps_boundary/$plotId/$plotName"
+    }
+    object FarmMap : Screen("farm_map")
 }
 
 @Composable
@@ -129,14 +135,20 @@ fun ShambaNavGraph(
                 onComplete = { navController.navigate(Screen.Dashboard.route) }
             )
         }
-        composable(Screen.ARBoundary.route) {
-            ARBoundaryScreen(
-                onNavigateBack = { navController.popBackStack() },
-                onSaveBoundary = { boundaryPoints ->
-                    // Save boundary points to database
-                    // Navigate back to farm setup or infrastructure
-                    navController.popBackStack()
-                }
+        composable(
+            route = Screen.GPSBoundary.route,
+            arguments = listOf(
+                navArgument("plotId") { type = NavType.LongType },
+                navArgument("plotName") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            GPSBoundaryScreen(
+                onNavigateBack = { navController.popBackStack() }
+            )
+        }
+        composable(Screen.FarmMap.route) {
+            FarmMapScreen(
+                onNavigateBack = { navController.popBackStack() }
             )
         }
     }

@@ -1,203 +1,169 @@
 package com.shambasmart.ml.vision
 
+import android.graphics.Bitmap
+import androidx.camera.view.PreviewView
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.shambasmart.data.local.dao.CropDao
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.datetime.LocalDate
 import javax.inject.Inject
-import kotlin.math.*
-import kotlin.random.Random
-
-data class ProductMaturity(
-    val productType: ProductType,
-    val optimalHueRange: ClosedRange<Double>,
-    val optimalSaturationRange: ClosedRange<Double>,
-    val optimalValueRange: ClosedRange<Double>,
-    val harvestWindowDays: Int,
-    val premiumMultiplier: Double
-)
-
-enum class ProductType {
-    TOMATO, MAIZE, BEANS, KALE, ONION, CHEESE_FRESH, CHEESE_AGED
-}
 
 @HiltViewModel
-class VisionGradingViewModel @Inject constructor() : ViewModel() {
+class VisionGradingViewModel @Inject constructor(
+    private val cameraManager: CameraManager,
+    private val colorimetricGrader: ColorimetricGrader,
+    private val cropDao: CropDao
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(VisionUiState())
     val uiState: StateFlow<VisionUiState> = _uiState.asStateFlow()
 
-    // Maturity profiles for different products
-    private val maturityProfiles = mapOf(
-        ProductType.TOMATO to ProductMaturity(
-            productType = ProductType.TOMATO,
-            optimalHueRange = 0.0..30.0, // Red hues
-            optimalSaturationRange = 0.7..1.0,
-            optimalValueRange = 0.6..0.9,
-            harvestWindowDays = 7,
-            premiumMultiplier = 1.3
-        ),
-        ProductType.MAIZE to ProductMaturity(
-            productType = ProductType.MAIZE,
-            optimalHueRange = 40.0..60.0, // Yellow hues
-            optimalSaturationRange = 0.6..0.9,
-            optimalValueRange = 0.7..1.0,
-            harvestWindowDays = 14,
-            premiumMultiplier = 1.2
-        ),
-        ProductType.BEANS to ProductMaturity(
-            productType = ProductType.BEANS,
-            optimalHueRange = 90.0..130.0, // Green hues
-            optimalSaturationRange = 0.5..0.8,
-            optimalValueRange = 0.5..0.8,
-            harvestWindowDays = 10,
-            premiumMultiplier = 1.15
-        ),
-        ProductType.KALE to ProductMaturity(
-            productType = ProductType.KALE,
-            optimalHueRange = 100.0..140.0, // Deep green
-            optimalSaturationRange = 0.6..0.9,
-            optimalValueRange = 0.4..0.7,
-            harvestWindowDays = 5,
-            premiumMultiplier = 1.25
-        ),
-        ProductType.ONION to ProductMaturity(
-            productType = ProductType.ONION,
-            optimalHueRange = 20.0..40.0, // Golden hues
-            optimalSaturationRange = 0.5..0.8,
-            optimalValueRange = 0.6..0.9,
-            harvestWindowDays = 21,
-            premiumMultiplier = 1.1
-        ),
-        ProductType.CHEESE_FRESH to ProductMaturity(
-            productType = ProductType.CHEESE_FRESH,
-            optimalHueRange = 40.0..60.0, // Creamy white
-            optimalSaturationRange = 0.1..0.3,
-            optimalValueRange = 0.85..0.95,
-            harvestWindowDays = 3,
-            premiumMultiplier = 1.4
-        ),
-        ProductType.CHEESE_AGED to ProductMaturity(
-            productType = ProductType.CHEESE_AGED,
-            optimalHueRange = 30.0..50.0, // Aged yellow
-            optimalSaturationRange = 0.3..0.6,
-            optimalValueRange = 0.6..0.8,
-            harvestWindowDays = 30,
-            premiumMultiplier = 1.5
-        )
+    // Map UI product types to grader product types
+    private val productTypeMap = mapOf(
+        ProductType.TOMATO to ColorimetricGrader.ProductType.TOMATO,
+        ProductType.MAIZE to ColorimetricGrader.ProductType.MAIZE,
+        ProductType.BEANS to ColorimetricGrader.ProductType.BEANS,
+        ProductType.KALE to ColorimetricGrader.ProductType.KALE,
+        ProductType.ONION to ColorimetricGrader.ProductType.ONION,
+        ProductType.CHEESE_FRESH to ColorimetricGrader.ProductType.CHEESE_FRESH,
+        ProductType.CHEESE_AGED to ColorimetricGrader.ProductType.CHEESE_AGED
     )
 
     fun setProductType(type: ProductType) {
         _uiState.update { it.copy(selectedProduct = type) }
     }
 
+    fun setupCamera(
+        lifecycleOwner: LifecycleOwner,
+        previewView: PreviewView
+    ) {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isCameraReady = false, cameraError = null) }
+
+            val result = cameraManager.setupCamera(
+                lifecycleOwner = lifecycleOwner,
+                previewView = previewView
+            )
+
+            result.fold(
+                onSuccess = {
+                    _uiState.update { it.copy(isCameraReady = true) }
+                },
+                onFailure = { error ->
+                    _uiState.update { 
+                        it.copy(cameraError = "Camera setup failed: ${error.message}") 
+                    }
+                }
+            )
+        }
+    }
+
     fun captureAndAnalyze() {
         viewModelScope.launch {
             _uiState.update { it.copy(isAnalyzing = true) }
 
-            // Simulate camera capture and HSV analysis
-            // In production, this would use OpenCV for real analysis
-            kotlinx.coroutines.delay(1500) // Simulate processing time
-
-            // Simulated HSV values (would come from camera)
-            val hue = Random.nextDouble(0.0, 360.0)
-            val saturation = Random.nextDouble(0.3, 1.0)
-            val value = Random.nextDouble(0.4, 1.0)
-
             val productType = uiState.value.selectedProduct
-            val profile = maturityProfiles[productType] ?: maturityProfiles[ProductType.TOMATO]!!
+            val graderProductType = productTypeMap[productType]
+                ?: ColorimetricGrader.ProductType.TOMATO
 
-            // Calculate maturity score
-            val hueScore = if (hue in profile.optimalHueRange) 1.0 else 
-                1.0 - (min(abs(hue - profile.optimalHueRange.start), abs(hue - profile.optimalHueRange.endInclusive)) / 180.0)
-            
-            val satScore = if (saturation in profile.optimalSaturationRange) 1.0 else
-                1.0 - (min(abs(saturation - profile.optimalSaturationRange.start), abs(saturation - profile.optimalSaturationRange.endInclusive)))
-            
-            val valScore = if (value in profile.optimalValueRange) 1.0 else
-                1.0 - (min(abs(value - profile.optimalValueRange.start), abs(value - profile.optimalValueRange.endInclusive)))
+            // Check if this product uses HSV or time-based grading
+            val usesHSV = productType in listOf(
+                ProductType.TOMATO, ProductType.ONION, ProductType.KALE,
+                ProductType.CHEESE_FRESH, ProductType.CHEESE_AGED
+            )
 
-            val maturityScore = (hueScore * 0.4 + satScore * 0.3 + valScore * 0.3) * 100
+            if (usesHSV) {
+                // HSV-based grading - capture image from camera
+                val captureResult = cameraManager.captureImage()
 
-            // Grade based on maturity score
-            val grade = when {
-                maturityScore >= 85 -> "A"
-                maturityScore >= 70 -> "B"
-                maturityScore >= 50 -> "C"
-                else -> "D"
-            }
-
-            // Determine harvest window status
-            val harvestStatus = when {
-                maturityScore >= 85 -> "PEAK - Harvest immediately for best quality"
-                maturityScore >= 70 -> "OPTIMAL - Harvest within ${profile.harvestWindowDays} days"
-                maturityScore >= 50 -> "APPROACHING - Monitor closely"
-                else -> "PREMATURE - Not ready for harvest"
-            }
-
-            // Check if in harvest window
-            val isInHarvestWindow = maturityScore >= 70
-            val daysUntilHarvest = if (maturityScore >= 85) 0 else 
-                ((100 - maturityScore) / 100.0 * profile.harvestWindowDays).toInt()
-
-            // Generate analysis
-            val analysis = buildString {
-                appendLine("Product: ${productType.name.replace("_", " ")}")
-                appendLine("Maturity Score: ${String.format("%.1f", maturityScore)}%")
-                appendLine("Grade: $grade")
-                appendLine()
-                appendLine("HSV Analysis:")
-                appendLine("• Hue: ${String.format("%.0f", hue)}° (Optimal: ${profile.optimalHueRange})")
-                appendLine("• Saturation: ${String.format("%.0f", saturation * 100)}% (Optimal: ${profile.optimalSaturationRange})")
-                appendLine("• Value: ${String.format("%.0f", value * 100)}% (Optimal: ${profile.optimalValueRange})")
-                appendLine()
-                appendLine("Harvest Window: $harvestStatus")
-                if (daysUntilHarvest > 0) {
-                    appendLine("Estimated days to peak: $daysUntilHarvest")
-                }
-                appendLine()
-                appendLine("Quality Assessment:")
-                when (grade) {
-                    "A" -> append("Excellent quality. Peak maturity detected. Commands ${((profile.premiumMultiplier - 1) * 100).toInt()}% price premium.")
-                    "B" -> append("Good quality. Minor variations from optimal. Suitable for standard market.")
-                    "C" -> append("Acceptable quality. Consider processing or local market sale.")
-                    else -> append("Below standard. Not recommended for harvest yet.")
-                }
-            }
-
-            _uiState.update {
-                it.copy(
-                    isAnalyzing = false,
-                    hue = hue,
-                    saturation = saturation,
-                    value = value,
-                    maturityScore = maturityScore,
-                    grade = grade,
-                    harvestStatus = harvestStatus,
-                    isInHarvestWindow = isInHarvestWindow,
-                    daysUntilHarvest = daysUntilHarvest,
-                    analysis = analysis,
-                    premiumMultiplier = profile.premiumMultiplier
+                captureResult.fold(
+                    onSuccess = { bitmap ->
+                        val result = colorimetricGrader.gradeByHSV(bitmap, graderProductType)
+                        updateStateFromResult(result)
+                    },
+                    onFailure = { error ->
+                        _uiState.update {
+                            it.copy(
+                                isAnalyzing = false,
+                                cameraError = "Image capture failed: ${error.message}"
+                            )
+                        }
+                    }
                 )
+            } else {
+                // Time-based grading - calculate from planting date
+                val plantingDate = fetchPlantingDate(productType)
+                if (plantingDate != null) {
+                    val result = colorimetricGrader.gradeByTime(graderProductType, plantingDate)
+                    updateStateFromResult(result)
+                } else {
+                    _uiState.update {
+                        it.copy(
+                            isAnalyzing = false,
+                            analysis = "No planting date found for ${productType.name.replace("_", " ")}. Please log a planting record first."
+                        )
+                    }
+                }
             }
         }
+    }
+
+    private fun updateStateFromResult(result: ColorimetricGrader.GradingResult) {
+        _uiState.update {
+            it.copy(
+                isAnalyzing = false,
+                hue = result.hsvValues?.hue ?: 0.0,
+                saturation = result.hsvValues?.saturation ?: 0.0,
+                value = result.hsvValues?.value ?: 0.0,
+                maturityScore = result.maturityScore,
+                grade = result.grade,
+                harvestStatus = result.harvestStatus,
+                isInHarvestWindow = result.isInHarvestWindow,
+                daysUntilHarvest = result.daysUntilHarvest,
+                analysis = result.analysis,
+                premiumMultiplier = result.premiumMultiplier,
+                gradingMethod = result.gradingMethod.name
+            )
+        }
+    }
+
+    private suspend fun fetchPlantingDate(productType: ProductType): LocalDate? {
+        // Query the most recent planting for this crop type
+        val cropName = when (productType) {
+            ProductType.MAIZE -> "maize"
+            ProductType.BEANS -> "beans"
+            else -> productType.name.lowercase()
+        }
+        
+        // This is a simplified lookup - in production you'd query the actual crop plantings
+        // For now, return null to indicate no planting date available
+        return null
+    }
+
+    fun setPlantingDateForTimeBasedGrading(date: LocalDate) {
+        _uiState.update { it.copy(manualPlantingDate = date) }
     }
 
     fun generateQRInvoice() {
         viewModelScope.launch {
             val state = uiState.value
             
-            // Generate QR code with comprehensive grading metadata
             val qrData = buildString {
                 append("SHAMBA_SMART_GRADE|")
                 append("Version:2.0|")
                 append("Product:${state.selectedProduct.name}|")
                 append("Grade:${state.grade}|")
                 append("MaturityScore:${String.format("%.1f", state.maturityScore)}|")
-                append("Hue:${String.format("%.0f", state.hue)}|")
-                append("Sat:${String.format("%.2f", state.saturation)}|")
-                append("Val:${String.format("%.2f", state.value)}|")
+                append("Method:${state.gradingMethod ?: "HSV"}|")
+                if (state.hue > 0 || state.saturation > 0 || state.value > 0) {
+                    append("Hue:${String.format("%.0f", state.hue)}|")
+                    append("Sat:${String.format("%.2f", state.saturation)}|")
+                    append("Val:${String.format("%.2f", state.value)}|")
+                }
                 append("HarvestWindow:${state.isInHarvestWindow}|")
                 append("DaysToHarvest:${state.daysUntilHarvest}|")
                 append("Premium:${String.format("%.2f", state.premiumMultiplier)}|")
@@ -206,25 +172,37 @@ class VisionGradingViewModel @Inject constructor() : ViewModel() {
                 append("Signature:${generateSignature(state)}")
             }
 
-            _uiState.update {
-                it.copy(qrData = qrData)
-            }
+            _uiState.update { it.copy(qrData = qrData) }
         }
     }
 
     private fun generateSignature(state: VisionUiState): String {
-        // Simple signature for data integrity
-        val data = "${state.grade}${state.maturityScore}${state.hue}${state.saturation}${state.value}"
+        val data = "${state.grade}${state.maturityScore}${state.hue}${state.saturation}${state.value}${state.gradingMethod}"
         return data.hashCode().toString(16).take(8)
     }
 
     fun clearResults() {
         _uiState.update { VisionUiState(selectedProduct = it.selectedProduct) }
     }
+
+    fun clearCameraError() {
+        _uiState.update { it.copy(cameraError = null) }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        cameraManager.release()
+    }
+}
+
+enum class ProductType {
+    TOMATO, MAIZE, BEANS, KALE, ONION, CHEESE_FRESH, CHEESE_AGED
 }
 
 data class VisionUiState(
     val isAnalyzing: Boolean = false,
+    val isCameraReady: Boolean = false,
+    val cameraError: String? = null,
     val selectedProduct: ProductType = ProductType.TOMATO,
     val hue: Double = 0.0,
     val saturation: Double = 0.0,
@@ -236,5 +214,7 @@ data class VisionUiState(
     val daysUntilHarvest: Int = 0,
     val analysis: String = "",
     val premiumMultiplier: Double = 1.0,
-    val qrData: String? = null
+    val qrData: String? = null,
+    val gradingMethod: String? = null,
+    val manualPlantingDate: LocalDate? = null
 )

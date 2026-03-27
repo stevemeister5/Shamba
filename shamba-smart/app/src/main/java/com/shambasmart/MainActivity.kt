@@ -10,11 +10,17 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import com.shambasmart.presentation.common.theme.ShambaSmartTheme
 import dagger.hilt.android.AndroidEntryPoint
+import org.osmdroid.config.Configuration
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Configure OSMDroid
+        Configuration.getInstance().userAgentValue = packageName
+        Configuration.getInstance().load(this, getPreferences(MODE_PRIVATE))
+        
         enableEdgeToEdge()
         setContent {
             ShambaSmartTheme {

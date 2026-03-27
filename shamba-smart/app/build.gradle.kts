@@ -165,6 +165,9 @@ dependencies {
     // OpenCV for computer vision (HSV analysis)
     implementation("org.opencv:opencv:4.9.0")
 
+    // ONNX Runtime with NPU support
+    implementation("com.microsoft.onnxruntime:onnxruntime-android:1.17.0")
+
     // OSMDroid for interactive farm maps (no token required)
     implementation("org.osmdroid:osmdroid-android:6.1.18")
     implementation("org.osmdroid:osmdroid-wms:6.1.18")

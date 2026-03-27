@@ -48,7 +48,7 @@ import com.shambasmart.data.local.converter.Converters
         MapLayerEntity::class,
         MapTileCacheEntity::class
     ],
-    version = 6,
+    version = 7,
     exportSchema = true
 )
 @TypeConverters(Converters::class)

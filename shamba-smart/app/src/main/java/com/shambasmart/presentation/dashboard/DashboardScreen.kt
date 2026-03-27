@@ -13,11 +13,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.shambasmart.maarifa.MaarifaViewModel
+import com.shambasmart.maarifa.ui.MaarifaFloatingTab
+import com.shambasmart.maarifa.ui.MaarifaSidePanel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
-    viewModel: DashboardViewModel = hiltViewModel()
+    viewModel: DashboardViewModel = hiltViewModel(),
+    maarifaViewModel: MaarifaViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val herdSize by viewModel.herdSize.collectAsStateWithLifecycle()
@@ -25,6 +29,10 @@ fun DashboardScreen(
     val sheepCount by viewModel.sheepCount.collectAsStateWithLifecycle()
     val todayMilkYield by viewModel.todayMilkYield.collectAsStateWithLifecycle()
 
+    // Maarifa state
+    val maarifaUiState by maarifaViewModel.uiState.collectAsStateWithLifecycle()
+
+    Box(modifier = Modifier.fillMaxSize()) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -140,6 +148,21 @@ fun DashboardScreen(
             }
         }
     }
+
+    // Maarifa Side Panel
+    MaarifaSidePanel(
+        isOpen = maarifaUiState.isPanelOpen,
+        selectedTab = maarifaUiState.selectedTab,
+        onTabSelected = { maarifaViewModel.selectTab(it) },
+        onClose = { maarifaViewModel.closePanel() },
+        viewModel = maarifaViewModel
+    )
+
+    // Maarifa Floating Tab
+    MaarifaFloatingTab(
+        onClick = { maarifaViewModel.togglePanel() }
+    )
+    } // Close Box
 }
 
 @Composable

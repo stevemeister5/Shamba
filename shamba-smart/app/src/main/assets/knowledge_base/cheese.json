@@ -1,0 +1,49 @@
+{
+  "source_title": "Small-Scale Goat Cheese Production — Tanzania",
+  "source_type": "bundled",
+  "source_credibility": "government_research",
+  "topic_tags": "cheese,dairy,milk,processing,value_addition",
+  "last_verified": "2024-01",
+  "chunks": [
+    {
+      "text": "Milk quality testing before cheese making: Acceptable pH range: 6.4-6.8. Titrable acidity method: add 10ml milk + 1ml phenolphthalein indicator, titrate with 0.1N NaOH until pink persists 30 seconds, result <0.18% lactic acid acceptable. Alcohol test: mix 5ml milk + 5ml 68% ethanol — if curds form, milk is unsuitable for cheese (high acidity or heat damage). Sensory assessment: colour should be white to slightly yellow, no pink or blue tinge; smell — clean, no off-odours (rancid, barny, chemical); consistency — uniform, no clots visible. Reject milk that fails any test.",
+      "section_header": "Milk Quality Testing"
+    },
+    {
+      "text": "Pasteurisation at small scale — LTLT method (Low Temperature Long Time): Heat milk to 63°C in stainless steel pot over gentle heat, hold at 63°C for exactly 30 minutes, stirring every 5 minutes to ensure even heating. Monitor with calibrated thermometer. Cool rapidly to required cheese making temperature by placing pot in cold water bath. HTST overview for larger operations: 72°C for 15 seconds, requires plate heat exchanger. Record pasteurisation temperature and time in batch log. Failed pasteurisation: if temperature drops below 60°C during hold, reheat and restart 30-minute timer.",
+      "section_header": "Pasteurisation"
+    },
+    {
+      "text": "Fresh Chèvre process: Heat 10 litres pasteurised goat milk to 20°C. Add mesophilic starter culture (MA4001 or equivalent) at rate of 0.5g per litre (5g for 10L). Stir gently for 2 minutes. Add liquid rennet: 0.5ml per litre (5ml for 10L) diluted in 50ml cool boiled water. Pour slowly through ladle, stir gently for 1 minute. Cover and let set undisturbed at 20°C for 18-24 hours. Curd is ready when it breaks cleanly on a knife cut and whey fills the cut. Ladle curd into moulds lined with cheesecloth. Drain at room temperature for 12-24 hours, turning once. Salt lightly (1% of curd weight). Yield: approximately 1.5-2.0 kg per 10L milk. Shelf life: 7-10 days refrigerated.",
+      "section_header": "Fresh Chèvre"
+    },
+    {
+      "text": "Feta-style cheese process: Heat 20 litres pasteurised goat milk to 30°C. Add mesophilic culture at 0.5g per litre. Add liquid rennet at 0.3ml per litre diluted in cool water. Set at 30°C for 45-60 minutes until clean break. Cut curd into 2cm cubes. Let stand 5 minutes. Gently stir for 10 minutes. Ladle into moulds, drain 6 hours at room temperature, turning every 2 hours. Cut into blocks. Prepare brine: 200g salt per 1 litre water, add 1 tablespoon white vinegar, pH 4.6. Brine cheese blocks for 24 hours at room temperature. Transfer to clean brine, store at 10-12°C. Age minimum 14 days. Yield: approximately 3.0-3.5 kg per 20L milk. Shelf life: 3-6 months in brine.",
+      "section_header": "Feta-Style"
+    },
+    {
+      "text": "Queso Fresco process: Heat 10 litres pasteurised goat milk to 37°C. Add mesophilic culture at 0.5g per litre. Add liquid rennet at 0.4ml per litre diluted in cool water. Set at 37°C for 30-45 minutes. Cut curd into 1cm cubes. Let stand 5 minutes. Gently stir and heat to 40°C over 20 minutes. Drain whey. Press curd in mould with 2kg weight for 2 hours at room temperature, flipping after 1 hour. Remove from mould, salt surface. Ready to eat immediately or within 3 days. Yield: approximately 1.5-2.0 kg per 10L milk. Shelf life: 5-7 days refrigerated. No aging required.",
+      "section_header": "Queso Fresco"
+    },
+    {
+      "text": "Ricotta from whey: After making any cheese, collect whey. Heat whey to 85°C stirring constantly. Add 2 tablespoons white vinegar or lemon juice per 5 litres whey. Stir gently. Curds will form within 5 minutes. Continue heating to 90°C. Remove from heat, let stand 10 minutes. Ladle curds into cheesecloth-lined colander. Drain 15-30 minutes. Salt if desired. Yield: approximately 300-500g per 5L whey. Use same day or refrigerate for 3-5 days. Ricotta can be frozen for up to 3 months.",
+      "section_header": "Ricotta"
+    },
+    {
+      "text": "Halloumi process: Heat 10 litres pasteurised goat milk to 34°C. Add mesophilic culture at 0.5g per litre. Add liquid rennet at 0.5ml per litre. Set at 34°C for 45 minutes. Cut curd into 2cm cubes. Stir gently 10 minutes. Let curds settle, drain whey to curd level. Cut settled curd into blocks. Heat whey to 85°C, return curd blocks to hot whey. Cook 30-45 minutes until curds float and become elastic. Remove curds, place in brine (200g salt per 1L water) for 1-2 hours. Halloumi can be grilled, fried, or eaten fresh. Store in brine or vacuum sealed. Yield: approximately 1.5 kg per 10L milk. Shelf life: 2 weeks in brine, 1 month vacuum sealed refrigerated.",
+      "section_header": "Halloumi"
+    },
+    {
+      "text": "Starter cultures: Mesophilic (works at 20-30°C): MA4001 or Flora Danica — used for Chèvre, Feta, Queso Fresco, Halloumi. Usage rate: 0.5g per litre of milk. Thermophilic (works at 37-45°C): TA61 or YF-L811 — used for Mozzarella, yogurt cheese. Activation: rehydrate freeze-dried culture in 10x volume of sterile milk at 30°C for 15 minutes before adding to main batch. Storage: keep sealed in freezer, use within 6 months of opening. Tanzania sourcing: available from veterinary supply shops in Dar es Salaam, or order from international suppliers (Chr Hansen, Danisco).",
+      "section_header": "Starter Cultures"
+    },
+    {
+      "text": "Rennet: Animal rennet: extracted from calf stomach, strongest coagulation, traditional flavour. Microbial rennet (Rhizomucor miehei): suitable for vegetarians, slightly slower clotting. Vegetable rennet (cynara cardunculus — thistle): mild flavour, traditional in Mediterranean. Dosing: liquid rennet 0.3-0.5ml per litre depending on cheese type and milk freshness. Dilute rennet in 50ml cool boiled water before adding to milk. Add through ladle from 30cm height to distribute evenly. Stir gently for 1 minute only then stop completely. Temperature sensitivity: optimal 30-37°C, below 25°C coagulation is slow, above 42°C rennet is destroyed. Troubleshooting: weak curd = too little rennet or too cool; tough curd = too much rennet or too warm; slow set = old rennet or high-acidity milk.",
+      "section_header": "Rennet"
+    },
+    {
+      "text": "Common cheese defects and causes: Bitter taste: excess rennet (reduce by 10%), over-aging, bacterial contamination — investigate rennet dosing and hygiene at coagulation stage. Slimy rind: too high humidity during aging, Brevibacterium linens overgrowth — improve air circulation, reduce humidity below 85%. Crumbly texture: too much acid development, over-draining — reduce culture amount, reduce drain time, increase moisture retention. Off-smell: poor hygiene, contaminated equipment — deep clean all surfaces, check raw milk quality. Gassy curd: coliform contamination — improve milk quality, check pasteurisation, clean equipment. Pink discolouration: yeast contamination (Rhodotorula) — improve sanitation, keep aging room clean. For each defect: identify most likely cause, which process stage to investigate, corrective action for next batch.",
+      "section_header": "Cheese Defects"
+    }
+  ]
+}

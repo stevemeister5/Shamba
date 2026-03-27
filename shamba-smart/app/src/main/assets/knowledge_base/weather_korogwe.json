@@ -1,0 +1,37 @@
+{
+  "source_title": "Korogwe District Climate Data — 30-Year Averages",
+  "source_type": "bundled",
+  "source_credibility": "government_research",
+  "topic_tags": "weather,climate,seasons,rainfall,korogwe,tanga",
+  "last_verified": "2024-01",
+  "chunks": [
+    {
+      "text": "Korogwe District, Tanga Region coordinates: -5.15°S, 38.48°E, elevation approximately 400 metres above sea level. 30-year average annual rainfall: 1,000-1,200mm. Average monthly rainfall in mm: January 45, February 35, March 85, April 180, May 160, June 40, July 25, August 20, September 25, October 55, November 120, December 140. Total annual: approximately 930mm. Two distinct rainy seasons with dry periods between.",
+      "section_header": "Monthly Rainfall"
+    },
+    {
+      "text": "Temperature data for Korogwe (30-year averages): January max 33°C min 22°C, February max 34°C min 22°C, March max 33°C min 22°C, April max 30°C min 21°C, May max 29°C min 20°C, June max 28°C min 18°C, July max 28°C min 17°C, August max 28°C min 17°C, September max 29°C min 18°C, October max 30°C min 19°C, November max 31°C min 20°C, December max 32°C min 21°C. Hottest months: January-February (34°C max). Coolest months: July-August (17°C min). Frost risk: none at this elevation and latitude.",
+      "section_header": "Temperature"
+    },
+    {
+      "text": "Seasonal calendar for Korogwe: Long rains (Masika): typical onset mid-March, cessation end of May. Can start as early as late February or as late as mid-April. Short rains (Vuli): typical onset late October, cessation December. Can start as early as mid-October or as late as mid-November. Hot dry season (Kaskazi): January-February, high temperatures 33-34°C, low humidity, minimal rainfall. Cool dry season (Kusi): June-September, temperatures 28-29°C, moderate humidity, very little rain. Best planting: long rains mid-March to mid-April for maize, short rains late October for beans and vegetables.",
+      "section_header": "Seasonal Calendar"
+    },
+    {
+      "text": "Humidity-linked disease risk calendar for Korogwe: January-February (hot dry): low disease risk overall, watch for heat stress in housed livestock. March-April (onset of long rains): rising humidity 70-85%, increased respiratory disease risk in livestock, grey leaf spot risk emerging on maize. May (peak rains): high humidity 85-95%, maximum fungal disease risk on crops (grey leaf spot, downy mildew, blight), pneumonia risk in housed goats. June-July (cool dry): reducing humidity, disease pressure decreasing. August-September (dry): low disease risk, dusty conditions may irritate respiratory tract. October-December (short rains): moderate humidity 65-80%, rising disease risk, monitor for armyworm outbreaks.",
+      "section_header": "Disease Risk Calendar"
+    },
+    {
+      "text": "Risk interpretation rules for Korogwe: If cumulative rainfall last 14 days exceeds 80mm AND average temperature exceeds 26°C: flag grey leaf spot risk on maize — recommend scouting, consider fungicide application (Mancozeb 80WP at 200g per 20L knapsack). If dry season day count exceeds 45 AND no irrigation logged: flag drought stress assessment for all crops — recommend water conservation, mulching, early maturing varieties. If humidity logged above 85% for 5 consecutive days: flag respiratory disease watch for housed livestock — recommend ventilation check, reduce stocking density, monitor for coughing. If wind speed exceeds 40 km/h: flag lodging risk for tall crops (maize, sorghum) — recommend staking or earthing up if possible.",
+      "section_header": "Risk Rules"
+    },
+    {
+      "text": "Flood risk indicators for Korogwe: Low-lying plots near rivers and streams are flood-prone during peak rains (April-May). Warning signs: rainfall exceeding 50mm in 24 hours, river levels rising rapidly, waterlogged soil visible at surface. Management: ensure drainage channels are clear before long rains, avoid planting in flood-prone areas during April, raise beds for vegetables in low areas. Post-flood: do not harvest or graze flood-affected crops for 7 days, check livestock water sources for contamination, disinfect water troughs.",
+      "section_header": "Flood Risk"
+    },
+    {
+      "text": "Month-by-month agronomic calendar for Korogwe: January: prepare land for long rains, source seeds and fertilizer, prune napier grass. February: final land preparation, check irrigation equipment, apply basal fertilizer to prepared beds. March: plant maize (long rains), plant napier grass cuttings, begin first weeding of vegetables. April: top dress maize with CAN, plant beans intercrop, monitor for grey leaf spot. May: second weeding, continue top dressing, harvest early vegetables. June-July: harvest long rains maize, plant cover crops, silage making from napier. August-September: dry season management, irrigate vegetables, prepare for short rains. October: plant beans, tomatoes, kale for short rains. November: top dress short rains crops, vaccinate herd before rains peak. December: harvest short rains crops, assess annual performance, plan next year.",
+      "section_header": "Agronomic Calendar"
+    }
+  ]
+}

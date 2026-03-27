@@ -6,6 +6,7 @@ import com.shambasmart.data.local.dao.maarifa.KnowledgeChunkDao
 import com.shambasmart.data.local.dao.maarifa.OperationalRuleDao
 import com.shambasmart.maarifa.chunker.SemanticChunker
 import com.shambasmart.maarifa.contextbridge.ContextBridge
+import com.shambasmart.maarifa.ingestion.KnowledgeBootstrapper
 import com.shambasmart.maarifa.ingestion.KnowledgeIngestionPipeline
 import com.shambasmart.maarifa.retrieval.KnowledgeRetriever
 import com.shambasmart.maarifa.retrieval.VectorSearchEngine
@@ -68,5 +69,16 @@ object MaarifaModule {
         semanticChunker: SemanticChunker
     ): KnowledgeIngestionPipeline = KnowledgeIngestionPipeline(
         chunkDao, ruleDao, vectorEngine, semanticChunker
+    )
+
+    @Provides
+    @Singleton
+    fun provideKnowledgeBootstrapper(
+        @ApplicationContext context: Context,
+        chunkDao: KnowledgeChunkDao,
+        ruleDao: OperationalRuleDao,
+        semanticChunker: SemanticChunker
+    ): KnowledgeBootstrapper = KnowledgeBootstrapper(
+        context, chunkDao, ruleDao, semanticChunker
     )
 }

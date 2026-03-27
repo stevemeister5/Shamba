@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.room.Room
 import com.shambasmart.data.local.ShambaDatabase
 import com.shambasmart.data.local.dao.*
+import com.shambasmart.data.local.dao.maarifa.KnowledgeChunkDao
+import com.shambasmart.data.local.dao.maarifa.OperationalRuleDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -82,4 +84,11 @@ object DatabaseModule {
 
     @Provides
     fun provideSyncDao(database: ShambaDatabase): SyncDao = database.syncDao()
+
+    // Maarifa Knowledge Engine DAOs
+    @Provides
+    fun provideKnowledgeChunkDao(database: ShambaDatabase): KnowledgeChunkDao = database.knowledgeChunkDao()
+
+    @Provides
+    fun provideOperationalRuleDao(database: ShambaDatabase): OperationalRuleDao = database.operationalRuleDao()
 }

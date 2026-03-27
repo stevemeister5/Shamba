@@ -4,7 +4,11 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.shambasmart.data.local.dao.*
+import com.shambasmart.data.local.dao.maarifa.KnowledgeChunkDao
+import com.shambasmart.data.local.dao.maarifa.OperationalRuleDao
 import com.shambasmart.data.local.entity.*
+import com.shambasmart.data.local.entity.maarifa.KnowledgeChunk
+import com.shambasmart.data.local.entity.maarifa.OperationalRule
 import com.shambasmart.data.local.converter.Converters
 
 @Database(
@@ -32,9 +36,12 @@ import com.shambasmart.data.local.converter.Converters
         CalendarEvent::class,
         SyncStatus::class,
         AudioEvent::class,
-        MaintenanceTask::class
+        MaintenanceTask::class,
+        // Maarifa Knowledge Engine entities
+        KnowledgeChunk::class,
+        OperationalRule::class
     ],
-    version = 3,
+    version = 4,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
@@ -58,4 +65,7 @@ abstract class ShambaDatabase : RoomDatabase() {
     abstract fun syncDao(): SyncDao
     abstract fun audioEventDao(): AudioEventDao
     abstract fun maintenanceTaskDao(): MaintenanceTaskDao
+    // Maarifa DAOs
+    abstract fun knowledgeChunkDao(): KnowledgeChunkDao
+    abstract fun operationalRuleDao(): OperationalRuleDao
 }

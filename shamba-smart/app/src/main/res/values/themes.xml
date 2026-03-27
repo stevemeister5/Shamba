@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Base application theme - simplified for Compose app -->
+    <style name="Theme.ShambaSmart" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+        <!-- Primary brand color -->
+        <item name="colorPrimary">#2E9E58</item>
+        <item name="colorPrimaryDark">#237A45</item>
+        <item name="colorAccent">#D4751F</item>
+        
+        <!-- Status bar color -->
+        <item name="android:statusBarColor">#0D1210</item>
+        
+        <!-- Navigation bar color -->
+        <item name="android:navigationBarColor">#0D1210</item>
+        
+        <!-- Background color -->
+        <item name="android:windowBackground">#0D1210</item>
+        
+        <!-- Surface color -->
+        <item name="android:colorBackground">#0D1210</item>
+    </style>
+</resources>

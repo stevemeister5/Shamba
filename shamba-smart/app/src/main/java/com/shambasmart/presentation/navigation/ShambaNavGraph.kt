@@ -9,6 +9,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.shambasmart.presentation.dashboard.DashboardScreen
 import com.shambasmart.presentation.livestock.LivestockScreen
+import com.shambasmart.presentation.livestock.EggProductionScreen
+import com.shambasmart.presentation.livestock.FlockManagementScreen
 import com.shambasmart.presentation.crops.CropsScreen
 import com.shambasmart.presentation.crops.PlotAnalyticsScreen
 import com.shambasmart.presentation.cheese.CheeseScreen
@@ -35,6 +37,8 @@ sealed class Screen(val route: String) {
     object Onboarding : Screen("onboarding")
     object Dashboard : Screen("dashboard")
     object Livestock : Screen("livestock")
+    object EggProduction : Screen("egg_production")
+    object FlockManagement : Screen("flock_management")
     object Crops : Screen("crops")
     object PlotAnalytics : Screen("plot_analytics")
     object Cheese : Screen("cheese")
@@ -85,6 +89,12 @@ fun ShambaNavGraph(
         }
         composable(Screen.Livestock.route) {
             LivestockScreen()
+        }
+        composable(Screen.EggProduction.route) {
+            EggProductionScreen()
+        }
+        composable(Screen.FlockManagement.route) {
+            FlockManagementScreen()
         }
         composable(Screen.Crops.route) {
             CropsScreen()

@@ -29,7 +29,16 @@ fun CropPlantingScreen(
     val plots by viewModel.allPlots.collectAsStateWithLifecycle()
     var selectedPlot by remember { mutableStateOf<Plot?>(null) }
     var showAddDialog by remember { mutableStateOf(false) }
-    var cropRecords by remember { mutableStateOf<List<CropPlanting>>(emptyList()) }
+    var dropdownExpanded by remember { mutableStateOf(false) }
+
+    // Get crop plantings for selected plot
+    val cropRecords by remember(selectedPlot?.id) {
+        derivedStateOf {
+            selectedPlot?.id?.let { plotId ->
+                viewModel.getCropPlantingsByPlot(plotId)
+            } ?: flowOf(emptyList())
+        }
+    }.collectAsStateWithLifecycle(emptyList())
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Text(
@@ -40,17 +49,31 @@ fun CropPlantingScreen(
 
         // Plot Selection
         ExposedDropdownMenuBox(
-            expanded = false,
-            onExpandedChange = {}
+            expanded = dropdownExpanded,
+            onExpandedChange = { dropdownExpanded = it }
         ) {
             OutlinedTextField(
                 value = selectedPlot?.let { "${it.name} - ${it.sizeAcres} acres" } ?: "Select Plot",
                 onValueChange = { _ -> },
                 readOnly = true,
                 label = { Text("Plot") },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = false) },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = dropdownExpanded) },
                 modifier = Modifier.fillMaxWidth().menuAnchor()
             )
+            ExposedDropdownMenu(
+                expanded = dropdownExpanded,
+                onDismissRequest = { dropdownExpanded = false }
+            ) {
+                plots.forEach { plot ->
+                    DropdownMenuItem(
+                        text = { Text("${plot.name} - ${plot.sizeAcres} acres") },
+                        onClick = {
+                            selectedPlot = plot
+                            dropdownExpanded = false
+                        }
+                    )
+                }
+            }
         }
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -101,9 +124,10 @@ fun CropPlantingScreen(
     // Add Crop Planting Dialog
     if (showAddDialog) {
         AddCropPlantingDialog(
+            plotId = selectedPlot?.id ?: 0L,
             onDismiss = { showAddDialog = false },
             onAdd = { record ->
-                // TODO: Save to database
+                viewModel.addCropPlanting(record)
                 showAddDialog = false
             }
         )
@@ -154,6 +178,7 @@ private fun CropPlantingCard(record: CropPlanting) {
 
 @Composable
 private fun AddCropPlantingDialog(
+    plotId: Long,
     onDismiss: () -> Unit,
     onAdd: (CropPlanting) -> Unit
 ) {
@@ -209,7 +234,7 @@ private fun AddCropPlantingDialog(
                 onClick = {
                     onAdd(
                         CropPlanting(
-                            plotId = 0, // TODO: Get from selected plot
+                            plotId = plotId,
                             cropType = cropType,
                             variety = variety.ifBlank { null },
                             plantingDate = LocalDate.parse(plantingDate),

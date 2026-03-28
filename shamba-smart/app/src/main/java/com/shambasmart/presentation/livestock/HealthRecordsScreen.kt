@@ -28,7 +28,16 @@ fun HealthRecordsScreen(
     val animals by viewModel.allAnimals.collectAsStateWithLifecycle()
     var selectedAnimal by remember { mutableStateOf<Animal?>(null) }
     var showAddDialog by remember { mutableStateOf(false) }
-    var healthRecords by remember { mutableStateOf<List<HealthRecord>>(emptyList()) }
+    var dropdownExpanded by remember { mutableStateOf(false) }
+
+    // Get health records for selected animal
+    val healthRecords by remember(selectedAnimal?.id) {
+        derivedStateOf {
+            selectedAnimal?.id?.let { animalId ->
+                viewModel.getHealthRecordsByAnimal(animalId)
+            } ?: flowOf(emptyList())
+        }
+    }.collectAsStateWithLifecycle(emptyList())
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Text(
@@ -40,17 +49,31 @@ fun HealthRecordsScreen(
         // Animal Selection
         if (animalId == null) {
             ExposedDropdownMenuBox(
-                expanded = false,
-                onExpandedChange = {}
+                expanded = dropdownExpanded,
+                onExpandedChange = { dropdownExpanded = it }
             ) {
                 OutlinedTextField(
                     value = selectedAnimal?.let { "${it.tagId ?: "No Tag"} - ${it.species}" } ?: "Select Animal",
                     onValueChange = { _ -> },
                     readOnly = true,
                     label = { Text("Animal") },
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = false) },
+                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = dropdownExpanded) },
                     modifier = Modifier.fillMaxWidth().menuAnchor()
                 )
+                ExposedDropdownMenu(
+                    expanded = dropdownExpanded,
+                    onDismissRequest = { dropdownExpanded = false }
+                ) {
+                    animals.forEach { animal ->
+                        DropdownMenuItem(
+                            text = { Text("${animal.tagId ?: "No Tag"} - ${animal.species}") },
+                            onClick = {
+                                selectedAnimal = animal
+                                dropdownExpanded = false
+                            }
+                        )
+                    }
+                }
             }
             Spacer(modifier = Modifier.height(16.dp))
         }
@@ -102,9 +125,10 @@ fun HealthRecordsScreen(
     // Add Health Record Dialog
     if (showAddDialog) {
         AddHealthRecordDialog(
+            animalId = selectedAnimal?.id ?: animalId ?: 0L,
             onDismiss = { showAddDialog = false },
             onAdd = { record ->
-                // TODO: Save to database
+                viewModel.addHealthRecord(record)
                 showAddDialog = false
             }
         )
@@ -149,6 +173,7 @@ private fun HealthRecordCard(record: HealthRecord) {
 
 @Composable
 private fun AddHealthRecordDialog(
+    animalId: Long,
     onDismiss: () -> Unit,
     onAdd: (HealthRecord) -> Unit
 ) {
@@ -211,7 +236,7 @@ private fun AddHealthRecordDialog(
                 onClick = {
                     onAdd(
                         HealthRecord(
-                            animalId = 0, // TODO: Get from selected animal
+                            animalId = animalId,
                             type = type,
                             description = description.ifBlank { null },
                             vaccineName = if (type == "vaccination") vaccineName.ifBlank { null } else null,

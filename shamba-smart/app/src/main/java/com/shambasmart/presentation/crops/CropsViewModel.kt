@@ -2,8 +2,10 @@ package com.shambasmart.presentation.crops
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.shambasmart.data.local.dao.CropDao
 import com.shambasmart.data.local.dao.HarvestDao
 import com.shambasmart.data.local.dao.PlotDao
+import com.shambasmart.data.local.entity.CropPlanting
 import com.shambasmart.data.local.entity.HarvestRecord
 import com.shambasmart.data.local.entity.Plot
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,7 +16,8 @@ import javax.inject.Inject
 @HiltViewModel
 class CropsViewModel @Inject constructor(
     private val plotDao: PlotDao,
-    private val harvestDao: HarvestDao
+    private val harvestDao: HarvestDao,
+    private val cropDao: CropDao
 ) : ViewModel() {
 
     val plots: StateFlow<List<Plot>> = plotDao.getAllPlots()
@@ -84,6 +87,39 @@ class CropsViewModel @Inject constructor(
     fun setSensorId(plotId: Long, sensorId: String) {
         viewModelScope.launch {
             plotDao.setSensorId(plotId, sensorId)
+        }
+    }
+
+    // Crop Planting methods
+    val allCropPlantings: StateFlow<List<CropPlanting>> = cropDao.getCropsByStatus("")
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    fun getCropPlantingsByPlot(plotId: Long): Flow<List<CropPlanting>> {
+        return cropDao.getCropsByPlotId(plotId)
+    }
+
+    fun addCropPlanting(cropPlanting: CropPlanting) {
+        viewModelScope.launch {
+            cropDao.insert(cropPlanting)
+        }
+    }
+
+    fun updateCropPlanting(cropPlanting: CropPlanting) {
+        viewModelScope.launch {
+            cropDao.update(cropPlanting.copy(updatedAt = System.currentTimeMillis()))
+        }
+    }
+
+    fun deleteCropPlanting(cropPlanting: CropPlanting) {
+        viewModelScope.launch {
+            cropDao.delete(cropPlanting)
+        }
+    }
+
+    // Harvest methods
+    fun addHarvest(harvest: HarvestRecord) {
+        viewModelScope.launch {
+            harvestDao.insert(harvest)
         }
     }
 }

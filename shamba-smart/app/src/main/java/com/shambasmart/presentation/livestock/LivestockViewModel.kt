@@ -3,7 +3,9 @@ package com.shambasmart.presentation.livestock
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.shambasmart.data.local.entity.Animal
+import com.shambasmart.data.local.entity.HealthRecord
 import com.shambasmart.domain.repository.AnimalRepository
+import com.shambasmart.domain.repository.HealthRecordRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -11,7 +13,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LivestockViewModel @Inject constructor(
-    private val animalRepository: AnimalRepository
+    private val animalRepository: AnimalRepository,
+    private val healthRecordRepository: HealthRecordRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LivestockUiState())
@@ -82,6 +85,47 @@ class LivestockViewModel @Inject constructor(
 
     fun clearMessage() {
         _uiState.update { it.copy(message = null, error = null) }
+    }
+
+    // Health Record methods
+    fun getHealthRecordsByAnimal(animalId: Long): Flow<List<HealthRecord>> {
+        return healthRecordRepository.getRecordsByAnimalId(animalId)
+    }
+
+    fun addHealthRecord(record: HealthRecord) {
+        viewModelScope.launch {
+            try {
+                _uiState.update { it.copy(isLoading = true) }
+                healthRecordRepository.insertHealthRecord(record)
+                _uiState.update { it.copy(isLoading = false, message = "Health record added successfully") }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
+            }
+        }
+    }
+
+    fun updateHealthRecord(record: HealthRecord) {
+        viewModelScope.launch {
+            try {
+                _uiState.update { it.copy(isLoading = true) }
+                healthRecordRepository.updateHealthRecord(record)
+                _uiState.update { it.copy(isLoading = false, message = "Health record updated successfully") }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
+            }
+        }
+    }
+
+    fun deleteHealthRecord(record: HealthRecord) {
+        viewModelScope.launch {
+            try {
+                _uiState.update { it.copy(isLoading = true) }
+                healthRecordRepository.deleteHealthRecord(record)
+                _uiState.update { it.copy(isLoading = false, message = "Health record deleted successfully") }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
+            }
+        }
     }
 }
 

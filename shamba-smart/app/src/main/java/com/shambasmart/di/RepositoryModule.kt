@@ -3,9 +3,11 @@ package com.shambasmart.di
 import com.shambasmart.data.repository.AnimalRepositoryImpl
 import com.shambasmart.data.repository.CropRepositoryImpl
 import com.shambasmart.data.repository.FinancialRepositoryImpl
+import com.shambasmart.data.repository.HealthRecordRepositoryImpl
 import com.shambasmart.domain.repository.AnimalRepository
 import com.shambasmart.domain.repository.CropRepository
 import com.shambasmart.domain.repository.FinancialRepository
+import com.shambasmart.domain.repository.HealthRecordRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -33,4 +35,10 @@ abstract class RepositoryModule {
     abstract fun bindFinancialRepository(
         financialRepositoryImpl: FinancialRepositoryImpl
     ): FinancialRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindHealthRecordRepository(
+        healthRecordRepositoryImpl: HealthRecordRepositoryImpl
+    ): HealthRecordRepository
 }

@@ -336,10 +336,20 @@ Organized by priority (highest value first):
 19. ✅ VectorSearchEngine uses pre-computed embeddings from database
 20. ✅ Knowledge_staging/ directory in .gitignore (not committed to git)
 
-### Sprint 6: ML & Maarifa Polish (Medium) 🔧 IN PROGRESS
-22. Remove stub model operations (implement actual quantization if needed)
-23. Populate Maarifa browse tree leaf nodes with ingested content
-24. Implement bookmark persistence in Maarifa
+### Sprint 6: ML & Maarifa Polish (Medium) ✅ COMPLETE
+22. ✅ Remove stub model operations
+    - ModelManager: parse JSON metadata, serialize to JSON, network connectivity checks
+    - ModelOptimizer: read model files, write to output, INT8 quantization default
+23. ✅ Populate Maarifa browse tree leaf nodes with ingested content
+    - Updated loadBrowseEntries() to query database for chunks by topic tags
+    - Added chunks field to BrowseEntry data class
+    - Populated leaf nodes for goats (health, breeds, reproduction, nutrition)
+    - Populated leaf nodes for sheep (health, breeds, reproduction, nutrition)
+24. ✅ Implement bookmark persistence in Maarifa
+    - getBookmarkedIds() loads from SharedPreferences
+    - saveBookmark() persists chunk IDs
+    - removeBookmarkId() removes from storage
+    - loadSavedEntries() loads actual chunks from database
 
 ### Sprint 7: Polish & Edge Cases (Low)
 25. Remove placeholder text from UI

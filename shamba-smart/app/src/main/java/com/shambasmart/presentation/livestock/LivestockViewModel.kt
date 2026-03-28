@@ -2,8 +2,10 @@ package com.shambasmart.presentation.livestock
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.shambasmart.data.local.dao.ReproductionDao
 import com.shambasmart.data.local.entity.Animal
 import com.shambasmart.data.local.entity.HealthRecord
+import com.shambasmart.data.local.entity.ReproductionRecord
 import com.shambasmart.domain.repository.AnimalRepository
 import com.shambasmart.domain.repository.HealthRecordRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -14,7 +16,8 @@ import javax.inject.Inject
 @HiltViewModel
 class LivestockViewModel @Inject constructor(
     private val animalRepository: AnimalRepository,
-    private val healthRecordRepository: HealthRecordRepository
+    private val healthRecordRepository: HealthRecordRepository,
+    private val reproductionDao: ReproductionDao
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LivestockUiState())
@@ -122,6 +125,47 @@ class LivestockViewModel @Inject constructor(
                 _uiState.update { it.copy(isLoading = true) }
                 healthRecordRepository.deleteHealthRecord(record)
                 _uiState.update { it.copy(isLoading = false, message = "Health record deleted successfully") }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
+            }
+        }
+    }
+
+    // Reproduction Record methods
+    fun getReproductionRecordsByDam(damId: Long): Flow<List<ReproductionRecord>> {
+        return reproductionDao.getRecordsByDamId(damId)
+    }
+
+    fun addReproductionRecord(record: ReproductionRecord) {
+        viewModelScope.launch {
+            try {
+                _uiState.update { it.copy(isLoading = true) }
+                reproductionDao.insert(record.copy(isSynced = false))
+                _uiState.update { it.copy(isLoading = false, message = "Reproduction record added successfully") }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
+            }
+        }
+    }
+
+    fun updateReproductionRecord(record: ReproductionRecord) {
+        viewModelScope.launch {
+            try {
+                _uiState.update { it.copy(isLoading = true) }
+                reproductionDao.update(record.copy(isSynced = false))
+                _uiState.update { it.copy(isLoading = false, message = "Reproduction record updated successfully") }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
+            }
+        }
+    }
+
+    fun deleteReproductionRecord(record: ReproductionRecord) {
+        viewModelScope.launch {
+            try {
+                _uiState.update { it.copy(isLoading = true) }
+                reproductionDao.delete(record)
+                _uiState.update { it.copy(isLoading = false, message = "Reproduction record deleted successfully") }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.message) }
             }

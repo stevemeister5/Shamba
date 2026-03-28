@@ -25,7 +25,17 @@ fun ReproductionScreen(
     var selectedDam by remember { mutableStateOf<Animal?>(null) }
     var selectedSire by remember { mutableStateOf<Animal?>(null) }
     var showAddDialog by remember { mutableStateOf(false) }
-    var reproductionRecords by remember { mutableStateOf<List<ReproductionRecord>>(emptyList()) }
+    var damDropdownExpanded by remember { mutableStateOf(false) }
+    var sireDropdownExpanded by remember { mutableStateOf(false) }
+
+    // Get reproduction records for selected dam
+    val reproductionRecords by remember(selectedDam?.id) {
+        derivedStateOf {
+            selectedDam?.id?.let { damId ->
+                viewModel.getReproductionRecordsByDam(damId)
+            } ?: flowOf(emptyList())
+        }
+    }.collectAsStateWithLifecycle(emptyList())
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Text(
@@ -36,33 +46,68 @@ fun ReproductionScreen(
 
         // Dam Selection
         ExposedDropdownMenuBox(
-            expanded = false,
-            onExpandedChange = {}
+            expanded = damDropdownExpanded,
+            onExpandedChange = { damDropdownExpanded = it }
         ) {
             OutlinedTextField(
                 value = selectedDam?.let { "Dam: ${it.tagId ?: "No Tag"} - ${it.species}" } ?: "Select Dam (Female)",
                 onValueChange = {},
                 readOnly = true,
                 label = { Text("Dam (Female)") },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = false) },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = damDropdownExpanded) },
                 modifier = Modifier.fillMaxWidth().menuAnchor()
             )
+            ExposedDropdownMenu(
+                expanded = damDropdownExpanded,
+                onDismissRequest = { damDropdownExpanded = false }
+            ) {
+                animals.filter { it.sex == "female" }.forEach { animal ->
+                    DropdownMenuItem(
+                        text = { Text("${animal.tagId ?: "No Tag"} - ${animal.species}") },
+                        onClick = {
+                            selectedDam = animal
+                            damDropdownExpanded = false
+                        }
+                    )
+                }
+            }
         }
         Spacer(modifier = Modifier.height(8.dp))
 
         // Sire Selection
         ExposedDropdownMenuBox(
-            expanded = false,
-            onExpandedChange = {}
+            expanded = sireDropdownExpanded,
+            onExpandedChange = { sireDropdownExpanded = it }
         ) {
             OutlinedTextField(
                 value = selectedSire?.let { "Sire: ${it.tagId ?: "No Tag"} - ${it.species}" } ?: "Select Sire (Male) - Optional",
                 onValueChange = {},
                 readOnly = true,
                 label = { Text("Sire (Male)") },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = false) },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = sireDropdownExpanded) },
                 modifier = Modifier.fillMaxWidth().menuAnchor()
             )
+            ExposedDropdownMenu(
+                expanded = sireDropdownExpanded,
+                onDismissRequest = { sireDropdownExpanded = false }
+            ) {
+                DropdownMenuItem(
+                    text = { Text("None") },
+                    onClick = {
+                        selectedSire = null
+                        sireDropdownExpanded = false
+                    }
+                )
+                animals.filter { it.sex == "male" }.forEach { animal ->
+                    DropdownMenuItem(
+                        text = { Text("${animal.tagId ?: "No Tag"} - ${animal.species}") },
+                        onClick = {
+                            selectedSire = animal
+                            sireDropdownExpanded = false
+                        }
+                    )
+                }
+            }
         }
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -113,9 +158,11 @@ fun ReproductionScreen(
     // Add Reproduction Record Dialog
     if (showAddDialog) {
         AddReproductionRecordDialog(
+            damId = selectedDam?.id ?: 0L,
+            sireId = selectedSire?.id,
             onDismiss = { showAddDialog = false },
             onAdd = { record ->
-                // TODO: Save to database
+                viewModel.addReproductionRecord(record)
                 showAddDialog = false
             }
         )
@@ -167,6 +214,8 @@ private fun ReproductionRecordCard(record: ReproductionRecord) {
 
 @Composable
 private fun AddReproductionRecordDialog(
+    damId: Long,
+    sireId: Long?,
     onDismiss: () -> Unit,
     onAdd: (ReproductionRecord) -> Unit
 ) {
@@ -252,8 +301,8 @@ private fun AddReproductionRecordDialog(
                 onClick = {
                     onAdd(
                         ReproductionRecord(
-                            damId = 0, // TODO: Get from selected dam
-                            sireId = null, // TODO: Get from selected sire
+                            damId = damId,
+                            sireId = sireId,
                             type = type,
                             matingDate = if (matingDate.isNotBlank()) LocalDate.parse(matingDate) else null,
                             pregnancyConfirmed = pregnancyConfirmed,

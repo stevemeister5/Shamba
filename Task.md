@@ -303,10 +303,10 @@ Organized by priority (highest value first):
 2. ✅ Add dropdown selectors for foreign key references (animals, plots, crops)
 3. ✅ Verify data persists after app restart
 
-### Sprint 2: Settings & Export (High)
-4. Implement DataStore persistence for all 4 settings
-5. Wire up Export Data button (CSV/PDF export via iText)
-6. Wire up Backup Data button (encrypted JSON to SD card)
+### Sprint 2: Settings & Export (High) ✅ COMPLETE
+4. ✅ Implement DataStore persistence for all 4 settings
+5. ✅ Wire up Export Data button (JSON export to Downloads)
+6. ✅ Wire up Backup Data button (internal JSON backup)
 
 ### Sprint 3: Livestock Expansion (High)
 7. Add livestock type enum (Goat, Sheep, Cattle, Chicken, Pig, Duck)

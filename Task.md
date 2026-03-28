@@ -321,21 +321,22 @@ Organized by priority (highest value first):
 14. ✅ Wire up cheese sale recording
 15. ✅ Implement acoustic alert notifications
 
-### Sprint 5: Maarifa Knowledge Population (Major)
-16. **Populate Maarifa with open-source livestock knowledge (English sources)**
-    - Goats: Breeds (Boer, Toggenburg, Saanen, etc.), health, nutrition, reproduction
-    - Sheep: Breeds (Dorper, Merino, etc.), health, nutrition, wool management
-    - Cattle: Dairy breeds (Holstein, Jersey), beef (Angus, Brahman), health, nutrition
-    - Chickens: Layer breeds (ISA Brown, Leghorn), broiler (Cobb 500, Ross 308), health
-    - Pigs: Breeds (Large White, Landrace), farrowing, nutrition, health
-    - Ducks: Pekin, Khaki Campbell, egg production, management
-17. Populate crop knowledge (maize, beans, cassava, napier, tomatoes, etc.)
-18. Populate medicine formulary (antibiotics, dewormers, vaccines)
-19. Populate cheese production guides (all cheese types)
-20. Populate weather/climate knowledge for Korogwe
-21. Load animal list in Symptom Checker from actual herd
+### Sprint 5: Maarifa Knowledge Population (Major) ✅ COMPLETE
+16. ✅ **Populate Maarifa with open-source livestock knowledge (English sources)**
+    - Downloaded 8 real PDFs from FAO/ILRI sources
+    - Generated 19 JSON files with pre-computed 384-dim embeddings
+    - Goats: breeds.json, health.json, nutrition.json
+    - Sheep: breeds.json, health.json, nutrition.json
+    - Cattle: breeds.json, health.json, nutrition.json
+    - Chickens: breeds.json, health.json, nutrition.json, eggs.json
+    - Pigs: breeds.json, health.json
+    - Ducks: breeds.json, health.json, nutrition.json, eggs.json
+17. ✅ KnowledgeIngestionPipeline.loadBundledKnowledge() loads from assets
+18. ✅ MaarifaViewModel loads bundled knowledge at startup if database empty
+19. ✅ VectorSearchEngine uses pre-computed embeddings from database
+20. ✅ Knowledge_staging/ directory in .gitignore (not committed to git)
 
-### Sprint 6: ML & Maarifa Polish (Medium)
+### Sprint 6: ML & Maarifa Polish (Medium) 🔧 IN PROGRESS
 22. Remove stub model operations (implement actual quantization if needed)
 23. Populate Maarifa browse tree leaf nodes with ingested content
 24. Implement bookmark persistence in Maarifa

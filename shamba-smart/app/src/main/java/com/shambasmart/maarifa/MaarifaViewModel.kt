@@ -137,6 +137,16 @@ class MaarifaViewModel @Inject constructor(
 
     fun loadBrowseEntries() {
         viewModelScope.launch {
+            // Query chunks for each category from database
+            val goatHealthChunks = chunkDao.getChunksByTag("goats,health")
+            val goatBreedChunks = chunkDao.getChunksByTag("goats,breeds")
+            val goatReproductionChunks = chunkDao.getChunksByTag("goats,reproduction")
+            val goatNutritionChunks = chunkDao.getChunksByTag("goats,nutrition")
+            val sheepHealthChunks = chunkDao.getChunksByTag("sheep,health")
+            val sheepBreedChunks = chunkDao.getChunksByTag("sheep,breeds")
+            val sheepReproductionChunks = chunkDao.getChunksByTag("sheep,reproduction")
+            val sheepNutritionChunks = chunkDao.getChunksByTag("sheep,nutrition")
+
             val entries = listOf(
                 BrowseEntry("Crops", "crops", listOf(
                     BrowseEntry("Maize", "crops/maize", emptyList()),
@@ -151,17 +161,17 @@ class MaarifaViewModel @Inject constructor(
                 )),
                 BrowseEntry("Livestock", "livestock", listOf(
                     BrowseEntry("Goats", "livestock/goats", listOf(
-                        BrowseEntry("Health & Disease", "livestock/goats/health", emptyList()),
-                        BrowseEntry("Breeds", "livestock/goats/breeds", emptyList()),
-                        BrowseEntry("Reproduction", "livestock/goats/reproduction", emptyList()),
-                        BrowseEntry("Nutrition", "livestock/goats/nutrition", emptyList()),
+                        BrowseEntry("Health & Disease", "livestock/goats/health", emptyList(), goatHealthChunks),
+                        BrowseEntry("Breeds", "livestock/goats/breeds", emptyList(), goatBreedChunks),
+                        BrowseEntry("Reproduction", "livestock/goats/reproduction", emptyList(), goatReproductionChunks),
+                        BrowseEntry("Nutrition", "livestock/goats/nutrition", emptyList(), goatNutritionChunks),
                         BrowseEntry("Kid Management", "livestock/goats/kids", emptyList())
                     )),
                     BrowseEntry("Sheep", "livestock/sheep", listOf(
-                        BrowseEntry("Health & Disease", "livestock/sheep/health", emptyList()),
-                        BrowseEntry("Breeds", "livestock/sheep/breeds", emptyList()),
-                        BrowseEntry("Reproduction", "livestock/sheep/reproduction", emptyList()),
-                        BrowseEntry("Nutrition", "livestock/sheep/nutrition", emptyList())
+                        BrowseEntry("Health & Disease", "livestock/sheep/health", emptyList(), sheepHealthChunks),
+                        BrowseEntry("Breeds", "livestock/sheep/breeds", emptyList(), sheepBreedChunks),
+                        BrowseEntry("Reproduction", "livestock/sheep/reproduction", emptyList(), sheepReproductionChunks),
+                        BrowseEntry("Nutrition", "livestock/sheep/nutrition", emptyList(), sheepNutritionChunks)
                     ))
                 )),
                 BrowseEntry("Medicines", "medicines", listOf(
@@ -209,21 +219,49 @@ class MaarifaViewModel @Inject constructor(
 
     fun loadSavedEntries() {
         viewModelScope.launch {
-            // Load bookmarked entries from DataStore or Room
-            _savedEntries.value = emptyList()
+            // Load bookmarked chunk IDs from DataStore
+            val bookmarkedIds = getBookmarkedIds()
+            val chunks = bookmarkedIds.mapNotNull { chunkId ->
+                chunkDao.getChunkById(chunkId)
+            }
+            _savedEntries.value = chunks
         }
     }
 
     fun bookmarkEntry(chunk: KnowledgeChunk) {
         viewModelScope.launch {
+            // Save to DataStore
+            saveBookmark(chunk.chunkId)
             _savedEntries.update { it + chunk }
         }
     }
 
     fun removeBookmark(chunkId: String) {
         viewModelScope.launch {
+            // Remove from DataStore
+            removeBookmarkId(chunkId)
             _savedEntries.update { it.filter { c -> c.chunkId != chunkId } }
         }
+    }
+
+    private suspend fun getBookmarkedIds(): List<String> {
+        val prefs = getApplication<Application>().getSharedPreferences("maarifa_bookmarks", 0)
+        val bookmarkString = prefs.getString("bookmarked_ids", "") ?: ""
+        return if (bookmarkString.isEmpty()) emptyList() else bookmarkString.split(",")
+    }
+
+    private suspend fun saveBookmark(chunkId: String) {
+        val prefs = getApplication<Application>().getSharedPreferences("maarifa_bookmarks", 0)
+        val current = prefs.getString("bookmarked_ids", "") ?: ""
+        val newSet = if (current.isEmpty()) chunkId else "$current,$chunkId"
+        prefs.edit().putString("bookmarked_ids", newSet).apply()
+    }
+
+    private suspend fun removeBookmarkId(chunkId: String) {
+        val prefs = getApplication<Application>().getSharedPreferences("maarifa_bookmarks", 0)
+        val current = prefs.getString("bookmarked_ids", "") ?: ""
+        val newSet = current.split(",").filter { it != chunkId }.joinToString(",")
+        prefs.edit().putString("bookmarked_ids", newSet).apply()
     }
 
     // === SYMPTOM CHECKER ===
@@ -359,7 +397,8 @@ data class ConversationEntry(
 data class BrowseEntry(
     val name: String,
     val path: String,
-    val children: List<BrowseEntry>
+    val children: List<BrowseEntry>,
+    val chunks: List<KnowledgeChunk> = emptyList()
 )
 
 data class SymptomCheckerState(

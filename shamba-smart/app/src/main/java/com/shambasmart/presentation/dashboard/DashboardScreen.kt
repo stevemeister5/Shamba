@@ -34,12 +34,19 @@ import com.shambasmart.presentation.common.theme.*
 @Composable
 fun DashboardScreen(
     viewModel: DashboardViewModel = hiltViewModel(),
-    maarifaViewModel: MaarifaViewModel = hiltViewModel()
+    maarifaViewModel: MaarifaViewModel = hiltViewModel(),
+    onNavigateToEggProduction: () -> Unit = {},
+    onNavigateToFlockManagement: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val herdSize by viewModel.herdSize.collectAsStateWithLifecycle()
     val goatCount by viewModel.goatCount.collectAsStateWithLifecycle()
     val sheepCount by viewModel.sheepCount.collectAsStateWithLifecycle()
+    val cattleCount by viewModel.cattleCount.collectAsStateWithLifecycle()
+    val chickenLayerCount by viewModel.chickenLayerCount.collectAsStateWithLifecycle()
+    val chickenBroilerCount by viewModel.chickenBroilerCount.collectAsStateWithLifecycle()
+    val pigCount by viewModel.pigCount.collectAsStateWithLifecycle()
+    val duckCount by viewModel.duckCount.collectAsStateWithLifecycle()
     val dashboardData by viewModel.dashboardData.collectAsStateWithLifecycle()
     
     // Maarifa state

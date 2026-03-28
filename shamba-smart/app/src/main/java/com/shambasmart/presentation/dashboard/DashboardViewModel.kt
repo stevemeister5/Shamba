@@ -29,7 +29,22 @@ class DashboardViewModel @Inject constructor(
     val goatCount: StateFlow<Int> = animalDao.getCountBySpecies("goat")
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
-    val sheepCount: StateFlow<Int> = animalDao.getCountBySpecies("sheep")
+    val sheepCount: StateFlow<Int> = animalDao.getCountBySpecies("Sheep")
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    val cattleCount: StateFlow<Int> = animalDao.getCountBySpecies("Cattle")
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    val chickenLayerCount: StateFlow<Int> = animalDao.getCountBySpecies("Chicken (Layer)")
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    val chickenBroilerCount: StateFlow<Int> = animalDao.getCountBySpecies("Chicken (Broiler)")
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    val pigCount: StateFlow<Int> = animalDao.getCountBySpecies("Pig")
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    val duckCount: StateFlow<Int> = animalDao.getCountBySpecies("Duck")
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
     init {

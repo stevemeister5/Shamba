@@ -316,10 +316,10 @@ Organized by priority (highest value first):
 11. ✅ Create FlockManagementScreen for batch poultry tracking
 12. ✅ Update DashboardView with per-species KPIs
 
-### Sprint 4: Complete Core Features (High)
-13. Implement milk production tracking in LivestockViewModel
-14. Wire up cheese sale recording
-15. Implement acoustic alert notifications
+### Sprint 4: Complete Core Features (High) ✅ COMPLETE
+13. ✅ Implement milk production tracking in LivestockViewModel
+14. ✅ Wire up cheese sale recording
+15. ✅ Implement acoustic alert notifications
 
 ### Sprint 5: Maarifa Knowledge Population (Major)
 16. **Populate Maarifa with open-source livestock knowledge (English sources)**

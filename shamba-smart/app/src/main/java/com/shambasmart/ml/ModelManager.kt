@@ -181,17 +181,35 @@ class ModelManager @Inject constructor(
         try {
             val metadataFile = File(context.filesDir, "$MODELS_DIR/$METADATA_FILE")
             if (metadataFile.exists()) {
-                // In a real implementation, parse JSON metadata
-                // For now, initialize with default metadata
-                loadedModels["pest_classifier"] = ModelMetadata(
-                    modelName = "pest_classifier",
-                    version = "1.0.0",
-                    checksum = "pending",
-                    sizeBytes = 0,
-                    lastUpdated = System.currentTimeMillis(),
-                    isLoaded = false,
-                    loadTimeMs = 0
-                )
+                val json = metadataFile.readText()
+                val jsonArray = org.json.JSONArray(json)
+                for (i in 0 until jsonArray.length()) {
+                    val obj = jsonArray.getJSONObject(i)
+                    val metadata = ModelMetadata(
+                        modelName = obj.getString("modelName"),
+                        version = obj.getString("version"),
+                        checksum = obj.getString("checksum"),
+                        sizeBytes = obj.getLong("sizeBytes"),
+                        lastUpdated = obj.getLong("lastUpdated"),
+                        isLoaded = obj.optBoolean("isLoaded", false),
+                        loadTimeMs = obj.optLong("loadTimeMs", 0)
+                    )
+                    loadedModels[metadata.modelName] = metadata
+                }
+            } else {
+                // Initialize with default metadata for bundled models
+                val pestClassifierFile = File(context.filesDir, "$MODELS_DIR/pest_classifier.onnx")
+                if (pestClassifierFile.exists()) {
+                    loadedModels["pest_classifier"] = ModelMetadata(
+                        modelName = "pest_classifier",
+                        version = "1.0.0",
+                        checksum = calculateChecksum(pestClassifierFile),
+                        sizeBytes = pestClassifierFile.length(),
+                        lastUpdated = System.currentTimeMillis(),
+                        isLoaded = false,
+                        loadTimeMs = 0
+                    )
+                }
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -205,8 +223,19 @@ class ModelManager @Inject constructor(
         try {
             val metadataFile = File(context.filesDir, "$MODELS_DIR/$METADATA_FILE")
             metadataFile.parentFile?.mkdirs()
-            // In a real implementation, serialize to JSON
-            // For now, just create the directory structure
+            val jsonArray = org.json.JSONArray()
+            loadedModels.values.forEach { metadata ->
+                val obj = org.json.JSONObject()
+                obj.put("modelName", metadata.modelName)
+                obj.put("version", metadata.version)
+                obj.put("checksum", metadata.checksum)
+                obj.put("sizeBytes", metadata.sizeBytes)
+                obj.put("lastUpdated", metadata.lastUpdated)
+                obj.put("isLoaded", metadata.isLoaded)
+                obj.put("loadTimeMs", metadata.loadTimeMs)
+                jsonArray.put(obj)
+            }
+            metadataFile.writeText(jsonArray.toString(2))
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -214,20 +243,50 @@ class ModelManager @Inject constructor(
 
     /**
      * Checks for model updates from remote (when online).
+     * Returns empty list if offline or no updates available.
      */
     suspend fun checkForUpdates(): List<ModelMetadata> = withContext(Dispatchers.IO) {
-        // In a real implementation, this would fetch from a remote server
-        // For now, return empty list
-        emptyList()
+        try {
+            // Check network connectivity
+            val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as android.net.ConnectivityManager
+            val network = connectivityManager.activeNetwork ?: return@withContext emptyList()
+            val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return@withContext emptyList()
+            
+            if (!capabilities.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET)) {
+                return@withContext emptyList()
+            }
+            
+            // In a production app, this would fetch from a remote server
+            // For now, return empty list as models are bundled with APK
+            emptyList()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emptyList()
+        }
     }
 
     /**
      * Downloads a model update from remote.
+     * Returns false if download fails or offline.
      */
     suspend fun downloadModelUpdate(modelName: String, url: String): Boolean = withContext(Dispatchers.IO) {
-        // In a real implementation, this would download from URL
-        // For now, return false
-        false
+        try {
+            // Check network connectivity
+            val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as android.net.ConnectivityManager
+            val network = connectivityManager.activeNetwork ?: return@withContext false
+            val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return@withContext false
+            
+            if (!capabilities.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET)) {
+                return@withContext false
+            }
+            
+            // In a production app, this would download from URL
+            // For now, return false as models are bundled with APK
+            false
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
     }
 
     /**

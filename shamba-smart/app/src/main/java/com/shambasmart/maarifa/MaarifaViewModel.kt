@@ -9,6 +9,7 @@ import com.shambasmart.data.local.entity.maarifa.KnowledgeChunk
 import com.shambasmart.maarifa.contextbridge.ContextBridge
 import com.shambasmart.maarifa.retrieval.*
 import com.shambasmart.maarifa.rules.RuleEngine
+import com.shambasmart.maarifa.ingestion.KnowledgeIngestionPipeline
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -60,7 +61,26 @@ class MaarifaViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
+            // Initialize vector search engine
             vectorEngine.initialize()
+            
+            // Load bundled knowledge from assets if database is empty
+            val currentStats = retriever.getStats()
+            if (currentStats.totalChunks == 0) {
+                val ingestionPipeline = KnowledgeIngestionPipeline(
+                    chunkDao = chunkDao,
+                    ruleDao = ruleDao,
+                    vectorEngine = vectorEngine,
+                    semanticChunker = com.shambasmart.maarifa.chunker.SemanticChunker()
+                )
+                val result = ingestionPipeline.loadBundledKnowledge(application)
+                if (result.success) {
+                    android.util.Log.i("MaarifaViewModel", "Loaded ${result.chunksCreated} bundled knowledge chunks")
+                } else {
+                    android.util.Log.w("MaarifaViewModel", "Bundled knowledge loading failed: ${result.errors}")
+                }
+            }
+            
             loadStats()
             loadBrowseEntries()
         }

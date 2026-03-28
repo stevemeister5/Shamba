@@ -1,5 +1,6 @@
 package com.shambasmart.maarifa.ingestion
 
+import android.content.Context
 import com.shambasmart.data.local.dao.maarifa.KnowledgeChunkDao
 import com.shambasmart.data.local.dao.maarifa.OperationalRuleDao
 import com.shambasmart.data.local.entity.maarifa.KnowledgeChunk
@@ -7,6 +8,7 @@ import com.shambasmart.maarifa.chunker.SemanticChunker
 import com.shambasmart.maarifa.retrieval.VectorSearchEngine
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.json.JSONObject
 import java.time.LocalDate
 
 /**
@@ -255,4 +257,86 @@ class KnowledgeIngestionPipeline(
         val dateAdded: String,
         val sourceType: String
     )
+
+    /**
+     * Load pre-computed embeddings from bundled assets/knowledge_base/
+     * These are generated offline from FAO/ILRI PDFs and bundled with APK.
+     */
+    suspend fun loadBundledKnowledge(context: Context): IngestionResult = withContext(Dispatchers.IO) {
+        val warnings = mutableListOf<String>()
+        val errors = mutableListOf<String>()
+        var totalChunks = 0
+
+        try {
+            val knowledgeBase = context.assets.list("knowledge_base") ?: emptyArray()
+            
+            for (domain in knowledgeBase) {
+                val domainFiles = context.assets.list("knowledge_base/$domain") ?: emptyArray()
+                
+                for (fileName in domainFiles) {
+                    if (!fileName.endsWith(".json")) continue
+                    
+                    try {
+                        val jsonString = context.assets.open("knowledge_base/$domain/$fileName")
+                            .bufferedReader()
+                            .use { it.readText() }
+                        
+                        val json = JSONObject(jsonString)
+                        val chunksArray = json.getJSONArray("chunks")
+                        val topic = json.getString("topic")
+                        
+                        val chunks = mutableListOf<KnowledgeChunk>()
+                        
+                        for (i in 0 until chunksArray.length()) {
+                            val chunkJson = chunksArray.getJSONObject(i)
+                            val embeddingArray = chunkJson.getJSONArray("embedding")
+                            
+                            // Convert JSON array to FloatArray
+                            val embedding = FloatArray(embeddingArray.length())
+                            for (j in 0 until embeddingArray.length()) {
+                                embedding[j] = embeddingArray.getDouble(j).toFloat()
+                            }
+                            
+                            val chunk = KnowledgeChunk(
+                                id = chunkJson.getString("id"),
+                                text = chunkJson.getString("text"),
+                                vector = embedding.contentToString(),
+                                sourceType = "bundled",
+                                sourceTitle = "$domain/$fileName",
+                                sourceCredibility = "fao",
+                                topicTags = "$domain,$topic",
+                                dateAdded = LocalDate.now().toString(),
+                                lastVerified = LocalDate.now().toString(),
+                                isCritical = false
+                            )
+                            chunks.add(chunk)
+                        }
+                        
+                        chunkDao.insertAll(chunks)
+                        totalChunks += chunks.size
+                        
+                    } catch (e: Exception) {
+                        errors.add("Failed to load $domain/$fileName: ${e.message}")
+                    }
+                }
+            }
+            
+            IngestionResult(
+                success = totalChunks > 0,
+                chunksCreated = totalChunks,
+                warnings = warnings,
+                errors = errors,
+                documentTitle = "Bundled Knowledge Base"
+            )
+            
+        } catch (e: Exception) {
+            IngestionResult(
+                success = false,
+                chunksCreated = 0,
+                warnings = warnings,
+                errors = listOf("Failed to load bundled knowledge: ${e.message}"),
+                documentTitle = "Bundled Knowledge Base"
+            )
+        }
+    }
 }

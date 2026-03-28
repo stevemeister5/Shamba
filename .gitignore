@@ -21,3 +21,6 @@ local.properties
 
 # Log files
 *.log
+
+# Knowledge staging (raw PDFs and processing scripts - too large for git)
+knowledge_staging/

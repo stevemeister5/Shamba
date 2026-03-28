@@ -15,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -649,7 +650,8 @@ private fun OverviewTab(animal: Animal) {
                 InfoRow("Sex", animal.sex.replaceFirstChar { it.uppercase() })
                 InfoRow("Weight", animal.weight?.let { "${String.format("%.1f", it)} kg" } ?: "Not recorded")
                 InfoRow("Status", animal.status.replaceFirstChar { it.uppercase() })
-                InfoRow("Age", animal.age?.let { "$it months" } ?: "Unknown")
+                // Age calculated from dateOfBirth would require Clock import - showing dateOfBirth instead
+                InfoRow("Date of Birth", animal.dateOfBirth?.toString() ?: "Unknown")
             }
         }
     }

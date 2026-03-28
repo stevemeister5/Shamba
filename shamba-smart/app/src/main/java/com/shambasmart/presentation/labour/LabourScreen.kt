@@ -16,7 +16,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.shambasmart.data.local.entity.Worker
+import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -174,7 +177,7 @@ private fun AddWorkerDialog(
     var name by remember { mutableStateOf("") }
     var role by remember { mutableStateOf("") }
     var contact by remember { mutableStateOf("") }
-    var hireDate by remember { mutableStateOf(LocalDate.now().toString()) }
+    var hireDate by remember { mutableStateOf(Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()) }
     var dailyRate by remember { mutableStateOf("") }
     var isSeasonal by remember { mutableStateOf(false) }
     var endDate by remember { mutableStateOf("") }

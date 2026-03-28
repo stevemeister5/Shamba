@@ -104,7 +104,7 @@ class KnowledgeBootstrapper(
             val sectionHeader = chunkObj.optString("section_header", null)
 
             // Chunk using semantic chunker
-            val createdChunks = semanticChunker.chunkDocument(
+            val createdChunks = SemanticChunker.chunkDocument(
                 documentText = text,
                 sourceTitle = sourceTitle,
                 sourceType = sourceType,

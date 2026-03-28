@@ -48,7 +48,7 @@ class RuleEngine(private val ruleDao: OperationalRuleDao) {
     }
 
     suspend fun getPlantingWindow(crop: String, location: String): PlantingWindowResult? {
-        val rules = ruleDao.getPlantingRules(crop, location)
+        val rules = ruleDao.getPlantingRules("planting_window", crop, location)
         if (rules.isEmpty()) return null
         val rule = rules.first()
         val params = try { JSONObject(rule.parametersJson) } catch (e: Exception) { return null }

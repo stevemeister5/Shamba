@@ -18,6 +18,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -63,10 +64,10 @@ fun DashboardScreen(
                 // KPI Strip (5 horizontal KPIs)
                 KPIStrip(
                     herdSize = herdSize,
-                    milkToday = dashboardData?.today_milk ?: 0.0,
-                    cheeseStock = 0,
-                    monthRevenue = dashboardData?.month_revenue ?: 0.0,
-                    openTasks = dashboardData?.pending_tasks ?: 0
+                    milkToday = dashboardData?.todayMilkYield ?: 0.0,
+                    cheeseStock = dashboardData?.cheeseBatchesInAging ?: 0,
+                    monthRevenue = 0.0, // Not available in DashboardView
+                    openTasks = dashboardData?.pendingTasks ?: 0
                 )
                 
                 Spacer(modifier = Modifier.height(24.dp))
@@ -97,15 +98,15 @@ fun DashboardScreen(
                         // Alerts Panel
                         AlertsPanel(
                             hasAlerts = uiState.hasAlerts,
-                            pendingTasks = dashboardData?.pending_tasks ?: 0,
-                            lowFeedAlerts = dashboardData?.low_feed_alerts ?: 0
+                            pendingTasks = dashboardData?.pendingTasks ?: 0,
+                            lowFeedAlerts = dashboardData?.lowFeedAlerts ?: 0
                         )
                     }
                     
                     // Right Column (3/12) - Tasks & Inventory
                     Column(modifier = Modifier.weight(3f)) {
                         // Today's Tasks Card
-                        TodaysTasksCard(pendingTasks = dashboardData?.pending_tasks ?: 0)
+                        TodaysTasksCard(pendingTasks = dashboardData?.pendingTasks ?: 0)
                         
                         Spacer(modifier = Modifier.height(16.dp))
                         
@@ -183,7 +184,10 @@ private fun FarmStatusIndicator(status: FarmStatus) {
         Box(
             modifier = Modifier
                 .size(12.dp)
-                .scale(pulse)
+                .graphicsLayer {
+                    scaleX = pulse
+                    scaleY = pulse
+                }
                 .background(backgroundColor, CircleShape)
         )
         Text(

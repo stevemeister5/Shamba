@@ -29,6 +29,10 @@ class LivestockViewModel @Inject constructor(
     val sheepCount: StateFlow<Int> = animalRepository.getCountBySpecies("sheep")
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
+    // TODO: Implement milk production tracking with repository
+    val todayMilkYield: StateFlow<Double?> = flow<Double?> { emit(0.0) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0.0)
+
     fun addAnimal(animal: Animal) {
         viewModelScope.launch {
             try {

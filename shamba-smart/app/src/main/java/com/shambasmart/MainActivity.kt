@@ -7,13 +7,22 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.navigation.compose.rememberNavController
+import com.shambasmart.data.preferences.OnboardingPreferences
+import com.shambasmart.presentation.navigation.ShambaNavGraph
 import com.shambasmart.presentation.common.theme.ShambaSmartTheme
 import dagger.hilt.android.AndroidEntryPoint
 import org.osmdroid.config.Configuration
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+    
+    @Inject
+    lateinit var onboardingPreferences: OnboardingPreferences
+    
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         
@@ -28,19 +37,16 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    ShambaSmartApp()
+                    val navController = rememberNavController()
+                    val isOnboardingCompleted by onboardingPreferences.isOnboardingCompleted
+                        .collectAsState(initial = false)
+                    
+                    ShambaNavGraph(
+                        navController = navController,
+                        isOnboardingCompleted = isOnboardingCompleted
+                    )
                 }
             }
         }
     }
-}
-
-@androidx.compose.runtime.Composable
-fun ShambaSmartApp() {
-    // TODO: Implement navigation and main app composable
-    // This will be expanded in subsequent tasks
-    androidx.compose.material3.Text(
-        text = "Shamba Smart - Farm Management",
-        style = MaterialTheme.typography.headlineMedium
-    )
 }

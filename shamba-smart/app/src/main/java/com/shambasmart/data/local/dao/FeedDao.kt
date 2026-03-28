@@ -38,4 +38,12 @@ interface FeedDao {
 
     @Query("SELECT SUM(stockLevel * costPerUnit) FROM feed_inventory WHERE costPerUnit IS NOT NULL")
     suspend fun getTotalFeedValue(): Double?
+
+    // SyncManager support
+    @Query("SELECT * FROM feed_inventory WHERE updatedAt > :timestamp")
+    suspend fun getRowsModifiedAfter(timestamp: Long): List<FeedInventory>
+
+    // ContextBridge support
+    @Query("SELECT * FROM feed_inventory ORDER BY feedType ASC")
+    suspend fun getAllFeeds(): List<FeedInventory>
 }

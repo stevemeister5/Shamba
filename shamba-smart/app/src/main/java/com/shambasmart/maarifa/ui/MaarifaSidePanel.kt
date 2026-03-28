@@ -20,6 +20,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.shambasmart.maarifa.*
+import com.shambasmart.maarifa.retrieval.ResponseAssembler
 
 /**
  * Maarifa Side Panel — slides out from right edge without navigating away.

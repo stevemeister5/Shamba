@@ -293,7 +293,7 @@ class SoundClassifier @Inject constructor(
                 return null
             }
 
-            val samples = (SAMPLE_RATE * durationMs / 1000)
+            val samples = (SAMPLE_RATE * durationMs / 1000).toInt()
             val audioBuffer = ShortArray(samples)
             val floatBuffer = FloatArray(samples)
 

@@ -18,7 +18,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 data class MapUiState(
@@ -28,6 +27,7 @@ data class MapUiState(
     val activeHeatmap: HeatmapType? = null,
     val isDrawingMode: Boolean = false,
     val drawingTool: DrawingTool? = null,
+    val drawingPoints: List<org.osmdroid.util.GeoPoint> = emptyList(),
     val isOfflineMode: Boolean = false,
     val isGpsTracking: Boolean = false,
     val currentLocation: LatLng? = null,
@@ -116,7 +116,7 @@ class FarmMapViewModel @Inject constructor(
                 MapLayerEntity("heatmap_feed", false, 0.7f, 14),
                 MapLayerEntity("heatmap_revenue", false, 0.7f, 15)
             )
-            mapLayerDao.insertAllLayers(defaultLayers)
+            mapLayerDao.insertLayers(defaultLayers)
         }
     }
 
@@ -221,6 +221,26 @@ class FarmMapViewModel @Inject constructor(
                 drawingTool = if (enabled) tool else null
             )
         }
+    }
+
+    fun addDrawingPoint(point: org.osmdroid.util.GeoPoint) {
+        _uiState.update {
+            it.copy(drawingPoints = it.drawingPoints + point)
+        }
+    }
+
+    fun removeDrawingPoint() {
+        _uiState.update {
+            if (it.drawingPoints.isNotEmpty()) {
+                it.copy(drawingPoints = it.drawingPoints.dropLast(1))
+            } else {
+                it
+            }
+        }
+    }
+
+    fun clearDrawingPoints() {
+        _uiState.update { it.copy(drawingPoints = emptyList()) }
     }
 
     fun setCameraPosition(position: MapCameraPosition) {

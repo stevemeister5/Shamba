@@ -29,8 +29,10 @@ import com.shambasmart.presentation.setup.FarmSetupScreen
 import com.shambasmart.presentation.gps.GPSBoundaryScreen
 import com.shambasmart.map.FarmMapScreen
 import com.shambasmart.presentation.crops.ScoutingCaptureScreen
+import com.shambasmart.presentation.onboarding.OnboardingScreen
 
 sealed class Screen(val route: String) {
+    object Onboarding : Screen("onboarding")
     object Dashboard : Screen("dashboard")
     object Livestock : Screen("livestock")
     object Crops : Screen("crops")
@@ -60,13 +62,24 @@ sealed class Screen(val route: String) {
 @Composable
 fun ShambaNavGraph(
     navController: NavHostController,
+    isOnboardingCompleted: Boolean,
     modifier: Modifier = Modifier
 ) {
     NavHost(
         navController = navController,
-        startDestination = Screen.Dashboard.route,
+        startDestination = if (isOnboardingCompleted) Screen.FarmSetup.route else Screen.Onboarding.route,
         modifier = modifier
     ) {
+        composable(Screen.Onboarding.route) {
+            OnboardingScreen(
+                onComplete = {
+                    navController.navigate(Screen.FarmSetup.route) {
+                        popUpTo(Screen.Onboarding.route) { inclusive = true }
+                    }
+                }
+            )
+        }
+        
         composable(Screen.Dashboard.route) {
             DashboardScreen()
         }
@@ -134,7 +147,26 @@ fun ShambaNavGraph(
         composable(Screen.FarmSetup.route) {
             FarmSetupScreen(
                 onNavigateBack = { navController.popBackStack() },
-                onComplete = { navController.navigate(Screen.Dashboard.route) }
+                onComplete = {
+                    navController.navigate(Screen.Dashboard.route) {
+                        popUpTo(Screen.FarmSetup.route) { inclusive = true }
+                    }
+                },
+                onNavigateToGPS = { id, name ->
+                    navController.navigate(Screen.GPSBoundary.createRoute(id, name))
+                },
+                onNavigateToInfrastructure = {
+                    navController.navigate(Screen.Infrastructure.route)
+                },
+                onNavigateToPlots = {
+                    navController.navigate(Screen.Crops.route)
+                },
+                onNavigateToLivestock = {
+                    navController.navigate(Screen.Livestock.route)
+                },
+                onNavigateToCrops = {
+                    navController.navigate(Screen.Crops.route)
+                }
             )
         }
         composable(
@@ -143,7 +175,7 @@ fun ShambaNavGraph(
                 navArgument("plotId") { type = NavType.LongType },
                 navArgument("plotName") { type = NavType.StringType }
             )
-        ) { backStackEntry ->
+        ) {
             GPSBoundaryScreen(
                 onNavigateBack = { navController.popBackStack() }
             )

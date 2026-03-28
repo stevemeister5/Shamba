@@ -90,4 +90,8 @@ interface FinancialDao {
 
     @Query("SELECT * FROM loans WHERE isSynced = 0")
     suspend fun getUnsyncedLoans(): List<Loan>
+
+    // SyncManager support
+    @Query("SELECT * FROM income WHERE last_updated > :timestamp")
+    suspend fun getRowsModifiedAfter(timestamp: Long): List<Income>
 }

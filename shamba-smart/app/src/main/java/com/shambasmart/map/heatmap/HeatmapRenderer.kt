@@ -168,6 +168,7 @@ object HeatmapRenderer {
                         ((marker.areaSquareMeters ?: 0.0) / 10000.0 * 0.5)
                 } else 0.0
             }
+            else -> 0.0
         }
     }
 }

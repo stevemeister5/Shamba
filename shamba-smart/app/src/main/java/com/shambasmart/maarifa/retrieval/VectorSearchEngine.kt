@@ -40,6 +40,8 @@ class VectorSearchEngine(private val context: Context) {
             val modelBytes = loadModelFile()
             if (modelBytes != null) {
                 session = ortEnv!!.createSession(modelBytes, sessionOptions)
+            } else {
+                android.util.Log.w("VectorSearchEngine", "Model file is null")
             }
         } catch (e: Exception) {
             // Model not available — vector search disabled, BM25 only
@@ -68,9 +70,9 @@ class VectorSearchEngine(private val context: Context) {
 
             val shape = longArrayOf(1, inputIdsArray.size.toLong())
 
-            val inputIdsTensor = OnnxTensor.createTensor(ortEnv, inputIdsArray.reshape(shape))
-            val attentionMaskTensor = OnnxTensor.createTensor(ortEnv, attentionMaskArray.reshape(shape))
-            val tokenTypeIdsTensor = OnnxTensor.createTensor(ortEnv, tokenTypeIdsArray.reshape(shape))
+            val inputIdsTensor = OnnxTensor.createTensor(ortEnv, reshape(inputIdsArray, shape))
+            val attentionMaskTensor = OnnxTensor.createTensor(ortEnv, reshape(attentionMaskArray, shape))
+            val tokenTypeIdsTensor = OnnxTensor.createTensor(ortEnv, reshape(tokenTypeIdsArray, shape))
 
             val inputs = mapOf(
                 "input_ids" to inputIdsTensor,
@@ -142,6 +144,14 @@ class VectorSearchEngine(private val context: Context) {
     fun close() {
         session?.close()
         ortEnv?.close()
+    }
+
+    private fun reshape(array: LongArray, shape: LongArray): Array<LongArray> {
+        val batchSize = shape[0].toInt()
+        val seqLen = shape[1].toInt()
+        return Array(batchSize) { b ->
+            LongArray(seqLen) { i -> array[b * seqLen + i] }
+        }
     }
 
     /**

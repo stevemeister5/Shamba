@@ -3,8 +3,11 @@ package com.shambasmart.maarifa.contextbridge
 import com.shambasmart.data.local.dao.*
 import com.shambasmart.data.local.entity.*
 import com.shambasmart.maarifa.retrieval.IntentClassifier
-import java.time.LocalDate
-import java.time.temporal.ChronoUnit
+import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.daysUntil
+import kotlinx.datetime.todayIn
 
 /**
  * Maarifa Context Bridge — reads live farm SQLite data and injects
@@ -107,8 +110,8 @@ class ContextBridge(
     suspend fun buildContext(
         entities: IntentClassifier.EntityResult
     ): FarmContext {
-        val today = LocalDate.now()
-        val currentMonth = today.monthValue
+        val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+        val currentMonth = today.monthNumber
         val currentSeason = deriveSeason(currentMonth)
 
         // Animal context if named or detected
@@ -152,25 +155,28 @@ class ContextBridge(
     }
 
     private suspend fun findAnimalContext(tagIdOrName: String, species: String): AnimalContext? {
-        val animals = animalDao.getAllAnimals()
-        val animal = animals.firstOrNull {
-            it.tagId.equals(tagIdOrName, ignoreCase = true) ||
-            it.name?.equals(tagIdOrName, ignoreCase = true) == true
+        // getAllActiveAnimals() returns Flow, so we need to collect it
+        val animals = mutableListOf<Animal>()
+        animalDao.getAllActiveAnimals().collect { animals.addAll(it) }
+        
+        val animal = animals.firstOrNull { a ->
+            a.tagId?.equals(tagIdOrName, ignoreCase = true) == true
         } ?: return null
 
         val healthRecords = healthRecordDao.getRecordsByAnimal(animal.id)
         val lastHealth = healthRecords.maxByOrNull { it.date }
 
         val milkRecords = milkProductionDao.getRecordsByAnimal(animal.id)
+        val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
         val last7DaysMilk = milkRecords
-            .filter { ChronoUnit.DAYS.between(LocalDate.parse(it.date), LocalDate.now()) <= 7 }
+            .filter { record -> record.date.daysUntil(today) <= 7 }
             .sumOf { (it.morningYield ?: 0.0) + (it.eveningYield ?: 0.0) }
 
         val treatments = healthRecords
-            .filter { it.type == "treatment" && it.drugName != null }
+            .filter { it.type == "treatment" && it.vaccineName != null }
             .mapNotNull { record ->
-                val drug = record.drugName ?: return@mapNotNull null
-                val startDate = record.date
+                val drug = record.vaccineName ?: return@mapNotNull null
+                val startDate = record.date.toString()
                 // Withdrawal lookup would need rules — simplified here
                 TreatmentInfo(
                     drug = drug,
@@ -182,20 +188,25 @@ class ContextBridge(
             }
 
         val reproRecords = reproductionDao.getRecordsByAnimal(animal.id)
-        val latestRepro = reproRecords.maxByOrNull { it.matingDate }
+        val latestRepro = reproRecords.filter { it.matingDate != null }.maxByOrNull { it.matingDate!! }
         val pregStatus = if (latestRepro?.pregnancyConfirmed == true) "pregnant" else null
+
+        // Calculate age from dateOfBirth
+        val age = animal.dateOfBirth?.let { dob ->
+            (dob.daysUntil(today) / 365)
+        }
 
         return AnimalContext(
             animalId = animal.id,
             tagId = animal.tagId ?: "No tag",
-            species = animal.species ?: species,
+            species = animal.species,
             breed = animal.breed,
             sex = animal.sex,
-            age = animal.age,
-            weightKg = animal.weightKg,
-            status = animal.status ?: "active",
+            age = age,
+            weightKg = animal.weight,
+            status = animal.status,
             lastHealthEvent = lastHealth?.type,
-            lastHealthDate = lastHealth?.date,
+            lastHealthDate = lastHealth?.date?.toString(),
             currentTreatments = treatments,
             milkYieldTrend7Day = if (last7DaysMilk > 0) last7DaysMilk else null,
             reproductiveStatus = pregStatus,
@@ -204,7 +215,8 @@ class ContextBridge(
     }
 
     private suspend fun findPlotContext(plotName: String): PlotContext? {
-        val plots = plotDao.getAllPlots()
+        val plots = mutableListOf<Plot>()
+        plotDao.getAllPlots().collect { plots.addAll(it) }
         val plot = plots.firstOrNull {
             it.name.equals(plotName, ignoreCase = true)
         } ?: return null
@@ -212,17 +224,21 @@ class ContextBridge(
         val plantings = cropDao.getPlantingsByPlot(plot.id)
         val currentPlanting = plantings.maxByOrNull { it.plantingDate }
 
-        val daysSince = currentPlanting?.let {
-            ChronoUnit.DAYS.between(LocalDate.parse(it.plantingDate), LocalDate.now())
+        val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+        val plantingDate = currentPlanting?.plantingDate
+        val daysSince: Long? = if (plantingDate != null) {
+            plantingDate.daysUntil(today).toLong()
+        } else {
+            null
         }
 
         return PlotContext(
             plotId = plot.id,
-            name = plot.name ?: "Unknown",
+            name = plot.name,
             sizeAcres = plot.sizeAcres,
             currentCrop = currentPlanting?.cropType,
             variety = currentPlanting?.variety,
-            plantingDate = currentPlanting?.plantingDate,
+            plantingDate = currentPlanting?.plantingDate?.toString(),
             daysSincePlanting = daysSince,
             growthStage = currentPlanting?.status,
             lastInputsApplied = emptyList()
@@ -230,14 +246,18 @@ class ContextBridge(
     }
 
     private suspend fun buildHerdContext(): HerdContext {
-        val animals = animalDao.getAllAnimals()
-        val activeAnimals = animals.filter { it.status == "active" }
-        val goats = activeAnimals.count { it.species?.lowercase() == "goat" }
-        val sheep = activeAnimals.count { it.species?.lowercase() == "sheep" }
+        // getAllActiveAnimals() returns Flow, so we need to collect it
+        val animals = mutableListOf<Animal>()
+        animalDao.getAllActiveAnimals().collect { animals.addAll(it) }
+        
+        val activeAnimals = animals.filter { a -> a.status == "active" }
+        val goats = activeAnimals.count { a -> a.species.lowercase() == "goat" }
+        val sheep = activeAnimals.count { a -> a.species.lowercase() == "sheep" }
 
+        val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
         val recentEvents = healthRecordDao.getAllRecords()
-            .filter { ChronoUnit.DAYS.between(LocalDate.parse(it.date), LocalDate.now()) <= 7 }
-            .map { "${it.animalId}: ${it.type} - ${it.description}" }
+            .filter { record -> record.date.daysUntil(today) <= 7 }
+            .map { record -> "${record.animalId}: ${record.type} - ${record.description ?: "No description"}" }
             .take(5)
 
         return HerdContext(
@@ -251,11 +271,11 @@ class ContextBridge(
 
     private suspend fun buildWeatherContext(today: LocalDate): WeatherContext {
         val logs = weatherDao.getAllLogs()
-            .filter { ChronoUnit.DAYS.between(LocalDate.parse(it.date), today) <= 7 }
+            .filter { log -> log.date.daysUntil(today) <= 7 }
 
-        val rainfallPairs = logs.map { it.date to (it.rainfallMm ?: 0.0) }
-        val totalRain = rainfallPairs.sumOf { it.second }
-        val avgTemp = logs.mapNotNull { it.maxTempC }.average().takeIf { !it.isNaN() }
+        val rainfallPairs = logs.map { log -> log.date.toString() to (log.rainfallMm ?: 0.0) }
+        val totalRain = rainfallPairs.sumOf { pair -> pair.second }
+        val avgTemp = logs.mapNotNull { log -> log.maxTemp }.average().takeIf { !it.isNaN() }
 
         return WeatherContext(
             last7DaysRainfall = rainfallPairs,
@@ -267,9 +287,9 @@ class ContextBridge(
 
     private suspend fun buildFeedContext(): FeedContext {
         val feeds = feedDao.getAllFeeds()
-        val lowStock = feeds.filter {
-            (it.currentStock ?: 0.0) <= (it.reorderThreshold ?: 0.0)
-        }.mapNotNull { it.name }
+        val lowStock = feeds.filter { feed ->
+            feed.stockLevel <= (feed.reorderThreshold ?: 0.0)
+        }.map { feed -> feed.feedType }
 
         return FeedContext(
             lowStockItems = lowStock,

@@ -33,4 +33,15 @@ interface HealthRecordDao {
 
     @Query("SELECT * FROM health_records WHERE isSynced = 0")
     suspend fun getUnsyncedRecords(): List<HealthRecord>
+
+    // SyncManager support
+    @Query("SELECT * FROM health_records WHERE last_updated > :timestamp")
+    suspend fun getRowsModifiedAfter(timestamp: Long): List<HealthRecord>
+
+    // ContextBridge support
+    @Query("SELECT * FROM health_records WHERE animalId = :animalId ORDER BY date DESC")
+    suspend fun getRecordsByAnimal(animalId: Long): List<HealthRecord>
+
+    @Query("SELECT * FROM health_records ORDER BY date DESC")
+    suspend fun getAllRecords(): List<HealthRecord>
 }

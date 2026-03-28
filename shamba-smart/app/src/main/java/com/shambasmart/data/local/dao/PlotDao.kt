@@ -57,4 +57,12 @@ interface PlotDao {
 
     @Query("SELECT * FROM plots WHERE performanceIndex < :threshold ORDER BY performanceIndex ASC")
     fun getUnderperformingPlots(threshold: Double = 50.0): Flow<List<Plot>>
+
+    // SyncManager support
+    @Query("SELECT * FROM plots WHERE updatedAt > :timestamp")
+    suspend fun getRowsModifiedAfter(timestamp: Long): List<Plot>
+
+    // ContextBridge support
+    @Query("SELECT * FROM plots ORDER BY name ASC")
+    suspend fun getAllPlotsList(): List<Plot>
 }

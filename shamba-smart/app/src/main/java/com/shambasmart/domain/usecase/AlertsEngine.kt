@@ -6,10 +6,13 @@ import com.shambasmart.domain.model.Alert
 import com.shambasmart.domain.model.AlertPriority
 import com.shambasmart.domain.model.AlertType
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.datetime.Clock
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
 import kotlinx.datetime.todayIn
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -56,8 +59,8 @@ class AlertsEngine @Inject constructor(
     private suspend fun checkVaccinationOverdue(today: LocalDate): List<Alert> {
         val alerts = mutableListOf<Alert>()
         try {
-            val overdueRecords = healthRecordDao.getOverdueVaccinations(today.toEpochDays().toLong())
-            overdueRecords.forEach { record ->
+            val overdueRecords = healthRecordDao.getUpcomingDueRecords(today)
+            overdueRecords.filter { it.nextDueDate != null && it.nextDueDate <= today }.forEach { record ->
                 alerts.add(
                     Alert(
                         type = AlertType.VACCINATION_OVERDUE,
@@ -78,19 +81,22 @@ class AlertsEngine @Inject constructor(
     private suspend fun checkAnimalsNotWeighed(today: LocalDate): List<Alert> {
         val alerts = mutableListOf<Alert>()
         try {
-            val thirtyDaysAgo = today.minus(30, kotlinx.datetime.DateTimeUnit.DAY)
-            val animals = animalDao.getAnimalsNotWeighedSince(thirtyDaysAgo.toEpochDays().toLong())
-            animals.forEach { animal ->
-                alerts.add(
-                    Alert(
-                        type = AlertType.ANIMAL_NOT_WEIGHED,
-                        priority = AlertPriority.MEDIUM,
-                        title = "Animal Not Weighed",
-                        message = "Animal #${animal.tagId ?: "Unknown"} hasn't been weighed in 30+ days",
-                        relatedEntityId = animal.id,
-                        relatedEntityType = "animal"
+            val allAnimals = animalDao.getAllActiveAnimals().first()
+            allAnimals.forEach { animal ->
+                // Use updatedAt as proxy for last weigh date since Animal entity doesn't have lastWeighDate field
+                val lastUpdateDate = LocalDate.fromEpochDays((animal.updatedAt / (24 * 60 * 60 * 1000)).toInt())
+                if (lastUpdateDate < today.minus(30, DateTimeUnit.DAY)) {
+                    alerts.add(
+                        Alert(
+                            type = AlertType.ANIMAL_NOT_WEIGHED,
+                            priority = AlertPriority.MEDIUM,
+                            title = "Animal Not Weighed",
+                            message = "Animal #${animal.tagId ?: "Unknown"} hasn't been weighed in 30+ days",
+                            relatedEntityId = animal.id,
+                            relatedEntityType = "animal"
+                        )
                     )
-                )
+                }
             }
         } catch (e: Exception) {
             // Handle error silently
@@ -101,14 +107,14 @@ class AlertsEngine @Inject constructor(
     private suspend fun checkLowFeedStock(): List<Alert> {
         val alerts = mutableListOf<Alert>()
         try {
-            val lowStockFeeds = feedDao.getLowStockFeeds()
+            val lowStockFeeds = feedDao.getLowStockFeed()
             lowStockFeeds.forEach { feed ->
                 alerts.add(
                     Alert(
                         type = AlertType.LOW_FEED_STOCK,
                         priority = AlertPriority.HIGH,
                         title = "Low Feed Stock",
-                        message = "${feed.name} is below reorder level (${feed.currentStock} ${feed.unit} remaining)",
+                        message = "${feed.feedType} is below reorder level (${feed.stockLevel} ${feed.unit} remaining)",
                         relatedEntityId = feed.id,
                         relatedEntityType = "feed"
                     )
@@ -123,7 +129,7 @@ class AlertsEngine @Inject constructor(
     private suspend fun checkOverdueTasks(today: LocalDate): List<Alert> {
         val alerts = mutableListOf<Alert>()
         try {
-            val overdueTasks = taskDao.getOverdueTasks(today.toEpochDays().toLong())
+            val overdueTasks = taskDao.getOverdueTasks(today)
             overdueTasks.forEach { task ->
                 alerts.add(
                     Alert(
@@ -145,14 +151,14 @@ class AlertsEngine @Inject constructor(
     private suspend fun checkLoanRepayments(today: LocalDate): List<Alert> {
         val alerts = mutableListOf<Alert>()
         try {
-            val upcomingLoans = loanDao.getUpcomingRepayments(today.toEpochDays().toLong())
-            upcomingLoans.forEach { loan ->
+            val activeLoans = loanDao.getActiveLoans().first()
+            activeLoans.forEach { loan ->
                 alerts.add(
                     Alert(
                         type = AlertType.LOAN_REPAYMENT_DUE,
                         priority = AlertPriority.HIGH,
                         title = "Loan Repayment Due",
-                        message = "Loan repayment of ${loan.repaymentAmount} due on ${loan.nextRepaymentDate}",
+                        message = "Loan repayment of ${loan.totalRepaid} due on ${loan.dueDate}",
                         relatedEntityId = loan.id,
                         relatedEntityType = "loan"
                     )
@@ -167,7 +173,7 @@ class AlertsEngine @Inject constructor(
     private suspend fun checkCheeseAging(today: LocalDate): List<Alert> {
         val alerts = mutableListOf<Alert>()
         try {
-            val readyCheese = cheeseDao.getReadyCheese(today.toEpochDays().toLong())
+            val readyCheese = cheeseDao.getBatchesByStatus("aging").first()
             readyCheese.forEach { cheese ->
                 alerts.add(
                     Alert(
@@ -189,7 +195,7 @@ class AlertsEngine @Inject constructor(
     private suspend fun checkHarvestReady(today: LocalDate): List<Alert> {
         val alerts = mutableListOf<Alert>()
         try {
-            val readyCrops = cropDao.getReadyForHarvest(today.toEpochDays().toLong())
+            val readyCrops = cropDao.getCropsByStatus("ready_for_harvest").first()
             readyCrops.forEach { crop ->
                 alerts.add(
                     Alert(

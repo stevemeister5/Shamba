@@ -24,7 +24,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.shambasmart.data.local.entity.Income
 import com.shambasmart.data.local.entity.Expense
 import com.shambasmart.presentation.common.theme.*
+import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -593,7 +596,7 @@ private fun AddIncomeDialog(
     onDismiss: () -> Unit,
     onAdd: (Income) -> Unit
 ) {
-    var date by remember { mutableStateOf(LocalDate.now().toString()) }
+    var date by remember { mutableStateOf(Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()) }
     var category by remember { mutableStateOf("milk") }
     var description by remember { mutableStateOf("") }
     var amount by remember { mutableStateOf("") }
@@ -741,7 +744,7 @@ private fun AddExpenseDialog(
     onDismiss: () -> Unit,
     onAdd: (Expense) -> Unit
 ) {
-    var date by remember { mutableStateOf(LocalDate.now().toString()) }
+    var date by remember { mutableStateOf(Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()) }
     var category by remember { mutableStateOf("feed") }
     var description by remember { mutableStateOf("") }
     var amount by remember { mutableStateOf("") }

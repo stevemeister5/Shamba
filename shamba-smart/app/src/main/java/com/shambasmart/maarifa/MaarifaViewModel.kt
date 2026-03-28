@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.shambasmart.data.local.dao.maarifa.KnowledgeChunkDao
 import com.shambasmart.data.local.dao.maarifa.OperationalRuleDao
+import com.shambasmart.data.local.entity.maarifa.KnowledgeChunk
 import com.shambasmart.maarifa.contextbridge.ContextBridge
 import com.shambasmart.maarifa.retrieval.*
 import com.shambasmart.maarifa.rules.RuleEngine

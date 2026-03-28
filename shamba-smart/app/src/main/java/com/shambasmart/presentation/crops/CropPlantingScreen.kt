@@ -16,7 +16,10 @@ import com.shambasmart.data.local.entity.CropPlanting
 import com.shambasmart.data.local.entity.Plot
 import com.shambasmart.maarifa.MaarifaViewModel
 import com.shambasmart.maarifa.ui.*
+import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,7 +45,7 @@ fun CropPlantingScreen(
         ) {
             OutlinedTextField(
                 value = selectedPlot?.let { "${it.name} - ${it.sizeAcres} acres" } ?: "Select Plot",
-                onValueChange = {},
+                onValueChange = { _ -> },
                 readOnly = true,
                 label = { Text("Plot") },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = false) },
@@ -156,7 +159,7 @@ private fun AddCropPlantingDialog(
 ) {
     var cropType by remember { mutableStateOf("") }
     var variety by remember { mutableStateOf("") }
-    var plantingDate by remember { mutableStateOf(LocalDate.now().toString()) }
+    var plantingDate by remember { mutableStateOf(Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()) }
     var seedSource by remember { mutableStateOf("") }
     var seedQuantity by remember { mutableStateOf("") }
 

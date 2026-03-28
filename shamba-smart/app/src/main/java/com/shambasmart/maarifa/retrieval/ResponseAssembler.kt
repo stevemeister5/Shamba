@@ -3,6 +3,11 @@ package com.shambasmart.maarifa.retrieval
 import com.shambasmart.data.local.entity.maarifa.KnowledgeChunk
 import com.shambasmart.maarifa.contextbridge.ContextBridge
 import com.shambasmart.maarifa.rules.RuleEngine
+import kotlinx.datetime.Clock
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
+import kotlinx.datetime.toJavaLocalDate
 
 /**
  * Maarifa Response Assembler — consistency checking and answer assembly.
@@ -123,7 +128,7 @@ class ResponseAssembler(
         }
     }
 
-    private fun buildDosageAnswer(
+    private suspend fun buildDosageAnswer(
         query: String,
         chunks: List<KnowledgeRetriever.ScoredChunk>,
         context: ContextBridge.FarmContext?,
@@ -197,7 +202,7 @@ class ResponseAssembler(
         )
     }
 
-    private fun buildWithdrawalAnswer(
+    private suspend fun buildWithdrawalAnswer(
         query: String,
         chunks: List<KnowledgeRetriever.ScoredChunk>,
         context: ContextBridge.FarmContext?,
@@ -213,7 +218,7 @@ class ResponseAssembler(
 
         // Try rule engine
         val withdrawalResult = if (drug != null && species != null && treatmentDate != null) {
-            try { ruleEngine.calculateWithdrawal(drug, species, treatmentDate) } catch (e: Exception) { null }
+            try { ruleEngine.calculateWithdrawal(drug, species, treatmentDate.toJavaLocalDate()) } catch (e: Exception) { null }
         } else null
 
         if (withdrawalResult != null) {
@@ -330,7 +335,7 @@ class ResponseAssembler(
         )
     }
 
-    private fun buildPlantingAnswer(
+    private suspend fun buildPlantingAnswer(
         query: String,
         chunks: List<KnowledgeRetriever.ScoredChunk>,
         context: ContextBridge.FarmContext?,
@@ -382,7 +387,7 @@ class ResponseAssembler(
         )
     }
 
-    private fun buildBreedingAnswer(
+    private suspend fun buildBreedingAnswer(
         query: String,
         chunks: List<KnowledgeRetriever.ScoredChunk>,
         context: ContextBridge.FarmContext?,
@@ -395,7 +400,7 @@ class ResponseAssembler(
 
         // Try gestation rule
         val gestationResult = if (species != null) {
-            try { ruleEngine.calculateDueDate(species, context?.today ?: java.time.LocalDate.now()) } catch (e: Exception) { null }
+            try { ruleEngine.calculateDueDate(species, (context?.today ?: Clock.System.todayIn(TimeZone.currentSystemDefault())).toJavaLocalDate()) } catch (e: Exception) { null }
         } else null
 
         if (gestationResult != null) {

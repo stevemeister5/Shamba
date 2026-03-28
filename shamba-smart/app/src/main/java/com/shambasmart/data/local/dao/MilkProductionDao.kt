@@ -36,4 +36,12 @@ interface MilkProductionDao {
 
     @Query("SELECT * FROM milk_production WHERE isSynced = 0")
     suspend fun getUnsyncedRecords(): List<MilkProduction>
+
+    // SyncManager support
+    @Query("SELECT * FROM milk_production WHERE last_updated > :timestamp")
+    suspend fun getRowsModifiedAfter(timestamp: Long): List<MilkProduction>
+
+    // ContextBridge support
+    @Query("SELECT * FROM milk_production WHERE animalId = :animalId ORDER BY date DESC")
+    suspend fun getRecordsByAnimal(animalId: Long): List<MilkProduction>
 }

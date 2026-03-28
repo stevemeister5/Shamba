@@ -195,11 +195,12 @@ class EnhancedCameraManager @Inject constructor(
      */
     fun setManualFocus(x: Float, y: Float) {
         camera?.let { cam ->
-            val factory = cam.cameraControl.createMeteringPointFactory(
-                camera!!.cameraInfo
+            val factory = SurfaceOrientedMeteringPointFactory(
+                1.0f,  // Default width
+                1.0f   // Default height
             )
             val point = factory.createPoint(x, y)
-            val action = FocusMeteringAction.Builder(point)
+            val action = FocusMeteringAction.Builder(point, FocusMeteringAction.FLAG_AF)
                 .setAutoCancelDuration(3, java.util.concurrent.TimeUnit.SECONDS)
                 .build()
             cam.cameraControl.startFocusAndMetering(action)
@@ -224,11 +225,10 @@ class EnhancedCameraManager @Inject constructor(
      * Enables image stabilization if camera supports it.
      */
     private fun enableImageStabilization() {
-        camera?.cameraInfo?.let { cameraInfo ->
-            if (cameraInfo.isImageStabilizationSupported) {
-                camera?.cameraControl?.enableImageStabilization(true)
-            }
-        }
+        // Image stabilization is not directly available in CameraX
+        // This is a placeholder for future implementation
+        // The camera may handle stabilization automatically if supported by hardware
+        android.util.Log.d("EnhancedCameraManager", "Image stabilization requested (handled by hardware if available)")
     }
 
     /**

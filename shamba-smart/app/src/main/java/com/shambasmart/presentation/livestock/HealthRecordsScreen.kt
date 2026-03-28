@@ -14,7 +14,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.shambasmart.data.local.entity.HealthRecord
 import com.shambasmart.data.local.entity.Animal
+import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,7 +45,7 @@ fun HealthRecordsScreen(
             ) {
                 OutlinedTextField(
                     value = selectedAnimal?.let { "${it.tagId ?: "No Tag"} - ${it.species}" } ?: "Select Animal",
-                    onValueChange = {},
+                    onValueChange = { _ -> },
                     readOnly = true,
                     label = { Text("Animal") },
                     trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = false) },
@@ -152,7 +155,7 @@ private fun AddHealthRecordDialog(
     var type by remember { mutableStateOf("vaccination") }
     var description by remember { mutableStateOf("") }
     var vaccineName by remember { mutableStateOf("") }
-    var date by remember { mutableStateOf(LocalDate.now().toString()) }
+    var date by remember { mutableStateOf(Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()) }
     var nextDueDate by remember { mutableStateOf("") }
 
     AlertDialog(

@@ -21,7 +21,10 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.platform.LocalDensity
+import android.graphics.Paint
+import android.graphics.Typeface
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -340,11 +343,18 @@ private fun SpectrogramCard(spectrogram: SpectrogramData?) {
                     drawSpectrogram(spectrogram)
                 } else {
                     // Placeholder when no data
-                    drawText(
-                        text = "Waiting for audio input...",
-                        topLeft = Offset(size.width / 2 - 100, size.height / 2),
-                        color = Color.White.copy(alpha = 0.5f),
-                        fontSize = with(density) { 14.sp.toPx() }
+                    val paint = Paint().apply {
+                        color = android.graphics.Color.WHITE
+                        alpha = 128
+                        textSize = with(density) { 14.sp.toPx() }
+                        typeface = Typeface.DEFAULT
+                        textAlign = Paint.Align.CENTER
+                    }
+                    drawContext.canvas.nativeCanvas.drawText(
+                        "Waiting for audio input...",
+                        size.width / 2,
+                        size.height / 2,
+                        paint
                     )
                 }
             }

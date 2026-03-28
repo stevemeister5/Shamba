@@ -324,11 +324,12 @@ fun VisionGradingScreen(
         }
 
         // Results Section
-        if (uiState.grade != null) {
+        val grade = uiState.grade
+        if (grade != null) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
-                    containerColor = when (uiState.grade) {
+                    containerColor = when (grade) {
                         "A" -> MaterialTheme.colorScheme.primaryContainer
                         "B" -> MaterialTheme.colorScheme.secondaryContainer
                         "C" -> MaterialTheme.colorScheme.tertiaryContainer
@@ -347,7 +348,7 @@ fun VisionGradingScreen(
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
                             Text(
-                                text = uiState.grade,
+                                text = grade,
                                 style = MaterialTheme.typography.displayLarge,
                                 color = MaterialTheme.colorScheme.primary
                             )

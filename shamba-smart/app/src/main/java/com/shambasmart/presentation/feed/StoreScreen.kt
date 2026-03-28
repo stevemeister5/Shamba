@@ -1,6 +1,7 @@
 package com.shambasmart.presentation.feed
 
 import androidx.compose.animation.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,7 +22,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.shambasmart.data.local.entity.StoreItem
 import com.shambasmart.presentation.common.theme.*
+import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,7 +40,7 @@ fun StoreScreen(
         it.reorderLevel != null && it.quantity <= it.reorderLevel 
     }
     val expiring = storeItems.count {
-        it.expiryDate != null && it.expiryDate <= LocalDate.now().toString()
+        it.expiryDate != null && it.expiryDate <= Clock.System.todayIn(TimeZone.currentSystemDefault())
     }
 
     Box(modifier = Modifier.fillMaxSize().background(SurfaceBase)) {
@@ -206,7 +210,7 @@ private fun StoreKPIItem(
 @Composable
 private fun StoreItemCard(item: StoreItem) {
     val isLowStock = item.reorderLevel != null && item.quantity <= item.reorderLevel
-    val isExpiring = item.expiryDate != null && item.expiryDate <= LocalDate.now().toString()
+    val isExpiring = item.expiryDate != null && item.expiryDate <= Clock.System.todayIn(TimeZone.currentSystemDefault())
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -333,7 +337,7 @@ private fun StoreItemCard(item: StoreItem) {
                                 color = Neutral600
                             )
                             Text(
-                                text = it,
+                                text = it.toString(),
                                 style = MaterialTheme.typography.bodyMedium.copy(fontFamily = GeistMonoFamily),
                                 color = if (isExpiring) Red400 else Neutral950
                             )
@@ -571,7 +575,7 @@ private fun AddStoreItemDialog(
                             category = category,
                             quantity = quantity.toDoubleOrNull() ?: 0.0,
                             unit = unit,
-                            expiryDate = expiryDate.ifBlank { null },
+                            expiryDate = if (expiryDate.isNotBlank()) LocalDate.parse(expiryDate) else null,
                             reorderLevel = reorderLevel.toDoubleOrNull(),
                             costPerUnit = costPerUnit.toDoubleOrNull()
                         )

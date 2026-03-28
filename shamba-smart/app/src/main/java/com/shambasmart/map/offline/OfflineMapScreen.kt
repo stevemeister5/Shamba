@@ -1,6 +1,7 @@
 package com.shambasmart.map.offline
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -15,8 +16,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.mapbox.maps.Style
+import org.osmdroid.tileprovider.tilesource.TileSourceFactory
+import org.osmdroid.util.GeoPoint
+import org.osmdroid.views.MapView
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,125 +36,194 @@ fun OfflineMapScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Column {
-                        Text(
-                            text = "Offline Maps",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Text(
-                            text = if (uiState.isOfflineMode) "Offline Mode ON" else "Online",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = if (uiState.isOfflineMode) Color(0xFFFF9800) else Color(0xFF4CAF50)
-                        )
-                    }
+                    Text(
+                        text = "Offline Maps",
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color(0xFFF8FAF9)
+                    )
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Back",
+                            tint = Color(0xFF8A9E96)
+                        )
                     }
                 },
                 actions = {
-                    // Offline mode toggle
-                    IconButton(onClick = { viewModel.toggleOfflineMode() }) {
+                    IconButton(onClick = { showDownloadDialog = true }) {
                         Icon(
-                            if (uiState.isOfflineMode) Icons.Default.WifiOff else Icons.Default.Wifi,
-                            contentDescription = "Toggle Offline",
-                            tint = if (uiState.isOfflineMode) Color(0xFFFF9800) else MaterialTheme.colorScheme.onSurface
+                            imageVector = Icons.Default.Download,
+                            contentDescription = "Download",
+                            tint = Color(0xFF8A9E96)
                         )
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color(0xFF0D1210)
+                )
             )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { showDownloadDialog = true },
-                containerColor = MaterialTheme.colorScheme.primary
-            ) {
-                Icon(Icons.Default.Download, contentDescription = "Download Region")
-            }
         }
-    ) { padding ->
-        LazyColumn(
+    ) { paddingValues ->
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(padding)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+                .padding(paddingValues)
+                .background(Color(0xFF0D1210))
         ) {
-            // Status card
-            item {
-                OfflineStatusCard(
-                    isOfflineMode = uiState.isOfflineMode,
-                    cachedRegionsCount = uiState.cachedRegions.size,
-                    totalCacheSize = formatBytes(uiState.totalCacheSize)
+            // Map preview
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(300.dp)
+                    .padding(16.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .border(1.dp, Color(0xFF202C27), RoundedCornerShape(14.dp))
+            ) {
+                AndroidView(
+                    factory = { context ->
+                        MapView(context).apply {
+                            setTileSource(TileSourceFactory.DEFAULT_TILE_SOURCE)
+                            setMultiTouchControls(true)
+                            controller.setZoom(14.0)
+                            controller.setCenter(GeoPoint(-5.15, 38.48))
+                        }
+                    },
+                    modifier = Modifier.fillMaxSize()
                 )
             }
-            
-            // Active downloads section
-            if (uiState.activeDownloads.isNotEmpty()) {
-                item {
+
+            // Cache info
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color(0xFF141A17)
+                ),
+                shape = RoundedCornerShape(14.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(20.dp)
+                ) {
                     Text(
-                        text = "Active Downloads",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold,
-                        modifier = Modifier.padding(vertical = 8.dp)
+                        text = "Cache Information",
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color(0xFFF8FAF9)
                     )
-                }
-                
-                items(uiState.activeDownloads.values.toList()) { region ->
-                    ActiveDownloadCard(
-                        region = region,
-                        onCancel = { viewModel.cancelDownload(region.regionId) }
-                    )
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Column {
+                            Text(
+                                text = "Cached Tiles",
+                                fontSize = 13.sp,
+                                color = Color(0xFF8A9E96)
+                            )
+                            Text(
+                                text = "${viewModel.getCachedTileCount()}",
+                                fontSize = 22.sp,
+                                fontWeight = FontWeight.Light,
+                                color = Color(0xFFF8FAF9),
+                                fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
+                            )
+                        }
+                        
+                        Column(horizontalAlignment = Alignment.End) {
+                            Text(
+                                text = "Cache Size",
+                                fontSize = 13.sp,
+                                color = Color(0xFF8A9E96)
+                            )
+                            Text(
+                                text = viewModel.getCacheSizeFormatted(),
+                                fontSize = 22.sp,
+                                fontWeight = FontWeight.Light,
+                                color = Color(0xFFF8FAF9),
+                                fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
+                            )
+                        }
+                    }
                 }
             }
-            
-            // Cached regions section
-            item {
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Cached regions list
+            if (uiState.cachedRegions.isNotEmpty()) {
                 Text(
-                    text = "Downloaded Regions",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(vertical = 8.dp)
+                    text = "Cached Regions",
+                    fontSize = 17.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color(0xFFF8FAF9),
+                    modifier = Modifier.padding(horizontal = 16.dp)
                 )
-            }
-            
-            if (uiState.cachedRegions.isEmpty()) {
-                item {
-                    EmptyCacheCard()
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                LazyColumn(
+                    modifier = Modifier.weight(1f),
+                    contentPadding = PaddingValues(horizontal = 16.dp)
+                ) {
+                    items(uiState.cachedRegions) { region ->
+                        OfflineRegionItem(
+                            region = region,
+                            onDelete = { viewModel.deleteRegion(region.regionId) }
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
                 }
             } else {
-                items(uiState.cachedRegions) { region ->
-                    CachedRegionCard(
-                        region = region,
-                        onDelete = { viewModel.deleteCachedRegion(region.regionId) }
-                    )
-                }
-                
-                item {
-                    OutlinedButton(
-                        onClick = { viewModel.clearAllCache() },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = MaterialTheme.colorScheme.error
-                        )
+                // Empty state
+                Box(
+                    modifier = Modifier.weight(1f),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Icon(Icons.Default.DeleteForever, contentDescription = null)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Clear All Cache")
+                        Icon(
+                            imageVector = Icons.Default.Map,
+                            contentDescription = null,
+                            modifier = Modifier.size(64.dp),
+                            tint = Color(0xFF2E3D37)
+                        )
+                        
+                        Spacer(modifier = Modifier.height(16.dp))
+                        
+                        Text(
+                            text = "No Cached Maps",
+                            fontSize = 17.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = Color(0xFFC4CEC9)
+                        )
+                        
+                        Spacer(modifier = Modifier.height(8.dp))
+                        
+                        Text(
+                            text = "Download map regions for offline use",
+                            fontSize = 15.sp,
+                            color = Color(0xFF8A9E96)
+                        )
                     }
                 }
             }
         }
     }
-    
+
     // Download dialog
     if (showDownloadDialog) {
-        DownloadRegionDialog(
+        DownloadMapDialog(
             onDismiss = { showDownloadDialog = false },
-            onDownload = { name, minZoom, maxZoom ->
-                viewModel.downloadFarmRegion(name, minZoom, maxZoom)
+            onDownload = { name, bounds ->
+                viewModel.downloadRegion(name, bounds)
                 showDownloadDialog = false
             }
         )
@@ -157,170 +231,46 @@ fun OfflineMapScreen(
 }
 
 @Composable
-private fun OfflineStatusCard(
-    isOfflineMode: Boolean,
-    cachedRegionsCount: Int,
-    totalCacheSize: String
-) {
-    Card(
-        colors = CardDefaults.cardColors(
-            containerColor = if (isOfflineMode) 
-                Color(0xFFFF9800).copy(alpha = 0.1f) 
-            else 
-                MaterialTheme.colorScheme.primaryContainer
-        )
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Icon(
-                    if (isOfflineMode) Icons.Default.WifiOff else Icons.Default.CloudDone,
-                    contentDescription = null,
-                    tint = if (isOfflineMode) Color(0xFFFF9800) else Color(0xFF4CAF50)
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                Column {
-                    Text(
-                        text = if (isOfflineMode) "Offline Mode Active" else "Connected",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = if (isOfflineMode) 
-                            "Using cached map tiles only" 
-                        else 
-                            "Online maps + cached tiles",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-            
-            Spacer(modifier = Modifier.height(12.dp))
-            
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                StatItem(
-                    label = "Regions",
-                    value = cachedRegionsCount.toString()
-                )
-                StatItem(
-                    label = "Cache Size",
-                    value = totalCacheSize
-                )
-                StatItem(
-                    label = "Status",
-                    value = if (isOfflineMode) "Offline" else "Online"
-                )
-            }
-        }
-    }
-}
-
-@Composable
-private fun StatItem(label: String, value: String) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(
-            text = value,
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Bold
-        )
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-    }
-}
-
-@Composable
-private fun ActiveDownloadCard(
-    region: OfflineRegionState,
-    onCancel: () -> Unit
-) {
-    Card {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = region.name,
-                        style = MaterialTheme.typography.titleSmall,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        text = "${formatBytes(region.downloadedBytes)} / ${formatBytes(region.totalBytes)}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                IconButton(onClick = onCancel) {
-                    Icon(Icons.Default.Cancel, contentDescription = "Cancel")
-                }
-            }
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            LinearProgressIndicator(
-                progress = region.progress,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(8.dp)
-                    .clip(RoundedCornerShape(4.dp))
-            )
-            
-            Spacer(modifier = Modifier.height(4.dp))
-            
-            Text(
-                text = "${(region.progress * 100).toInt()}%",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}
-
-@Composable
-private fun CachedRegionCard(
+fun OfflineRegionItem(
     region: OfflineRegionState,
     onDelete: () -> Unit
 ) {
-    Card {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(0xFF141A17)
+        ),
+        shape = RoundedCornerShape(10.dp)
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                Icons.Default.Map,
-                contentDescription = null,
-                tint = Color(0xFF4CAF50)
-            )
-            Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = region.name,
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = Color(0xFFF8FAF9)
                 )
+                
+                Spacer(modifier = Modifier.height(4.dp))
+                
                 Text(
-                    text = "Downloaded • ${formatBytes(region.totalBytes)}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    text = "${region.totalBytes / (1024 * 1024)} MB",
+                    fontSize = 13.sp,
+                    color = Color(0xFF8A9E96)
                 )
             }
+            
             IconButton(onClick = onDelete) {
                 Icon(
-                    Icons.Default.Delete,
+                    imageVector = Icons.Default.Delete,
                     contentDescription = "Delete",
-                    tint = MaterialTheme.colorScheme.error
+                    tint = Color(0xFF8A9E96)
                 )
             }
         }
@@ -328,124 +278,69 @@ private fun CachedRegionCard(
 }
 
 @Composable
-private fun EmptyCacheCard() {
-    Card(
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Icon(
-                Icons.Default.Download,
-                contentDescription = null,
-                modifier = Modifier.size(48.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                text = "No Offline Maps",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = "Download map tiles for offline use in areas with poor connectivity",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}
-
-@Composable
-private fun DownloadRegionDialog(
+fun DownloadMapDialog(
     onDismiss: () -> Unit,
-    onDownload: (name: String, minZoom: Int, maxZoom: Int) -> Unit
+    onDownload: (String, BoundingBox) -> Unit
 ) {
-    var name by remember { mutableStateOf("Farm Area (Korogwe)") }
-    var minZoom by remember { mutableStateOf(10f) }
-    var maxZoom by remember { mutableStateOf(17f) }
-
+    var regionName by remember { mutableStateOf("") }
+    
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Download Map Region") },
+        containerColor = Color(0xFF141A17),
+        title = {
+            Text(
+                text = "Download Map Region",
+                color = Color(0xFFF8FAF9)
+            )
+        },
         text = {
             Column {
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text("Region Name") },
-                    modifier = Modifier.fillMaxWidth()
+                Text(
+                    text = "Enter a name for this map region:",
+                    color = Color(0xFF8A9E96)
                 )
                 
                 Spacer(modifier = Modifier.height(16.dp))
                 
-                Text(
-                    text = "Zoom Levels",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "Lower zoom = overview, Higher zoom = detail",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                
-                Spacer(modifier = Modifier.height(8.dp))
-                
-                Text("Min Zoom: ${minZoom.toInt()}")
-                Slider(
-                    value = minZoom,
-                    onValueChange = { minZoom = it },
-                    valueRange = 5f..15f,
-                    steps = 10
-                )
-                
-                Text("Max Zoom: ${maxZoom.toInt()}")
-                Slider(
-                    value = maxZoom,
-                    onValueChange = { maxZoom = it },
-                    valueRange = 12f..19f,
-                    steps = 7
-                )
-                
-                Spacer(modifier = Modifier.height(8.dp))
-                
-                Text(
-                    text = "Farm Area: ~10km × 10km",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                OutlinedTextField(
+                    value = regionName,
+                    onValueChange = { regionName = it },
+                    label = { Text("Region Name") },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Color(0xFF2E9E58),
+                        unfocusedBorderColor = Color(0xFF202C27)
+                    )
                 )
             }
         },
         confirmButton = {
             Button(
-                onClick = { onDownload(name, minZoom.toInt(), maxZoom.toInt()) },
-                enabled = name.isNotBlank()
+                onClick = {
+                    // Placeholder - would need actual bounds calculation
+                    val bounds = BoundingBox(-5.2, 38.5, -5.1, 38.4)
+                    onDownload(regionName, bounds)
+                },
+                enabled = regionName.isNotBlank(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color(0xFF2E9E58)
+                )
             ) {
-                Icon(Icons.Default.Download, contentDescription = null)
-                Spacer(modifier = Modifier.width(4.dp))
                 Text("Download")
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text("Cancel", color = Color(0xFF8A9E96))
             }
         }
     )
 }
 
-private fun formatBytes(bytes: Long): String {
-    return when {
-        bytes < 1024 -> "$bytes B"
-        bytes < 1024 * 1024 -> "${bytes / 1024} KB"
-        bytes < 1024 * 1024 * 1024 -> "${bytes / (1024 * 1024)} MB"
-        else -> "${bytes / (1024 * 1024 * 1024)} GB"
-    }
-}
+// Placeholder for BoundingBox - would need OSMDroid equivalent
+data class BoundingBox(
+    val latNorth: Double,
+    val lonEast: Double,
+    val latSouth: Double,
+    val lonWest: Double
+)

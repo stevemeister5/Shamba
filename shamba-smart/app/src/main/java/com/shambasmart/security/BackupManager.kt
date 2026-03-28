@@ -3,6 +3,7 @@ package com.shambasmart.security
 import android.content.Context
 import android.os.Environment
 import com.google.gson.Gson
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -24,7 +25,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class BackupManager @Inject constructor(
-    private val context: Context,
+    @ApplicationContext private val context: Context,
     private val hardwareKeyManager: HardwareKeyManager
 ) {
     companion object {

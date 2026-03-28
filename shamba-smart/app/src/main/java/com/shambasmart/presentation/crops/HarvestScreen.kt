@@ -3,7 +3,7 @@ package com.shambasmart.presentation.crops
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.IIcons
+import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -14,7 +14,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.shambasmart.data.local.entity.HarvestRecord
 import com.shambasmart.data.local.entity.Plot
+import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,7 +60,7 @@ fun HarvestScreen(
         ) {
             OutlinedTextField(
                 value = selectedPlot?.let { "${it.name} - ${it.sizeAcres} acres" } ?: "Select Plot",
-                onValueChange = {},
+                onValueChange = { _ -> },
                 readOnly = true,
                 label = { Text("Plot") },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = false) },
@@ -179,7 +182,7 @@ private fun AddHarvestDialog(
     onDismiss: () -> Unit,
     onAdd: (HarvestRecord) -> Unit
 ) {
-    var harvestDate by remember { mutableStateOf(LocalDate.now().toString()) }
+    var harvestDate by remember { mutableStateOf(Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()) }
     var quantityKg by remember { mutableStateOf("") }
     var qualityGrade by remember { mutableStateOf("") }
     var destination by remember { mutableStateOf("") }

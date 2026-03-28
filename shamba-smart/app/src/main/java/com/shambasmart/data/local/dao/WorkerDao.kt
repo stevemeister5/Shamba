@@ -64,4 +64,8 @@ interface WorkerDao {
 
     @Query("SELECT * FROM attendance_records WHERE isSynced = 0")
     suspend fun getUnsyncedAttendance(): List<AttendanceRecord>
+
+    // SyncManager support
+    @Query("SELECT * FROM workers WHERE updatedAt > :timestamp")
+    suspend fun getRowsModifiedAfter(timestamp: Long): List<Worker>
 }

@@ -256,16 +256,19 @@ fun FarmMapScreen(
             // Polygon drawing overlay
             if (uiState.isDrawingMode && uiState.drawingTool == DrawingTool.POLYGON) {
                 PolygonDrawingOverlay(
+                    points = uiState.drawingPoints,
                     onPointAdded = { point ->
-                        // Convert screen point to map coordinate and add to polygon
+                        // Add point to drawing state
+                        viewModel.addDrawingPoint(point)
                     },
-                    onPointMoved = { index, point ->
-                        // Update polygon point position
+                    onPointRemoved = {
+                        // Remove last point from drawing state
+                        viewModel.removeDrawingPoint()
                     },
-                    onFinish = { points ->
+                    onPolygonComplete = { points ->
                         // Create polygon marker from points
-                        val centerLat = points.map { it.y }.average()
-                        val centerLng = points.map { it.x }.average()
+                        val centerLat = points.map { it.latitude }.average()
+                        val centerLng = points.map { it.longitude }.average()
                         viewModel.addMarker(
                             name = "Polygon Boundary",
                             markerType = MapMarkerType.MEETING_POINT,
@@ -273,11 +276,14 @@ fun FarmMapScreen(
                             longitude = centerLng,
                             description = "Polygon with ${points.size} points"
                         )
+                        viewModel.clearDrawingPoints()
                         viewModel.setDrawingMode(false)
                     },
                     onCancel = {
+                        viewModel.clearDrawingPoints()
                         viewModel.setDrawingMode(false)
-                    }
+                    },
+                    isActive = true
                 )
             }
             

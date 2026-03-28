@@ -363,8 +363,8 @@ private fun getInfrastructureIcon(type: InfrastructureType): androidx.compose.ui
         InfrastructureType.ANIMAL_SHELTER -> Icons.Default.Home
         InfrastructureType.WATER_POINT -> Icons.Default.Water
         InfrastructureType.STORAGE -> Icons.Default.Inventory
-        InfrastructureType.CHEESE_ROOM -> Icons.Default.Cheese
-        InfrastructureType.COMPOST_PIT -> Icons.Default.Compost
+        InfrastructureType.CHEESE_ROOM -> Icons.Default.Kitchen
+        InfrastructureType.COMPOST_PIT -> Icons.Default.Grass
         InfrastructureType.PLOT -> Icons.Default.Agriculture
     }
 }

@@ -40,7 +40,7 @@ class ApiClient @Inject constructor() {
 
     val apiService: ApiService by lazy {
         Retrofit.Builder()
-            .baseUrl(BuildConfig.API_BASE_URL)
+            .baseUrl(BuildConfig.WEATHER_API_BASE_URL)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()

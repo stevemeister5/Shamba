@@ -35,4 +35,12 @@ interface CropDao {
 
     @Query("SELECT * FROM crop_plantings WHERE isSynced = 0")
     suspend fun getUnsyncedCrops(): List<CropPlanting>
+
+    // SyncManager support
+    @Query("SELECT * FROM crop_plantings WHERE updatedAt > :timestamp")
+    suspend fun getRowsModifiedAfter(timestamp: Long): List<CropPlanting>
+
+    // ContextBridge support
+    @Query("SELECT * FROM crop_plantings WHERE plotId = :plotId ORDER BY plantingDate DESC")
+    suspend fun getPlantingsByPlot(plotId: Long): List<CropPlanting>
 }

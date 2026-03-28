@@ -73,7 +73,7 @@ val Green30 = Green700
 val Green40 = Green600
 val Green80 = Green300
 val Green90 = Green200
-val Green100 = Green50
+val Green100Legacy = Green50
 
 val DarkGreen10 = Green900
 val DarkGreen20 = Green800
@@ -97,7 +97,7 @@ val Red30 = Red400
 val Red40 = Red400
 val Red80 = Red200
 val Red90 = Red100
-val Red100 = Color(0xFFFFFFFF)
+val Red100Legacy = Color(0xFFFFFFFF)
 
 val GreenGray10 = SurfaceBase
 val GreenGray20 = Neutral100

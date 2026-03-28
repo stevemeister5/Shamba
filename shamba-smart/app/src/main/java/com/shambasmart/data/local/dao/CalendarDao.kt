@@ -39,4 +39,8 @@ interface CalendarDao {
 
     @Query("DELETE FROM calendar_events WHERE date < :date")
     suspend fun deleteOldEvents(date: LocalDate)
+
+    // SyncManager support
+    @Query("SELECT * FROM calendar_events WHERE updatedAt > :timestamp")
+    suspend fun getRowsModifiedAfter(timestamp: Long): List<CalendarEvent>
 }

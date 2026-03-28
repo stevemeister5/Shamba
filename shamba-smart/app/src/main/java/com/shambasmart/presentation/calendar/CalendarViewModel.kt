@@ -9,7 +9,10 @@ import com.shambasmart.data.local.entity.Task
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
 import javax.inject.Inject
 
 @HiltViewModel
@@ -50,7 +53,8 @@ class CalendarViewModel @Inject constructor(
 
     fun completeTask(task: Task) {
         viewModelScope.launch {
-            taskDao.updateStatus(task.id, "completed", LocalDate.now())
+            val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+            taskDao.updateStatus(task.id, "completed", today)
         }
     }
 }

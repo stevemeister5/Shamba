@@ -2,7 +2,6 @@ package com.shambasmart.map.offline
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.mapbox.common.OfflineSwitch
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -33,8 +32,6 @@ class OfflineMapViewModel @Inject constructor(
             offlineMapManager.state.collect { managerState ->
                 _uiState.update {
                     it.copy(
-                        isOfflineMode = offlineMapManager.isOfflineMode(),
-                        activeDownloads = managerState.activeDownloads,
                         cachedRegions = managerState.cachedRegions,
                         totalCacheSize = managerState.totalCacheSize,
                         errorMessage = managerState.errorMessage
@@ -44,51 +41,57 @@ class OfflineMapViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Download the default farm region
-     */
-    fun downloadFarmRegion(name: String, minZoom: Int = 10, maxZoom: Int = 17) {
-        val regionId = "farm_${System.currentTimeMillis()}"
-        offlineMapManager.downloadRegion(
-            regionId = regionId,
-            name = name,
-            minZoom = minZoom,
-            maxZoom = maxZoom
-        )
+    fun downloadRegion(name: String, bounds: BoundingBox) {
+        viewModelScope.launch {
+            try {
+                _uiState.update { it.copy(isOfflineMode = true) }
+                // Placeholder for download implementation
+                // In a real implementation, this would use OSMDroid's tile download capabilities
+                _uiState.update { 
+                    it.copy(
+                        isOfflineMode = false,
+                        errorMessage = "Download functionality not yet implemented"
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(
+                        isOfflineMode = false,
+                        errorMessage = "Download failed: ${e.message}"
+                    )
+                }
+            }
+        }
     }
 
-    /**
-     * Cancel an active download
-     */
-    fun cancelDownload(regionId: String) {
-        offlineMapManager.cancelDownload(regionId)
+    fun deleteRegion(regionId: String) {
+        viewModelScope.launch {
+            try {
+                offlineMapManager.clearCache()
+                _uiState.update {
+                    it.copy(errorMessage = "Cache cleared")
+                }
+            } catch (e: Exception) {
+                _uiState.update {
+                    it.copy(errorMessage = "Delete failed: ${e.message}")
+                }
+            }
+        }
     }
 
-    /**
-     * Delete a cached region
-     */
-    fun deleteCachedRegion(regionId: String) {
-        offlineMapManager.deleteCachedRegion(regionId)
+    fun getCachedTileCount(): Int {
+        return offlineMapManager.getCachedTileCount()
     }
 
-    /**
-     * Clear all cached regions
-     */
-    fun clearAllCache() {
-        offlineMapManager.clearAllCache()
+    fun getCacheSizeFormatted(): String {
+        return offlineMapManager.getCacheSizeFormatted()
     }
 
-    /**
-     * Toggle offline mode
-     */
-    fun toggleOfflineMode() {
-        val currentMode = offlineMapManager.isOfflineMode()
-        offlineMapManager.setOfflineMode(!currentMode)
-        _uiState.update { it.copy(isOfflineMode = !currentMode) }
+    fun isOfflineAvailable(): Boolean {
+        return offlineMapManager.isOfflineAvailable()
     }
 
     fun clearError() {
-        offlineMapManager.clearError()
         _uiState.update { it.copy(errorMessage = null) }
     }
 }

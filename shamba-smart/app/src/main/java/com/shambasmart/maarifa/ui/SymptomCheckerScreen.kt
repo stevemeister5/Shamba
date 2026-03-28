@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.shambasmart.maarifa.*
+import com.shambasmart.maarifa.retrieval.ResponseAssembler
 
 /**
  * Maarifa Symptom Checker — guided step-by-step diagnostic wizard.
@@ -78,7 +79,7 @@ fun SymptomCheckerScreen(
                 5 -> StepDuration(viewModel, symptomState)
                 6 -> StepAffectedCount(viewModel, symptomState)
                 7 -> StepRecentEvents(viewModel, symptomState)
-                8 -> StepResults(viewModel, symptomState)
+                8 -> StepResults(viewModel, symptomState, onDismiss)
             }
         }
     }
@@ -361,7 +362,7 @@ private fun StepRecentEvents(viewModel: MaarifaViewModel, state: SymptomCheckerS
 // === STEP 8: RESULTS ===
 
 @Composable
-private fun StepResults(viewModel: MaarifaViewModel, state: SymptomCheckerState) {
+private fun StepResults(viewModel: MaarifaViewModel, state: SymptomCheckerState, onDismiss: () -> Unit) {
     val answer = state.result
 
     if (answer == null) {

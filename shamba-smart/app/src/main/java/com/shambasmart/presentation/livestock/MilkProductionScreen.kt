@@ -14,7 +14,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.shambasmart.data.local.entity.MilkProduction
 import com.shambasmart.data.local.entity.Animal
+import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,7 +60,7 @@ fun MilkProductionScreen(
         ) {
             OutlinedTextField(
                 value = selectedDoe?.let { "Doe: ${it.tagId ?: "No Tag"} - ${it.species}" } ?: "Select Doe (Female Goat)",
-                onValueChange = {},
+                onValueChange = { _ -> },
                 readOnly = true,
                 label = { Text("Doe (Female Goat)") },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = false) },
@@ -74,7 +77,7 @@ fun MilkProductionScreen(
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Icon(
-                        Icons.Default.Milk,
+                        Icons.Default.Opacity,
                         contentDescription = null,
                         modifier = Modifier.size(64.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
@@ -192,7 +195,7 @@ private fun AddMilkProductionDialog(
     onDismiss: () -> Unit,
     onAdd: (MilkProduction) -> Unit
 ) {
-    var date by remember { mutableStateOf(LocalDate.now().toString()) }
+    var date by remember { mutableStateOf(Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()) }
     var morningYield by remember { mutableStateOf("") }
     var eveningYield by remember { mutableStateOf("") }
     var notes by remember { mutableStateOf("") }

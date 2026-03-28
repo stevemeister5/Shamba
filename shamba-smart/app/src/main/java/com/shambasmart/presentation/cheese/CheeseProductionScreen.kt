@@ -4,6 +4,7 @@ import com.shambasmart.maarifa.MaarifaViewModel
 import com.shambasmart.maarifa.ui.*
 
 import androidx.compose.animation.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -24,7 +25,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.shambasmart.data.local.entity.CheeseBatch
 import com.shambasmart.presentation.common.theme.*
+import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -394,7 +398,7 @@ private fun AddCheeseBatchDialog(
     onAdd: (CheeseBatch) -> Unit
 ) {
     var batchId by remember { mutableStateOf("") }
-    var productionDate by remember { mutableStateOf(LocalDate.now().toString()) }
+    var productionDate by remember { mutableStateOf(Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()) }
     var milkVolumeUsed by remember { mutableStateOf("") }
     var cheeseType by remember { mutableStateOf("fresh") }
     var yieldKg by remember { mutableStateOf("") }

@@ -32,4 +32,12 @@ interface ReproductionDao {
 
     @Query("SELECT * FROM reproduction_records WHERE isSynced = 0")
     suspend fun getUnsyncedRecords(): List<ReproductionRecord>
+
+    // SyncManager support
+    @Query("SELECT * FROM reproduction_records WHERE last_updated > :timestamp")
+    suspend fun getRowsModifiedAfter(timestamp: Long): List<ReproductionRecord>
+
+    // ContextBridge support
+    @Query("SELECT * FROM reproduction_records WHERE damId = :animalId ORDER BY matingDate DESC")
+    suspend fun getRecordsByAnimal(animalId: Long): List<ReproductionRecord>
 }

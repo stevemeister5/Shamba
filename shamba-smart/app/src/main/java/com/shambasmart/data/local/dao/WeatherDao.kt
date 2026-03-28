@@ -33,4 +33,12 @@ interface WeatherDao {
 
     @Query("SELECT SUM(rainfallMm) FROM weather_logs WHERE date >= :startDate AND date <= :endDate")
     suspend fun getTotalRainfall(startDate: LocalDate, endDate: LocalDate): Double?
+
+    // SyncManager support
+    @Query("SELECT * FROM weather_logs WHERE last_updated > :timestamp")
+    suspend fun getRowsModifiedAfter(timestamp: Long): List<WeatherLog>
+
+    // ContextBridge support
+    @Query("SELECT * FROM weather_logs ORDER BY date DESC")
+    suspend fun getAllLogs(): List<WeatherLog>
 }

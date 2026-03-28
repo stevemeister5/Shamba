@@ -45,4 +45,8 @@ interface TaskDao {
 
     @Query("SELECT COUNT(*) FROM tasks WHERE status = 'pending' AND dueDate <= :date")
     suspend fun getPendingTaskCount(date: LocalDate): Int
+
+    // SyncManager support
+    @Query("SELECT * FROM tasks WHERE updatedAt > :timestamp")
+    suspend fun getRowsModifiedAfter(timestamp: Long): List<Task>
 }

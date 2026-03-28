@@ -66,4 +66,8 @@ interface CheeseDao {
 
     @Query("SELECT * FROM milk_collections WHERE isSynced = 0")
     suspend fun getUnsyncedCollections(): List<MilkCollection>
+
+    // SyncManager support
+    @Query("SELECT * FROM cheese_batches WHERE updatedAt > :timestamp")
+    suspend fun getRowsModifiedAfter(timestamp: Long): List<CheeseBatch>
 }

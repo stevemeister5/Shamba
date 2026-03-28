@@ -3,6 +3,11 @@ package com.shambasmart.presentation.common.theme
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
@@ -150,7 +155,7 @@ object PageTransitions {
 // Data loading (skeleton screens) - 1200ms shimmer
 object LoadingAnimations {
     val shimmer = infiniteRepeatable(
-        animation = tween(
+        animation = tween<Float>(
             durationMillis = 1200,
             easing = LinearEasing
         ),

@@ -48,9 +48,9 @@ class DashboardViewModel @Inject constructor(
                     it.copy(
                         isLoading = false,
                         dashboardView = dashboardView,
-                        hasAlerts = (dashboardView?.pending_tasks ?: 0) > 0 || 
-                                   (dashboardView?.low_feed_alerts ?: 0) > 0 ||
-                                   (dashboardView?.critical_pest_alerts ?: 0) > 0
+                        hasAlerts = (dashboardView?.pendingTasks ?: 0) > 0 || 
+                                   (dashboardView?.lowFeedAlerts ?: 0) > 0 ||
+                                   (dashboardView?.criticalPestAlerts ?: 0) > 0
                     )
                 }
             } catch (e: Exception) {

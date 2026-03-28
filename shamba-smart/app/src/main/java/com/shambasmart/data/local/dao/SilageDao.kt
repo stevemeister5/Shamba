@@ -35,4 +35,8 @@ interface SilageDao {
 
     @Query("SELECT SUM(currentTonnage) FROM silage_inventory WHERE fermentationComplete = 1")
     suspend fun getTotalAvailableSilage(): Double?
+
+    // SyncManager support
+    @Query("SELECT * FROM silage_inventory WHERE updatedAt > :timestamp")
+    suspend fun getRowsModifiedAfter(timestamp: Long): List<SilageInventory>
 }

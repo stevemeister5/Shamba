@@ -26,6 +26,7 @@ import com.shambasmart.data.local.view.LivestockDashboardView
         HarvestRecord::class,
         SilageInventory::class,
         WeatherLog::class,
+        WeatherCache::class,
         MilkCollection::class,
         CheeseBatch::class,
         FeedInventory::class,
@@ -57,7 +58,7 @@ import com.shambasmart.data.local.view.LivestockDashboardView
         PlotAnalyticsView::class,
         LivestockDashboardView::class
     ],
-    version = 10,
+    version = 11,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -71,6 +72,7 @@ abstract class ShambaDatabase : RoomDatabase() {
     abstract fun harvestDao(): HarvestDao
     abstract fun silageDao(): SilageDao
     abstract fun weatherDao(): WeatherDao
+    abstract fun weatherCacheDao(): WeatherCacheDao
     abstract fun cheeseDao(): CheeseDao
     abstract fun feedDao(): FeedDao
     abstract fun storeDao(): StoreDao

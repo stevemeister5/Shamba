@@ -77,7 +77,7 @@ class KnowledgeIngestionPipeline(
         }
 
         // Gate 3: Chunk
-        val chunks = semanticChunker.chunkDocument(
+        val chunks = SemanticChunker.chunkDocument(
             documentText = rawText,
             sourceTitle = title,
             sourceType = sourceType,

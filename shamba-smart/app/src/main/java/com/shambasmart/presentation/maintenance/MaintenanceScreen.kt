@@ -565,6 +565,8 @@ private fun getMaintenanceIcon(type: MaintenanceType): androidx.compose.ui.graph
         MaintenanceType.FENCE_REPAIR -> Icons.Default.Fence
         MaintenanceType.TOOL_MAINTENANCE -> Icons.Default.Handyman
         MaintenanceType.PREVENTIVE_MAINTENANCE -> Icons.Default.Settings
+        MaintenanceType.VEHICLE_MAINTENANCE -> Icons.Default.DirectionsCar
+        MaintenanceType.VEHICLE_PART_REPLACEMENT -> Icons.Default.CarRepair
     }
 }
 

@@ -59,7 +59,7 @@ class ScoutingCaptureViewModel @Inject constructor(
     private fun detectPlot(latitude: Double, longitude: Double) {
         viewModelScope.launch {
             try {
-                val plots = plotDao.getAllPlotsSync()
+                val plots = plotDao.getAllPlotsList()
                 val nearestPlot = plots.minByOrNull { plot ->
                     val plotLat = plot.latitude ?: 0.0
                     val plotLng = plot.longitude ?: 0.0

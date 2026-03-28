@@ -7,12 +7,12 @@ plugins {
 
 android {
     namespace = "com.shambasmart"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.shambasmart"
         minSdk = 29
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0.0"
 
@@ -23,6 +23,7 @@ android {
 
         // Build config fields
         buildConfigField("String", "WEATHER_API_BASE_URL", "\"https://api.openweathermap.org/data/2.5/\"")
+        buildConfigField("String", "WEATHER_API_KEY", "\"your_api_key_here\"")
         buildConfigField("Double", "FARM_LATITUDE", "-5.15")
         buildConfigField("Double", "FARM_LONGITUDE", "38.48")
     }
@@ -41,10 +42,20 @@ android {
                 "proguard-rules.pro"
             )
             signingConfig = signingConfigs.getByName("release")
+            packaging {
+                jniLibs {
+                    useLegacyPackaging = false
+                }
+            }
         }
         debug {
             isMinifyEnabled = false
             applicationIdSuffix = ".debug"
+            packaging {
+                jniLibs {
+                    useLegacyPackaging = false
+                }
+            }
         }
     }
 
@@ -75,7 +86,21 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+        jniLibs {
+            useLegacyPackaging = false
+        }
     }
+}
+
+// Resolve duplicate classes between TFLite and LiteRT/Old TFLite versions
+configurations.all {
+    resolutionStrategy {
+        force("org.tensorflow:tensorflow-lite:2.16.1")
+        force("org.tensorflow:tensorflow-lite-api:2.16.1")
+        force("org.tensorflow:tensorflow-lite-support:0.4.4")
+    }
+    // Exclude the new LiteRT API which conflicts with TFLite 2.16.1
+    exclude(group = "com.google.ai.edge.litert", module = "litert-api")
 }
 
 dependencies {
@@ -85,7 +110,7 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.8.2")
 
     // Compose BOM
-    val composeBom = platform("androidx.compose:compose-bom:2024.01.00")
+    val composeBom = platform("androidx.compose:compose-bom:2024.05.00")
     implementation(composeBom)
     androidTestImplementation(composeBom)
 
@@ -94,6 +119,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.material3:material3-window-size-class")
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.compose.animation:animation")
 
@@ -141,6 +167,12 @@ dependencies {
     // Gson for JSON
     implementation("com.google.code.gson:gson:2.10.1")
 
+    // Retrofit + OkHttp for network calls
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("com.squareup.okhttp3:logging-interceptor:4.12.0")
+
     // Coil for image loading
     implementation("io.coil-kt:coil-compose:2.5.0")
 
@@ -163,12 +195,14 @@ dependencies {
     implementation("androidx.camera:camera-view:1.3.1")
 
     // OpenCV for computer vision (HSV analysis)
-    implementation("org.opencv:opencv:4.9.0")
+    implementation("org.opencv:opencv:4.13.0")
 
     // ONNX Runtime with NPU support
-    implementation("com.microsoft.onnxruntime:onnxruntime-android:1.17.0")
-    // CameraX for enhanced camera capture (already present, ensuring version)
-    // Gson for JSON parsing (already present, ensuring version)
+    implementation("com.microsoft.onnxruntime:onnxruntime-android:1.24.3")
+    
+    // TensorFlow Lite
+    implementation("org.tensorflow:tensorflow-lite:2.16.1")
+    implementation("org.tensorflow:tensorflow-lite-support:0.4.4")
 
     // OSMDroid for interactive farm maps (no token required)
     implementation("org.osmdroid:osmdroid-android:6.1.18")

@@ -1,6 +1,7 @@
 package com.shambasmart.presentation.cheese
 
 import androidx.compose.animation.*
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,7 +22,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.shambasmart.data.local.entity.MilkCollection
 import com.shambasmart.presentation.common.theme.*
+import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -287,14 +291,14 @@ private fun MilkCollectionCard(collection: MilkCollection) {
                         )
                     }
                     Text(
-                        text = if (collection.smellOk) "Smell: OK" else "Smell: Issue",
+                        text = if (collection.smellOk == true) "Smell: OK" else "Smell: Issue",
                         style = MaterialTheme.typography.bodySmall,
-                        color = if (collection.smellOk) Green400 else Amber400
+                        color = if (collection.smellOk == true) Green400 else Amber400
                     )
                     Text(
-                        text = if (collection.colorOk) "Color: OK" else "Color: Issue",
+                        text = if (collection.colorOk == true) "Color: OK" else "Color: Issue",
                         style = MaterialTheme.typography.bodySmall,
-                        color = if (collection.colorOk) Green400 else Amber400
+                        color = if (collection.colorOk == true) Green400 else Amber400
                     )
                 }
                 
@@ -368,7 +372,7 @@ private fun AddMilkCollectionDialog(
     onDismiss: () -> Unit,
     onAdd: (MilkCollection) -> Unit
 ) {
-    var date by remember { mutableStateOf(LocalDate.now().toString()) }
+    var date by remember { mutableStateOf(Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()) }
     var quantityLitres by remember { mutableStateOf("") }
     var phLevel by remember { mutableStateOf("") }
     var smellOk by remember { mutableStateOf(true) }

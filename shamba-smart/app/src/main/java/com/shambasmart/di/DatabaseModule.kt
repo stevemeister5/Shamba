@@ -2,6 +2,8 @@ package com.shambasmart.di
 
 import android.content.Context
 import androidx.room.Room
+import androidx.room.RoomDatabase.Callback
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.shambasmart.data.local.ShambaDatabase
 import com.shambasmart.data.local.dao.*
 import com.shambasmart.data.local.dao.maarifa.KnowledgeChunkDao
@@ -13,6 +15,9 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import net.sqlcipher.database.SupportFactory
 import javax.inject.Singleton
 
@@ -38,7 +43,7 @@ object DatabaseModule {
 
         val factory = SupportFactory(passphrase)
 
-        return Room.databaseBuilder(
+        val database = Room.databaseBuilder(
             context,
             ShambaDatabase::class.java,
             "shamba_smart.db"
@@ -46,6 +51,8 @@ object DatabaseModule {
             .openHelperFactory(factory)
             .fallbackToDestructiveMigration()
             .build()
+        
+        return database
     }
 
     @Provides
@@ -76,6 +83,9 @@ object DatabaseModule {
     fun provideWeatherDao(database: ShambaDatabase): WeatherDao = database.weatherDao()
 
     @Provides
+    fun provideWeatherCacheDao(database: ShambaDatabase): WeatherCacheDao = database.weatherCacheDao()
+
+    @Provides
     fun provideCheeseDao(database: ShambaDatabase): CheeseDao = database.cheeseDao()
 
     @Provides
@@ -88,6 +98,9 @@ object DatabaseModule {
     fun provideFinancialDao(database: ShambaDatabase): FinancialDao = database.financialDao()
 
     @Provides
+    fun provideLoanDao(database: ShambaDatabase): LoanDao = database.loanDao()
+
+    @Provides
     fun provideWorkerDao(database: ShambaDatabase): WorkerDao = database.workerDao()
 
     @Provides
@@ -98,6 +111,21 @@ object DatabaseModule {
 
     @Provides
     fun provideSyncDao(database: ShambaDatabase): SyncDao = database.syncDao()
+
+    @Provides
+    fun provideAudioEventDao(database: ShambaDatabase): AudioEventDao = database.audioEventDao()
+
+    @Provides
+    fun provideMaintenanceTaskDao(database: ShambaDatabase): MaintenanceTaskDao = database.maintenanceTaskDao()
+
+    @Provides
+    fun provideBoundaryDao(database: ShambaDatabase): BoundaryDao = database.boundaryDao()
+
+    @Provides
+    fun provideScoutingReportDao(database: ShambaDatabase): ScoutingReportDao = database.scoutingReportDao()
+
+    @Provides
+    fun provideDashboardViewDao(database: ShambaDatabase): DashboardViewDao = database.dashboardViewDao()
 
     // Maarifa Knowledge Engine DAOs
     @Provides

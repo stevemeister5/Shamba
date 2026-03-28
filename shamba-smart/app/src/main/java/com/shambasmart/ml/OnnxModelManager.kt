@@ -5,9 +5,11 @@ import ai.onnxruntime.OnnxTensor
 import ai.onnxruntime.OrtEnvironment
 import ai.onnxruntime.OrtSession
 import ai.onnxruntime.providers.NNAPIFlags
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.nio.FloatBuffer
+import java.util.EnumSet
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -23,7 +25,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class OnnxModelManager @Inject constructor(
-    private val context: Context
+    @ApplicationContext private val context: Context
 ) {
     private var ortEnvironment: OrtEnvironment? = null
     private var pestSession: OrtSession? = null

@@ -1,6 +1,7 @@
 package com.shambasmart.security
 
 import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
 import java.security.SecureRandom
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -12,7 +13,7 @@ import javax.inject.Singleton
  */
 @Singleton
 class KeystoreManager @Inject constructor(
-    private val context: Context,
+    @ApplicationContext private val context: Context,
     private val hardwareKeyManager: HardwareKeyManager
 ) {
     /**
@@ -27,6 +28,14 @@ class KeystoreManager @Inject constructor(
             // Generate new passphrase and store securely
             generateAndStorePassphrase()
         }
+    }
+
+    /**
+     * Gets existing key or generates a new one using hardware-backed security.
+     * @return SecretKey for encryption operations
+     */
+    fun getOrCreateKey(): javax.crypto.SecretKey {
+        return hardwareKeyManager.getOrCreateKey()
     }
 
     /**

@@ -1,4 +1,4 @@
-# Shamba Smart — Complete Technical Specification
+# Shamba Smart — Complete Technical Specification (Verified State)
 
 ## Project Overview
 
@@ -40,10 +40,10 @@
 | **Database** | Room + SQLCipher (encrypted) |
 | **Architecture** | Single Source of Truth (SSOT) with Unidirectional Data Flow (UDF) |
 | **Version** | 1.1.0 |
-| **Version Code** | 2 |
+| **Version Code** | 1 |
 | **Min SDK** | Android 10 (API 29) |
-| **Target SDK** | Android 14 (API 34) |
-| **Compile SDK** | 34 |
+| **Target SDK** | Android 14 (API 35) |
+| **Compile SDK** | 35 |
 
 ---
 
@@ -79,7 +79,7 @@
 | Category | Technology | Version |
 |----------|------------|---------|
 | **Language** | Kotlin | 1.9.x |
-| **UI Framework** | Jetpack Compose | BOM 2024.01.00 |
+| **UI Framework** | Jetpack Compose | BOM 2024.05.00 |
 | **Database** | Room | 2.6.1 |
 | **Encryption** | SQLCipher | 4.5.4 |
 | **Dependency Injection** | Hilt (Dagger) | 2.50 |
@@ -94,10 +94,13 @@
 | **Security** | AndroidX Security Crypto | 1.1.0-alpha06 |
 | **PDF** | iText | 8.0.2 |
 | **Camera** | CameraX | 1.3.1 |
-| **Computer Vision** | OpenCV | 4.9.0 |
+| **Computer Vision** | OpenCV | 4.13.0 |
 | **Maps** | OSMDroid | 6.1.18 |
 | **GPS** | Google Play Services Location | 21.1.0 |
 | **Heatmap** | OSMBonusPack | 6.9.0 |
+| **ONNX Runtime** | Microsoft ONNX Runtime | 1.24.3 |
+| **TensorFlow Lite** | TensorFlow Lite | 2.16.1 |
+| **Network** | Retrofit + OkHttp | 2.9.0 / 4.12.0 |
 
 ### Compiler Configuration
 
@@ -109,7 +112,7 @@
 
 ### Compose Configuration
 
-- **Adaptive Layouts**: `androidx.compose.material3.adaptive` 1.0.0-alpha05
+- **Adaptive Layouts**: `androidx.compose.material3.adaptive` 1.0.0
 - **Material Design 3**: Enabled
 - **Experimental APIs**: LayoutApi, ExperimentalMaterial3Api opted-in
 
@@ -150,7 +153,8 @@ ShambaSmartApplication
         ├── SyncModule (WorkManager + SyncManager)
         ├── NetworkModule (API services)
         ├── MapModule (OSMDroid configuration)
-        └── MaarifaModule (Knowledge engine)
+        ├── MaarifaModule (Knowledge engine)
+        └── PreferencesModule (DataStore)
 ```
 
 ### Project Structure
@@ -163,17 +167,21 @@ app/src/main/java/com/shambasmart/
 │   ├── local/
 │   │   ├── ShambaDatabase.kt
 │   │   ├── converter/Converters.kt
-│   │   ├── dao/ (24 DAOs)
-│   │   └── entity/ (28 entities)
+│   │   ├── dao/ (30+ DAOs)
+│   │   ├── entity/ (30+ entities)
+│   │   └── view/ (Database views)
+│   ├── preferences/
+│   │   └── OnboardingPreferences.kt
 │   ├── remote/ (API services)
 │   ├── repository/ (Repository implementations)
-│   └── sync/ (SyncWorker)
+│   └── sync/ (SyncManager, SyncWorker)
 ├── di/
 │   ├── DatabaseModule.kt
 │   ├── RepositoryModule.kt
 │   ├── SyncModule.kt
 │   ├── NetworkModule.kt
-│   └── MapModule.kt
+│   ├── MapModule.kt
+│   └── PreferencesModule.kt
 ├── domain/
 │   ├── model/Alert.kt
 │   ├── repository/ (Interfaces)
@@ -189,6 +197,7 @@ app/src/main/java/com/shambasmart/
 │   ├── retrieval/
 │   │   ├── IntentClassifier.kt
 │   │   ├── KnowledgeRetriever.kt
+│   │   ├── PestKnowledgeMapper.kt
 │   │   ├── ResponseAssembler.kt
 │   │   └── VectorSearchEngine.kt
 │   ├── rules/RuleEngine.kt
@@ -204,35 +213,107 @@ app/src/main/java/com/shambasmart/
 │   ├── MapMarkerType.kt
 │   ├── drawing/
 │   ├── heatmap/
+│   │   └── PestHeatmapOverlay.kt
 │   ├── integration/
 │   └── offline/
 ├── ml/
+│   ├── ModelManager.kt
 │   ├── ModelOptimizer.kt
+│   ├── OnnxModelManager.kt
+│   ├── PestClassifier.kt
 │   ├── audio/
 │   ├── lcr/
 │   ├── vision/
 │   └── water/
 ├── presentation/
 │   ├── alerts/
+│   │   ├── AlertsScreen.kt
+│   │   ├── AlertsViewModel.kt
+│   │   └── PestAlertGenerator.kt
 │   ├── ar/
 │   ├── calendar/
+│   │   ├── CalendarScreen.kt
+│   │   └── CalendarViewModel.kt
 │   ├── cheese/
+│   │   ├── CheeseInventoryScreen.kt
+│   │   ├── CheeseProductionScreen.kt
+│   │   ├── CheeseScreen.kt
+│   │   ├── CheeseViewModel.kt
+│   │   └── MilkCollectionScreen.kt
 │   ├── common/
+│   │   ├── components/
+│   │   └── theme/
 │   ├── crops/
+│   │   ├── CropPlantingScreen.kt
+│   │   ├── CropsScreen.kt
+│   │   ├── CropsViewModel.kt
+│   │   ├── HarvestScreen.kt
+│   │   ├── PlotAnalyticsScreen.kt
+│   │   ├── PlotRegistryScreen.kt
+│   │   ├── ScoutingCaptureScreen.kt
+│   │   ├── ScoutingCaptureViewModel.kt
+│   │   ├── WeatherScreen.kt
+│   │   └── components/
 │   ├── dashboard/
+│   │   ├── DashboardScreen.kt
+│   │   └── DashboardViewModel.kt
 │   ├── feed/
+│   │   ├── FeedInventoryScreen.kt
+│   │   ├── FeedScreen.kt
+│   │   ├── FeedViewModel.kt
+│   │   ├── StoreScreen.kt
+│   │   └── StoreViewModel.kt
 │   ├── financial/
+│   │   ├── FinancialScreen.kt
+│   │   └── FinancialViewModel.kt
 │   ├── gps/
+│   │   ├── GPSBoundaryScreen.kt
+│   │   ├── GPSBoundaryViewModel.kt
+│   │   ├── GPSKalmanFilter.kt
+│   │   ├── LocationProvider.kt
+│   │   └── PolygonCalculator.kt
 │   ├── infrastructure/
+│   │   └── InfrastructureScreen.kt
 │   ├── labour/
+│   │   ├── LabourScreen.kt
+│   │   └── LabourViewModel.kt
 │   ├── livestock/
+│   │   ├── GrowthTrackingScreen.kt
+│   │   ├── HealthRecordsScreen.kt
+│   │   ├── LivestockScreen.kt
+│   │   ├── LivestockViewModel.kt
+│   │   ├── MilkProductionScreen.kt
+│   │   └── ReproductionScreen.kt
 │   ├── maintenance/
+│   │   ├── MaintenanceScreen.kt
+│   │   └── MaintenanceViewModel.kt
 │   ├── ml/
+│   │   ├── acoustic/
+│   │   ├── lcr/
+│   │   ├── npu/
+│   │   ├── vision/
+│   │   └── water/
 │   ├── navigation/
+│   │   └── ShambaNavGraph.kt
+│   ├── onboarding/
+│   │   ├── FeaturesScreen.kt
+│   │   ├── OnboardingScreen.kt
+│   │   ├── OnboardingViewModel.kt
+│   │   ├── PermissionsScreen.kt
+│   │   └── WelcomeScreen.kt
 │   ├── settings/
+│   │   ├── SettingsScreen.kt
+│   │   └── SettingsViewModel.kt
 │   └── setup/
+│       ├── FarmSetupScreen.kt
+│       └── FarmSetupViewModel.kt
 ├── security/
+│   ├── BackupManager.kt
+│   ├── BackupMetadata.kt
+│   ├── BackupScheduler.kt
+│   ├── BackupWorker.kt
 │   ├── EncryptionHelper.kt
+│   ├── HardwareKeyManager.kt
 │   └── KeystoreManager.kt
 └── util/
 ```
@@ -241,116 +322,135 @@ app/src/main/java/com/shambasmart/
 
 ## Database Schema
 
-### Entity Overview (28 Tables)
+### Entity Overview (30+ Tables)
 
 #### Livestock Entities
 
 | Entity | Purpose | Key Fields |
 |--------|---------|------------|
-| **Animal** | Individual animal records | id, tagId, species, breed, sex, birthDate, status, weight, damId, sireId |
-| **HealthRecord** | Veterinary treatments & vaccinations | animalId, type, date, description, vaccineName, nextDueDate |
-| **ReproductionRecord** | Breeding & kidding records | damId, sireId, type, matingDate, pregnancyStatus, expectedDueDate, actualBirthDate, kidsCount |
-| **MilkProduction** | Daily milk yield per doe | animalId, date, morningYield, eveningYield, notes |
-| **WeightEntry** | Growth tracking | animalId, date, weight, notes |
+| **Animal** | Individual animal records | id, tagId, species, breed, sex, birthDate, status, weight, damId, sireId, revision_id, last_modified_by, last_updated |
+| **HealthRecord** | Veterinary treatments & vaccinations | animalId, type, date, description, vaccineName, nextDueDate, revision_id, last_modified_by, last_updated |
+| **ReproductionRecord** | Breeding & kidding records | damId, sireId, type, matingDate, pregnancyStatus, expectedDueDate, actualBirthDate, kidsCount, revision_id, last_modified_by, last_updated |
+| **MilkProduction** | Daily milk yield per doe | animalId, date, morningYield, eveningYield, notes, revision_id, last_modified_by, last_updated |
+| **WeightEntry** | Growth tracking | animalId, date, weight, notes, revision_id, last_modified_by, last_updated |
 
 #### Crop Entities
 
 | Entity | Purpose | Key Fields |
 |--------|---------|------------|
-| **Plot** | Field/plot registry | id, name, sizeAcres, currentUse, soilType, location |
-| **CropPlanting** | Planting records | plotId, cropType, variety, plantingDate, expectedHarvestDate, status |
-| **HarvestRecord** | Harvest tracking | cropPlantingId, date, quantityKg, grade, destination, pricePerKg |
-| **SilageInventory** | Silage stock | date, quantity, quality, pitLocation, fermentationDays |
-| **WeatherLog** | Weather data | date, rainfallMm, maxTemp, minTemp, humidity, windSpeed, notes |
+| **Plot** | Field/plot registry | id, name, sizeAcres, currentUse, soilType, location, revision_id, last_modified_by, last_updated |
+| **CropPlanting** | Planting records | plotId, cropType, variety, plantingDate, expectedHarvestDate, status, revision_id, last_modified_by, last_updated |
+| **HarvestRecord** | Harvest tracking | cropPlantingId, date, quantityKg, grade, destination, pricePerKg, revision_id, last_modified_by, last_updated |
+| **SilageInventory** | Silage stock | date, quantity, quality, pitLocation, fermentationDays, revision_id, last_modified_by, last_updated |
+| **WeatherLog** | Weather data | date, rainfallMm, maxTemp, minTemp, humidity, windSpeed, notes, revision_id, last_modified_by, last_updated |
+| **ScoutingReport** | Pest scouting data | id, plotId, pestType, severityScore, gpsLatitude, gpsLongitude, imageUri, detectedAt, revision_id, last_modified_by, last_updated |
 
 #### Cheese Production Entities
 
 | Entity | Purpose | Key Fields |
 |--------|---------|------------|
-| **MilkCollection** | Raw milk for cheese | date, quantityLitres, pH, smellTest, colorTest, accepted, sourceAnimalId |
-| **CheeseBatch** | Production batches | batchId, milkVolume, cheeseType, yieldKg, startDate, agingLocation, status |
+| **MilkCollection** | Raw milk for cheese | date, quantityLitres, pH, smellTest, colorTest, accepted, sourceAnimalId, revision_id, last_modified_by, last_updated |
+| **CheeseBatch** | Production batches | batchId, milkVolume, cheeseType, yieldKg, startDate, agingLocation, status, revision_id, last_modified_by, last_updated |
 
 #### Feed & Store Entities
 
 | Entity | Purpose | Key Fields |
 |--------|---------|------------|
-| **FeedInventory** | Feed stock levels | feedType, quantity, unit, reorderThreshold, costPerUnit, lastRestocked |
-| **StoreItem** | Farm supplies inventory | itemName, category, quantity, unit, expiryDate, reorderThreshold |
+| **FeedInventory** | Feed stock levels | feedType, quantity, unit, reorderThreshold, costPerUnit, lastRestocked, revision_id, last_modified_by, last_updated |
+| **StoreItem** | Farm supplies inventory | itemName, category, quantity, unit, expiryDate, reorderThreshold, revision_id, last_modified_by, last_updated |
 
 #### Financial Entities
 
 | Entity | Purpose | Key Fields |
 |--------|---------|------------|
-| **Income** | Revenue records | date, category, description, amount, paymentMethod |
-| **Expense** | Cost records | date, category, description, amount, paymentMethod |
-| **Loan** | Credit tracking | lender, principalAmount, interestRate, startDate, dueDate, status, amountPaid |
+| **Income** | Revenue records | date, category, description, amount, paymentMethod, revision_id, last_modified_by, last_updated |
+| **Expense** | Cost records | date, category, description, amount, paymentMethod, revision_id, last_modified_by, last_updated |
+| **Loan** | Credit tracking | lender, principalAmount, interestRate, startDate, dueDate, status, amountPaid, revision_id, last_modified_by, last_updated |
 
 #### Labour Entities
 
 | Entity | Purpose | Key Fields |
 |--------|---------|------------|
-| **Worker** | Employee records | name, role, contact, hireDate, dailyRate, isSeasonal, isActive |
-| **AttendanceRecord** | Daily attendance | workerId, date, isPresent, overtimeHours, notes |
+| **Worker** | Employee records | name, role, contact, hireDate, dailyRate, isSeasonal, isActive, revision_id, last_modified_by, last_updated |
+| **AttendanceRecord** | Daily attendance | workerId, date, isPresent, overtimeHours, notes, revision_id, last_modified_by, last_updated |
 
 #### Calendar & Tasks
 
 | Entity | Purpose | Key Fields |
 |--------|---------|------------|
-| **CalendarEvent** | Farm events | title, date, type, description, isMaarifaGenerated |
-| **Task** | To-do items | title, dueDate, isCompleted, priority, assignedWorkerId |
+| **CalendarEvent** | Farm events | title, date, type, description, isMaarifaGenerated, revision_id, last_modified_by, last_updated |
+| **Task** | To-do items | title, dueDate, isCompleted, priority, assignedWorkerId, revision_id, last_modified_by, last_updated |
 
 #### Infrastructure & Map
 
 | Entity | Purpose | Key Fields |
 |--------|---------|------------|
-| **FarmBoundary** | GPS boundary data | boundaryJson, areaAcres, lastUpdated |
-| **MapMarker** | Custom map markers | latitude, longitude, type, label, notes |
-| **MaintenanceTask** | Equipment/infrastructure maintenance | equipmentType, description, scheduledDate, status |
+| **FarmBoundary** | GPS boundary data | boundaryJson, areaAcres, lastUpdated, revision_id, last_modified_by |
+| **BoundaryPointEntity** | GPS boundary points | boundaryId, latitude, longitude, sequence, revision_id, last_modified_by |
+| **MapMarkerEntity** | Custom map markers | latitude, longitude, type, label, notes, revision_id, last_modified_by, last_updated |
+| **MapLayerEntity** | Map layer configuration | name, type, visible, opacity, revision_id, last_modified_by, last_updated |
+| **MapTileCacheEntity** | Offline map tiles | tileSource, zoomLevel, x, y, data, lastAccessed, revision_id, last_modified_by |
+| **MaintenanceTask** | Equipment/infrastructure maintenance | equipmentType, description, scheduledDate, status, revision_id, last_modified_by, last_updated |
 
 #### System Entities
 
 | Entity | Purpose | Key Fields |
 |--------|---------|------------|
-| **SyncStatus** | Sync tracking | entityType, entityId, lastSyncedAt, isSynced |
-| **Vehicle** | Equipment registry | name, type, fuelType, purchaseDate |
-| **VehiclePart** | Maintenance parts | vehicleId, partName, lastReplacedDate, nextServiceDate |
+| **SyncStatus** | Sync tracking | entityType, entityId, lastSyncedAt, isSynced, local_max_timestamp per entity type |
+| **Vehicle** | Equipment registry | name, type, fuelType, purchaseDate, revision_id, last_modified_by, last_updated |
+| **VehiclePart** | Maintenance parts | vehicleId, partName, lastReplacedDate, nextServiceDate, revision_id, last_modified_by, last_updated |
+| **AudioEvent** | Acoustic detection events | date, audioType, confidence, notes, revision_id, last_modified_by, last_updated |
 
-### Maarifa Entities
+#### Maarifa Entities
 
 | Entity | Purpose | Key Fields |
 |--------|---------|------------|
 | **KnowledgeChunk** | Text chunks from documents | content, domainTag, sourceDocument, embedding, keywords |
 | **OperationalRule** | Computable rules | ruleType, condition, action, priority |
-| **IngestedDocument** | Imported knowledge files | title, domainTag, filePath, chunkCount, dateIngested |
 
-### DAOs (24 Data Access Objects)
+#### Database Views
+
+| View | Purpose |
+|------|---------|
+| **DashboardView** | Pre-joined KPI data (herd size, milk today, cheese batches, tasks, alerts) |
+| **PlotAnalyticsView** | Aggregated crop/yield data per plot |
+| **LivestockDashboardView** | Aggregated livestock dashboard data |
+
+### DAOs (30+ Data Access Objects)
 
 | DAO | Purpose |
 |-----|---------|
-| AnimalDao | CRUD for animals, queries by species/status |
-| HealthRecordDao | Health records by animal, vaccination schedules |
-| ReproductionDao | Breeding records, gestation tracking |
-| MilkProductionDao | Milk yield queries, daily summaries |
-| WeightEntryDao | Growth tracking queries |
-| PlotDao | Plot management |
-| CropDao | Planting records, harvest tracking |
-| HarvestDao | Harvest records, yield analytics |
-| SilageDao | Silage inventory |
-| WeatherDao | Weather logs |
+| AnimalDao | CRUD for animals, queries by species/status, getRowsModifiedAfter() |
+| HealthRecordDao | Health records by animal, vaccination schedules, getRowsModifiedAfter() |
+| ReproductionDao | Breeding records, gestation tracking, getRowsModifiedAfter() |
+| MilkProductionDao | Milk yield queries, daily summaries, getRowsModifiedAfter() |
+| WeightEntryDao | Growth tracking queries, getRowsModifiedAfter() |
+| PlotDao | Plot management, getRowsModifiedAfter() |
+| CropDao | Planting records, harvest tracking, getRowsModifiedAfter() |
+| HarvestDao | Harvest records, yield analytics, getRowsModifiedAfter() |
+| SilageDao | Silage inventory, getRowsModifiedAfter() |
+| WeatherDao | Weather logs, getRowsModifiedAfter() |
 | WeatherCacheDao | Cached weather data |
 | WeatherEventDao | Weather alerts |
-| CheeseDao | Milk collection, cheese batches |
-| FeedDao | Feed inventory |
-| StoreDao | Store items |
-| FinancialDao | Income, expenses, loans |
-| WorkerDao | Worker management |
-| TaskDao | Task management |
-| CalendarDao | Calendar events |
-| SyncDao | Sync status tracking |
+| CheeseDao | Milk collection, cheese batches, getRowsModifiedAfter() |
+| FeedDao | Feed inventory, getRowsModifiedAfter() |
+| StoreDao | Store items, getRowsModifiedAfter() |
+| FinancialDao | Income, expenses, loans, getRowsModifiedAfter() |
+| LoanDao | Loan management |
+| WorkerDao | Worker management, getRowsModifiedAfter() |
+| TaskDao | Task management, getRowsModifiedAfter() |
+| CalendarDao | Calendar events, getRowsModifiedAfter() |
+| SyncDao | Sync status tracking, watermark updates |
+| AudioEventDao | Acoustic detection events |
+| MaintenanceTaskDao | Maintenance tracking |
 | BoundaryDao | Farm boundaries |
 | MapMarkerDao | Map markers |
-| MaintenanceTaskDao | Maintenance tracking |
-| AudioEventDao | Acoustic detection events |
+| MapLayerDao | Map layers |
+| MapTileCacheDao | Offline map tiles |
+| ScoutingReportDao | Pest scouting data, heatmap queries, severity counts |
+| DashboardViewDao | Database views for dashboard |
+| KnowledgeChunkDao | Maarifa knowledge chunks |
+| OperationalRuleDao | Maarifa operational rules |
 
 ---
 
@@ -362,9 +462,15 @@ app/src/main/java/com/shambasmart/
 
 **Features**:
 - Live KPI cards: Herd Size, Milk Today, Cheese Batches, Pending Tasks
-- Alert section: Pending tasks, low feed stock, health flags
+- Alert section: Pending tasks, low feed stock, health flags, critical pest alerts
 - Morning briefing from Maarifa (seasonal tips, urgent actions)
 - Real-time data from Room database via StateFlow
+- Uses DashboardView for optimized pre-joined queries
+
+**Implementation Details**:
+- DashboardViewModel uses DashboardViewDao for pre-joined KPI data
+- Separate StateFlows for herdSize, goatCount, sheepCount
+- Refresh mechanism with loading state management
 
 ### 2. Livestock Module
 
@@ -387,7 +493,7 @@ app/src/main/java/com/shambasmart/
 
 ### 3. Crops Module
 
-**Files**: `PlotRegistryScreen.kt`, `CropPlantingScreen.kt`, `HarvestScreen.kt`, `WeatherScreen.kt`, `PlotAnalyticsScreen.kt`, `CropsViewModel.kt`
+**Files**: `PlotRegistryScreen.kt`, `CropPlantingScreen.kt`, `HarvestScreen.kt`, `WeatherScreen.kt`, `PlotAnalyticsScreen.kt`, `CropsViewModel.kt`, `ScoutingCaptureScreen.kt`, `ScoutingCaptureViewModel.kt`
 
 **Features**:
 - **Plot Registry**: 16-acre farm plot management
@@ -395,6 +501,7 @@ app/src/main/java/com/shambasmart/
 - **Harvest Tracking**: Quantity, quality grading, pricing
 - **Weather Logging**: Rainfall, temperature, wind, events
 - **Analytics**: Yield trends, input costs, profitability
+- **Pest Scouting**: Camera-based pest detection with ONNX inference
 
 **Maarifa Integration**:
 - Crop status cards (growth stage, due inputs)
@@ -403,9 +510,17 @@ app/src/main/java/com/shambasmart/
 - Planting recommendations (spacing, seed rate, fertiliser schedule)
 - Silage quality assessment checklist
 
+**Pest Detection Flow**:
+1. Camera capture via CameraX
+2. GPS-based plot detection (nearest plot to coordinates)
+3. ONNX YOLOv8 inference for pest detection
+4. Severity classification (Low, Moderate, Critical)
+5. ScoutingReport entity creation with encrypted image
+6. Maarifa protocol surfacing for detected pest
+
 ### 4. Cheese Module
 
-**Files**: `MilkCollectionScreen.kt`, `CheeseProductionScreen.kt`, `CheeseInventoryScreen.kt`, `CheeseViewModel.kt`
+**Files**: `MilkCollectionScreen.kt`, `CheeseProductionScreen.kt`, `CheeseInventoryScreen.kt`, `CheeseScreen.kt`, `CheeseViewModel.kt`
 
 **Features**:
 - **Milk Collection**: Quality checks (smell, color, pH), acceptance/rejection
@@ -498,12 +613,20 @@ app/src/main/java/com/shambasmart/
 
 ### 11. Alerts Module
 
-**Files**: `AlertsScreen.kt`, `AlertsViewModel.kt`
+**Files**: `AlertsScreen.kt`, `AlertsViewModel.kt`, `PestAlertGenerator.kt`
 
 **Features**:
 - Centralized alert dashboard
 - Health alerts, feed low stock, task reminders
+- Critical pest detection alerts
 - Priority-based sorting
+- "Authorize Treatment" action for pest alerts
+
+**Pest Alert Generation**:
+- Monitors ScoutingReports for Critical severity
+- Generates dashboard notification with pest details and location
+- Links to Maarifa management protocol
+- Persists in Alert entity
 
 ### 12. Maintenance Module
 
@@ -520,7 +643,94 @@ app/src/main/java/com/shambasmart/
 
 **Features**:
 - Initial farm configuration wizard
-- First-time user onboarding
+- First-time user onboarding integration
+
+### 14. Onboarding Module
+
+**Files**: `OnboardingScreen.kt`, `OnboardingViewModel.kt`, `WelcomeScreen.kt`, `FeaturesScreen.kt`, `PermissionsScreen.kt`
+
+**Data Layer**: `OnboardingPreferences.kt` (DataStore wrapper)
+
+**DI**: `PreferencesModule.kt` (DataStore provider)
+
+**Features**:
+- First-launch onboarding flow (3 screens)
+- HorizontalPager with swipeable screens
+- Welcome screen with app introduction
+- Features showcase screen
+- Permissions request screen
+- Skip option at any time
+- Persisted completion state via DataStore
+- Conditional routing: Onboarding → Farm Setup (first launch) or Farm Setup directly (subsequent launches)
+
+**Implementation Details**:
+- MainActivity injects OnboardingPreferences
+- Collects isOnboardingCompleted as State<Boolean>
+- Passes to ShambaNavGraph for conditional routing
+- ShambaNavGraph.startDestination = if (isOnboardingCompleted) FarmSetup else Onboarding
+
+### 15. ML/Vision Module
+
+**Files**: `OnnxModelManager.kt`, `PestClassifier.kt`, `ModelManager.kt`, `vision/EnhancedCameraManager.kt`
+
+**Features**:
+- **ONNX Runtime Integration**: YOLOv8 pest detection model
+- **NPU Acceleration**: NNAPI delegate for Hexagon v73 NPU
+- **Multi-Stage Inference**: Detection + Severity Classification
+- **Pest Classes**: 8 East African pests (FAW, Stalk Borer, Aphids, Blight, Locusts, Leafminer, etc.)
+- **Model Management**: Lazy loading, versioning, checksum verification, remote updates
+
+**OnnxModelManager Details**:
+- Initializes OrtEnvironment with NNAPI flags
+- Loads pest_classifier.onnx from assets/models/
+- Input size: 640x640 (YOLOv8 standard)
+- Species-specific confidence thresholds (0.25-0.40)
+- NMS (Non-Maximum Suppression) for duplicate removal
+- IoU calculation for overlap detection
+
+**PestClassifier Details**:
+- Multi-stage inference pipeline
+- Image preprocessing (resize, normalize)
+- Stage 1: Detection with bounding box
+- Stage 2: Severity classification (Low, Moderate, Critical)
+- Leaf area percentage calculation
+- Pest density estimation
+
+### 16. Scouting Module
+
+**Files**: `ScoutingCaptureScreen.kt`, `ScoutingCaptureViewModel.kt`, `ScoutingReport.kt`, `ScoutingReportDao.kt`, `ScoutingRepository.kt`
+
+**Features**:
+- Camera capture for pest detection
+- GPS-based plot detection
+- ONNX inference execution
+- ScoutingReport entity creation
+- Encrypted image storage
+- Heatmap visualization on farm map
+
+**ScoutingCaptureViewModel Flow**:
+1. setCapturedImage(uri) → Load and display image
+2. detectPlot(gpsLat, gpsLng) → Find nearest plot
+3. runInference(bitmap) → Execute ONNX model
+4. saveReport() → Create ScoutingReport entity with revision fields
+
+### 17. Maps Module
+
+**Files**: `FarmMapScreen.kt`, `FarmMapViewModel.kt`, `MapMarkerType.kt`, `heatmap/PestHeatmapOverlay.kt`
+
+**Features**:
+- OSMDroid-based farm map
+- Custom markers for shelters, water points, plots
+- GPS boundary drawing
+- Pest heatmap overlay with severity colors
+- Time-based filtering (7 days, 30 days, all time)
+- Pest-type filtering dropdown
+
+**PestHeatmapOverlay Details**:
+- Color-coded circles based on severity (Green→Yellow→Orange→Red)
+- Radius scaling by severity score
+- Marker clustering for dense areas
+- Tap-to-view details popup
 
 ---
 
@@ -568,6 +778,7 @@ Maarifa is a fully offline agricultural knowledge engine embedded in Shamba Smar
 | KnowledgeIngestionPipeline | `ingestion/KnowledgeIngestionPipeline.kt` | Quality gates + conflict detection |
 | KnowledgeBootstrapper | `ingestion/KnowledgeBootstrapper.kt` | Initial knowledge base loading |
 | MaarifaViewModel | `MaarifaViewModel.kt` | Orchestrates full retrieval pipeline |
+| PestKnowledgeMapper | `retrieval/PestKnowledgeMapper.kt` | Links pest detections to management protocols |
 
 ### Retrieval Pipeline
 
@@ -597,6 +808,22 @@ Maarifa is a fully offline agricultural knowledge engine embedded in Shamba Smar
 - **Medicines**: Formulary with dosages, withdrawal periods, Tanzania availability
 - **Cheese**: Process guides, quality control, defect diagnosis, TFDA compliance
 - **Weather**: 30-year Korogwe climate data, seasonal calendars, risk indicators
+- **Pests**: 8 East African pests with Tanzania Ministry of Agriculture approved protocols
+
+### Pest Knowledge Base
+
+Located at: `assets/knowledge_base/pest_knowledge.json`
+
+| Pest | Crops Affected | Management Protocols |
+|------|---------------|---------------------|
+| Fall Armyworm (FAW) | Maize | Biological: Trichogramma wasps, Bt. Chemical: Emamectin benzoate |
+| Maize Stalk Borer | Maize | Cultural: Destroy crop residue. Chemical: Chlorantraniliprole |
+| Maize Streak Virus | Maize | Resistant varieties, leafhopper control |
+| Bean Fly | Beans | Seed treatment, systemic insecticides |
+| Aphids | Multiple | Ladybugs, neem oil, imidacloprid |
+| Blight | Multiple | Copper fungicides, resistant varieties |
+| Desert Locusts | All crops | Coordinated spraying, FAO protocols |
+| Leafminer | Tomatoes | Yellow sticky traps, abamectin |
 
 ### Symptom Checker
 
@@ -634,14 +861,15 @@ Import new documents to expand knowledge base:
 | GPSKalmanFilter | `presentation/gps/GPSKalmanFilter.kt` | GPS noise filtering |
 | LocationProvider | `presentation/gps/LocationProvider.kt` | GPS access |
 | PolygonCalculator | `presentation/gps/PolygonCalculator.kt` | Area calculations |
+| PestHeatmapOverlay | `map/heatmap/PestHeatmapOverlay.kt` | Pest heatmap visualization |
 
 ### Map Features
 
 - **OSMDroid**: OpenStreetMap-based, no API token required
-- **Offline Maps**: Pre-cached tile support
+- **Offline Maps**: Pre-cached tile support via MapTileCacheEntity
 - **Custom Markers**: Shelters, water points, plots, livestock areas
 - **Boundary Drawing**: GPS-based farm boundary capture
-- **Heatmap Overlay**: Crop health, soil moisture visualization
+- **Heatmap Overlay**: Pest severity visualization
 - **Area Calculation**: Polygon-based acreage computation
 
 ---
@@ -652,9 +880,9 @@ Import new documents to expand knowledge base:
 
 ```
 ┌─────────────┐     ┌──────────────┐     ┌─────────────┐
-│  Room DB    │ ←→  │ SyncWorker   │ ←→  │ Remote API  │
-│ (Source of  │     │ (WorkManager)│     │ (When       │
-│  Truth)     │     │              │     │  online)    │
+│  Room DB    │ ←→  │ SyncManager  │ ←→  │ Remote API  │
+│ (Source of  │     │ + SyncWorker │     │ (When       │
+│  Truth)     │     │ (WorkManager)│     │  online)    │
 └─────────────┘     └──────────────┘     └─────────────┘
 ```
 
@@ -662,17 +890,43 @@ Import new documents to expand knowledge base:
 
 | Setting | Value |
 |---------|-------|
-| **Strategy** | Offline-first |
+| **Strategy** | Offline-first, watermark-based delta sync |
 | **Sync Interval** | 15 minutes (when online) |
-| **Retry Policy** | Exponential backoff (max 3 retries) |
-| **Conflict Resolution** | Last-write-wins with audit trail |
-| **Delta Sync** | Using `last_synced_timestamp` |
+| **Retry Policy** | Exponential backoff (max 3 retries, 1s/2s/4s) |
+| **Conflict Resolution** | Last-write-wins via revision_id comparison |
+| **Delta Sync** | Only sync rows where last_updated > local_max_timestamp |
+| **Batch Size** | 100 rows per entity type |
+
+### SyncManager Implementation
+
+**Key Features**:
+- Watermark-based delta sync for all 28+ entity types
+- Per-entity-type watermarks stored in SyncStatus
+- Network availability check before sync
+- Sync progress tracking with error handling
+- Entity-specific getRowsModifiedAfter() queries in all DAOs
+
+**Sync Flow**:
+1. Check network availability
+2. Update syncInProgress = true
+3. For each entity type:
+   - Get lastSyncTimestamp from SyncStatus
+   - Query rows modified after timestamp
+   - Send to remote API (TODO)
+   - Update entity watermark to current time
+4. Update lastSyncTimestamp
+5. Update syncInProgress = false
+
+**Conflict Resolution**:
+- Uses revision_id (UUID) for concurrent edit detection
+- Last-writer-wins: remoteRevisionId > localRevisionId
+- Audit trail via last_modified_by field
 
 ### SyncWorker
 
 - **Annotation**: `@HiltWorker`
 - **Network Check**: `SyncManager` verifies connectivity before sync
-- **Entity Support**: All 22+ entity types
+- **Entity Support**: All 28+ entity types
 - **Status Tracking**: `SyncStatus` entity tracks per-entity sync state
 
 ---
@@ -682,24 +936,53 @@ Import new documents to expand knowledge base:
 ### Database Encryption
 
 - **SQLCipher**: 4.5.4 with AES-256 encryption
-- **Key Management**: Android Keystore integration
-- **Passphrase**: Derived from device-specific hardware ID
+- **Key Management**: Android Keystore integration via HardwareKeyManager
+- **Passphrase**: Random 256-bit key generated in Keystore, encrypted at rest
 
 ### Security Components
 
 | Component | File | Purpose |
 |-----------|------|---------|
+| KeystoreManager | `security/KeystoreManager.kt` | Key generation, storage, rotation, verification |
+| HardwareKeyManager | `security/HardwareKeyManager.kt` | Android KeyStore operations |
 | EncryptionHelper | `security/EncryptionHelper.kt` | AES encryption/decryption utilities |
-| KeystoreManager | `security/KeystoreManager.kt` | Android KeyStore operations |
+| BackupManager | `security/BackupManager.kt` | Encrypted backup creation and restoration |
+| BackupWorker | `security/BackupWorker.kt` | WorkManager worker for daily 2AM backups |
+| BackupScheduler | `security/BackupScheduler.kt` | WorkManager scheduling for backups |
+| BackupMetadata | `security/BackupMetadata.kt` | Backup file metadata tracking |
+
+### KeystoreManager Implementation
+
+**Key Features**:
+- Delegates to HardwareKeyManager for hardware-backed security
+- Generates random 256-bit passphrase using SecureRandom
+- Encrypts passphrase with hardware key before storage
+- Supports key rotation with verification
+- Stores rotation timestamp for audit
+
+**Key Operations**:
+- `getOrCreatePassphrase()`: Returns existing or generates new key
+- `rotateKey()`: Generates new passphrase, re-encrypts with hardware key
+- `verifyKey()`: Validates stored key can be decrypted correctly
+- `getKeyRotationTimestamp()`: Returns last rotation time
+
+### Backup System
+
+**Backup Features**:
+- Daily encrypted backups at 2AM via WorkManager
+- SD card storage with checksum verification
+- Backup metadata tracking (size, timestamp, checksum)
+- Clean old backups to manage storage
+- Restoration flow for data recovery
 
 ### Permissions
 
 - `INTERNET` — Weather API, sync
 - `ACCESS_FINE_LOCATION` — GPS boundary capture
 - `ACCESS_COARSE_LOCATION` — Approximate location
-- `CAMERA` — Computer vision tasks
+- `CAMERA` — Computer vision tasks, pest scouting
 - `RECORD_AUDIO` — Acoustic detection
-- `WRITE_EXTERNAL_STORAGE` — Data export
+- `WRITE_EXTERNAL_STORAGE` — Data export, backups
 - `READ_EXTERNAL_STORAGE` — Document import
 
 ---
@@ -711,17 +994,18 @@ Import new documents to expand knowledge base:
 ```kotlin
 android {
     namespace = "com.shambasmart"
-    compileSdk = 34
+    compileSdk = 35
     
     defaultConfig {
         applicationId = "com.shambasmart"
         minSdk = 29
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 1
         versionName = "1.0.0"
         
         buildConfigField("String", "WEATHER_API_BASE_URL", 
             "\"https://api.openweathermap.org/data/2.5/\"")
+        buildConfigField("String", "WEATHER_API_KEY", "\"your_api_key_here\"")
         buildConfigField("Double", "FARM_LATITUDE", "-5.15")
         buildConfigField("Double", "FARM_LONGITUDE", "38.48")
     }
@@ -761,6 +1045,8 @@ android {
 | UI Frame Rate | 144 Hz (stable) |
 | Offline Storage | < 500 MB |
 | Vector Embedding | 2-4 min per 100-page PDF |
+| Heatmap Rendering | < 100ms for 1000 markers |
+| Sync Performance | < 5s for 1000 delta rows |
 
 ---
 
@@ -840,6 +1126,20 @@ app/src/
 
 ---
 
+## Utility Scripts
+
+Located in root directory for code maintenance:
+
+| Script | Purpose |
+|--------|---------|
+| `fix_overlay.py` | Fixes PolygonDrawingOverlay call in FarmMapScreen.kt |
+| `fix_poly.py` | Fixes polygon drawing section in FarmMapScreen.kt |
+| `gen.py` | Code generation utility (stub) |
+| `write_file.py` | File writing utility for code generation |
+| `onnx_temp.py` | ONNX model temporary utilities |
+
+---
+
 ## Future Roadmap
 
 ### Phase 11: ML/AI Integration (Planned)
@@ -878,6 +1178,11 @@ app/src/
 | 2026-03-27 | Schema-free knowledge storage | Extensible without migrations |
 | 2026-03-27 | Triple retrieval (BM25 + vector + rules) | No single method trusted alone |
 | 2026-03-27 | Four-tier confidence model | Communicate reliability honestly |
+| 2026-03-27 | Watermark-based delta sync | Handle unreliable Tanga connectivity |
+| 2026-03-27 | Hardware-backed security | Leverage Android Keystore for key protection |
+| 2026-03-27 | Database views for dashboards | Maintain 144Hz UI performance |
+| 2026-03-27 | YOLOv8 for pest detection | Proven object detection architecture |
+| 2026-03-27 | NNAPI for NPU acceleration | Leverage Hexagon v73 on Xiaomi Pad 7 |
 
 ---
 
@@ -893,3 +1198,9 @@ app/src/
 - Maarifa never fabricates information outside its knowledge base
 - Drug dosage answers always include veterinarian consultation disclaimer
 - Notifiable disease alerts trigger TVLA contact guidance
+- All 28+ entities include revision_id, last_modified_by, last_updated fields
+- SyncManager implements watermark-based delta sync with retry/backoff
+- Pest detection uses species-specific confidence thresholds
+- Scouting reports store encrypted images locally
+- Heatmap uses OSMDroid overlays with severity-based coloring
+

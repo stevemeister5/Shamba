@@ -5,6 +5,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import com.shambasmart.data.local.dao.*
 import com.shambasmart.data.local.entity.SyncStatus
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.UUID
@@ -32,7 +33,7 @@ data class SyncResult(
  */
 @Singleton
 class SyncManager @Inject constructor(
-    private val context: Context,
+    @ApplicationContext private val context: Context,
     private val animalDao: AnimalDao,
     private val healthRecordDao: HealthRecordDao,
     private val reproductionDao: ReproductionDao,

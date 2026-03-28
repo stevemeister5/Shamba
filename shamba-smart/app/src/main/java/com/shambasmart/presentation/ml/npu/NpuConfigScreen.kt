@@ -18,6 +18,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.shambasmart.ml.DelegateConfig
+import com.shambasmart.ml.ModelInfo
+import com.shambasmart.ml.NpuCapabilities
+import com.shambasmart.ml.PerformanceMetrics
 import com.shambasmart.ml.QuantizationType
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -443,7 +447,6 @@ private fun QuantizationChip(
 ) {
     Box(
         modifier = Modifier
-            .weight(1f)
             .clip(RoundedCornerShape(8.dp))
             .background(
                 if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)

@@ -41,4 +41,8 @@ interface StoreDao {
 
     @Query("SELECT SUM(quantity * costPerUnit) FROM store_items WHERE costPerUnit IS NOT NULL")
     suspend fun getTotalStoreValue(): Double?
+
+    // SyncManager support
+    @Query("SELECT * FROM store_items WHERE updatedAt > :timestamp")
+    suspend fun getRowsModifiedAfter(timestamp: Long): List<StoreItem>
 }

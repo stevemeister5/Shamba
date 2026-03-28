@@ -1,8 +1,5 @@
 package com.shambasmart.presentation.calendar
 
-import com.shambasmart.maarifa.MaarifaViewModel
-import com.shambasmart.maarifa.ui.*
-
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -17,7 +14,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.shambasmart.data.local.entity.CalendarEvent
 import com.shambasmart.data.local.entity.Task
+import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -45,7 +45,7 @@ fun CalendarScreen(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
-                    val today = LocalDate.now()
+                    val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
                     val todayEvents = events.count { it.date == today }
                     val pendingTasks = tasks.count { it.status != "completed" }
                     CalendarStat("Events Today", "$todayEvents")
@@ -262,7 +262,7 @@ private fun AddEventDialog(
 ) {
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
-    var date by remember { mutableStateOf(LocalDate.now().toString()) }
+    var date by remember { mutableStateOf(Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()) }
     var type by remember { mutableStateOf("planting") }
 
     AlertDialog(
@@ -334,7 +334,7 @@ private fun AddTaskDialog(
 ) {
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
-    var dueDate by remember { mutableStateOf(LocalDate.now().toString()) }
+    var dueDate by remember { mutableStateOf(Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()) }
 
     AlertDialog(
         onDismissRequest = onDismiss,

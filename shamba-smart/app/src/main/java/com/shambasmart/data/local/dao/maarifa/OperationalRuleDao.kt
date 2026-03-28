@@ -60,7 +60,7 @@ interface OperationalRuleDao {
           AND (crop = :crop OR crop IS NULL)
           AND (location = :location OR location IS NULL)
     """)
-    suspend fun getPlantingRules(crop: String, location: String): List<OperationalRule>
+    suspend fun getPlantingRules(ruleType: String, crop: String, location: String): List<OperationalRule>
     
     // === SPECIFIC RULE LOOKUPS ===
     @Query("""

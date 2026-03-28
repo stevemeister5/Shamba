@@ -3,12 +3,15 @@ package com.shambasmart.presentation.setup
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -27,6 +30,11 @@ data class SetupStep(
 fun FarmSetupScreen(
     onNavigateBack: () -> Unit,
     onComplete: () -> Unit,
+    onNavigateToGPS: (Long, String) -> Unit,
+    onNavigateToInfrastructure: () -> Unit,
+    onNavigateToPlots: () -> Unit,
+    onNavigateToLivestock: () -> Unit,
+    onNavigateToCrops: () -> Unit,
     viewModel: FarmSetupViewModel = hiltViewModel()
 ) {
     val currentStep by viewModel.currentStep.collectAsState()
@@ -74,6 +82,50 @@ fun FarmSetupScreen(
                     containerColor = MaterialTheme.colorScheme.surface
                 )
             )
+        },
+        bottomBar = {
+            Surface(
+                tonalElevation = 3.dp,
+                shadowElevation = 8.dp
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .windowInsetsPadding(WindowInsets.navigationBars)
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    if (currentStep > 1) {
+                        OutlinedButton(
+                            onClick = { viewModel.previousStep() },
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Icon(Icons.Default.ArrowBack, contentDescription = null)
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text("Previous")
+                        }
+                        Spacer(modifier = Modifier.width(16.dp))
+                    }
+
+                    Button(
+                        onClick = {
+                            if (currentStep < setupSteps.size) {
+                                viewModel.nextStep()
+                            } else {
+                                onComplete()
+                            }
+                        },
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(if (currentStep < setupSteps.size) "Next" else "Complete Setup")
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Icon(
+                            if (currentStep < setupSteps.size) Icons.Default.ArrowForward else Icons.Default.Check,
+                            contentDescription = null
+                        )
+                    }
+                }
+            }
         }
     ) { padding ->
         Column(
@@ -92,66 +144,39 @@ fun FarmSetupScreen(
             )
 
             // Step content
-            when (currentStep) {
-                1 -> FarmProfileStep(
-                    farmName = farmName,
-                    farmLocation = farmLocation,
-                    totalAcres = totalAcres,
-                    onFarmNameChange = { viewModel.setFarmName(it) },
-                    onFarmLocationChange = { viewModel.setFarmLocation(it) },
-                    onTotalAcresChange = { viewModel.setTotalAcres(it) }
-                )
-                2 -> MapBoundariesStep(viewModel = viewModel)
-                3 -> PlanBuildingsStep(viewModel = viewModel)
-                4 -> SetupPlotsStep(viewModel = viewModel)
-                5 -> InductFlockStep(viewModel = viewModel)
-                6 -> PlantCropsStep(viewModel = viewModel)
-                7 -> SoilTestingStep(viewModel = viewModel)
-                8 -> ReviewStep(
-                    farmName = farmName,
-                    farmLocation = farmLocation,
-                    totalAcres = totalAcres,
-                    setupSteps = setupSteps,
-                    onComplete = onComplete
-                )
-            }
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            // Navigation buttons
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                if (currentStep > 1) {
-                    OutlinedButton(
-                        onClick = { viewModel.previousStep() },
-                        modifier = Modifier.weight(1f)
-                    ) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = null)
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Previous")
-                    }
-                    Spacer(modifier = Modifier.width(16.dp))
-                }
-
-                Button(
-                    onClick = {
-                        if (currentStep < setupSteps.size) {
-                            viewModel.nextStep()
-                        } else {
-                            onComplete()
-                        }
-                    },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(if (currentStep < setupSteps.size) "Next" else "Complete Setup")
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Icon(
-                        if (currentStep < setupSteps.size) Icons.Default.ArrowForward else Icons.Default.Check,
-                        contentDescription = null
+            Box(modifier = Modifier.weight(1f)) {
+                when (currentStep) {
+                    1 -> FarmProfileStep(
+                        farmName = farmName,
+                        farmLocation = farmLocation,
+                        totalAcres = totalAcres,
+                        onFarmNameChange = { viewModel.setFarmName(it) },
+                        onFarmLocationChange = { viewModel.setFarmLocation(it) },
+                        onTotalAcresChange = { viewModel.setTotalAcres(it) }
+                    )
+                    2 -> MapBoundariesStep(
+                        onNavigateToGPS = { onNavigateToGPS(0L, "Main Farm") }
+                    )
+                    3 -> PlanBuildingsStep(
+                        viewModel = viewModel,
+                        onNavigateToInfrastructure = onNavigateToInfrastructure
+                    )
+                    4 -> SetupPlotsStep(
+                        onNavigateToPlots = onNavigateToPlots
+                    )
+                    5 -> InductFlockStep(
+                        onNavigateToLivestock = onNavigateToLivestock
+                    )
+                    6 -> PlantCropsStep(
+                        onNavigateToCrops = onNavigateToCrops
+                    )
+                    7 -> SoilTestingStep(viewModel = viewModel)
+                    8 -> ReviewStep(
+                        farmName = farmName,
+                        farmLocation = farmLocation,
+                        totalAcres = totalAcres,
+                        setupSteps = setupSteps,
+                        onComplete = onComplete
                     )
                 }
             }
@@ -171,6 +196,7 @@ private fun FarmProfileStep(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
         Text(
@@ -247,10 +273,11 @@ private fun FarmProfileStep(
 }
 
 @Composable
-private fun MapBoundariesStep(viewModel: FarmSetupViewModel) {
+private fun MapBoundariesStep(onNavigateToGPS: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
         Text(
@@ -283,17 +310,17 @@ private fun MapBoundariesStep(viewModel: FarmSetupViewModel) {
                         tint = MaterialTheme.colorScheme.primary
                     )
                     Spacer(modifier = Modifier.height(16.dp))
-                    Text("AR Boundary Mapping")
+                    Text("GPS Boundary Mapping")
                     Text(
-                        "Use ARCore to mark boundaries",
+                        "Use high-precision GPS to mark boundaries",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                     Spacer(modifier = Modifier.height(16.dp))
-                    Button(onClick = { /* Start AR mapping */ }) {
-                        Icon(Icons.Default.Camera, contentDescription = null)
+                    Button(onClick = onNavigateToGPS) {
+                        Icon(Icons.Default.MyLocation, contentDescription = null)
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text("Start AR Mapping")
+                        Text("Start GPS Mapping")
                     }
                 }
             }
@@ -319,7 +346,10 @@ private fun MapBoundariesStep(viewModel: FarmSetupViewModel) {
 }
 
 @Composable
-private fun PlanBuildingsStep(viewModel: FarmSetupViewModel) {
+private fun PlanBuildingsStep(
+    viewModel: FarmSetupViewModel,
+    onNavigateToInfrastructure: () -> Unit
+) {
     var showAddDialog by remember { mutableStateOf(false) }
     val buildings by viewModel.plannedBuildings.collectAsState()
 
@@ -356,7 +386,8 @@ private fun PlanBuildingsStep(viewModel: FarmSetupViewModel) {
 
         if (buildings.isEmpty()) {
             Card(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                onClick = onNavigateToInfrastructure
             ) {
                 Column(
                     modifier = Modifier
@@ -373,14 +404,14 @@ private fun PlanBuildingsStep(viewModel: FarmSetupViewModel) {
                     Spacer(modifier = Modifier.height(16.dp))
                     Text("No buildings planned yet")
                     Text(
-                        "Tap + to add shelters, storage, etc.",
+                        "Tap to open Infrastructure Manager",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
         } else {
-            LazyColumn {
+            LazyColumn(modifier = Modifier.weight(1f)) {
                 items(buildings) { building ->
                     Card(
                         modifier = Modifier
@@ -416,6 +447,15 @@ private fun PlanBuildingsStep(viewModel: FarmSetupViewModel) {
                     }
                 }
             }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            OutlinedButton(
+                onClick = onNavigateToInfrastructure,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Manage in Infrastructure Hub")
+            }
         }
     }
 
@@ -431,10 +471,11 @@ private fun PlanBuildingsStep(viewModel: FarmSetupViewModel) {
 }
 
 @Composable
-private fun SetupPlotsStep(viewModel: FarmSetupViewModel) {
+private fun SetupPlotsStep(onNavigateToPlots: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
         Text(
@@ -468,21 +509,22 @@ private fun SetupPlotsStep(viewModel: FarmSetupViewModel) {
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = { /* Open plot editor */ },
+            onClick = onNavigateToPlots,
             modifier = Modifier.fillMaxWidth()
         ) {
             Icon(Icons.Default.Landscape, contentDescription = null)
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Open Plot Editor")
+            Text("Open Plot Manager")
         }
     }
 }
 
 @Composable
-private fun InductFlockStep(viewModel: FarmSetupViewModel) {
+private fun InductFlockStep(onNavigateToLivestock: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
         Text(
@@ -514,12 +556,12 @@ private fun InductFlockStep(viewModel: FarmSetupViewModel) {
                     QuickAddButton(
                         icon = Icons.Default.Pets,
                         label = "Add Goats",
-                        onClick = { /* Add goats */ }
+                        onClick = onNavigateToLivestock
                     )
                     QuickAddButton(
                         icon = Icons.Default.Pets,
                         label = "Add Sheep",
-                        onClick = { /* Add sheep */ }
+                        onClick = onNavigateToLivestock
                     )
                 }
             }
@@ -528,12 +570,12 @@ private fun InductFlockStep(viewModel: FarmSetupViewModel) {
         Spacer(modifier = Modifier.height(16.dp))
 
         OutlinedButton(
-            onClick = { /* Import from file */ },
+            onClick = onNavigateToLivestock,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Icon(Icons.Default.Upload, contentDescription = null)
+            Icon(Icons.Default.List, contentDescription = null)
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Import from Spreadsheet")
+            Text("Go to Livestock Hub")
         }
     }
 }
@@ -568,10 +610,11 @@ private fun QuickAddButton(
 }
 
 @Composable
-private fun PlantCropsStep(viewModel: FarmSetupViewModel) {
+private fun PlantCropsStep(onNavigateToCrops: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
         Text(
@@ -605,12 +648,12 @@ private fun PlantCropsStep(viewModel: FarmSetupViewModel) {
         Spacer(modifier = Modifier.height(16.dp))
 
         Button(
-            onClick = { /* Open crop planner */ },
+            onClick = onNavigateToCrops,
             modifier = Modifier.fillMaxWidth()
         ) {
             Icon(Icons.Default.Grass, contentDescription = null)
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Open Crop Planner")
+            Text("Open Crop Hub")
         }
     }
 }
@@ -620,6 +663,7 @@ private fun SoilTestingStep(viewModel: FarmSetupViewModel) {
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
         Text(
@@ -675,6 +719,7 @@ private fun ReviewStep(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(16.dp)
     ) {
         Text(
@@ -852,7 +897,7 @@ private fun getBuildingIcon(type: String): androidx.compose.ui.graphics.vector.I
         "Shelter" -> Icons.Default.Home
         "Storage" -> Icons.Default.Inventory
         "Water Point" -> Icons.Default.Water
-        "Cheese Room" -> Icons.Default.Cheese
+        "Cheese Room" -> Icons.Default.Kitchen
         "Compost Pit" -> Icons.Default.Compost
         "Fence" -> Icons.Default.Fence
         else -> Icons.Default.Business

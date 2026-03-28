@@ -13,7 +13,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.shambasmart.data.local.entity.WeatherLog
+import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -177,7 +180,7 @@ private fun AddWeatherDialog(
     onDismiss: () -> Unit,
     onAdd: (WeatherLog) -> Unit
 ) {
-    var date by remember { mutableStateOf(LocalDate.now().toString()) }
+    var date by remember { mutableStateOf(Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()) }
     var rainfallMm by remember { mutableStateOf("") }
     var maxTemp by remember { mutableStateOf("") }
     var minTemp by remember { mutableStateOf("") }

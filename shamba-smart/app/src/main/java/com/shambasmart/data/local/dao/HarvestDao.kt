@@ -29,4 +29,8 @@ interface HarvestDao {
 
     @Query("SELECT * FROM harvest_records WHERE isSynced = 0")
     suspend fun getUnsyncedHarvests(): List<HarvestRecord>
+
+    // SyncManager support
+    @Query("SELECT * FROM harvest_records WHERE last_updated > :timestamp")
+    suspend fun getRowsModifiedAfter(timestamp: Long): List<HarvestRecord>
 }

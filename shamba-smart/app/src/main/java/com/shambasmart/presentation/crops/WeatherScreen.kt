@@ -24,7 +24,7 @@ fun WeatherScreen(
     viewModel: CropsViewModel = hiltViewModel()
 ) {
     var showAddDialog by remember { mutableStateOf(false) }
-    var weatherLogs by remember { mutableStateOf<List<WeatherLog>>(emptyList()) }
+    val weatherLogs by viewModel.weatherLogs.collectAsStateWithLifecycle()
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Text(
@@ -99,7 +99,7 @@ fun WeatherScreen(
         AddWeatherDialog(
             onDismiss = { showAddDialog = false },
             onAdd = { log ->
-                // TODO: Save to database
+                viewModel.addWeatherLog(log)
                 showAddDialog = false
             }
         )

@@ -5,9 +5,11 @@ import androidx.lifecycle.viewModelScope
 import com.shambasmart.data.local.dao.CropDao
 import com.shambasmart.data.local.dao.HarvestDao
 import com.shambasmart.data.local.dao.PlotDao
+import com.shambasmart.data.local.dao.WeatherDao
 import com.shambasmart.data.local.entity.CropPlanting
 import com.shambasmart.data.local.entity.HarvestRecord
 import com.shambasmart.data.local.entity.Plot
+import com.shambasmart.data.local.entity.WeatherLog
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -17,7 +19,8 @@ import javax.inject.Inject
 class CropsViewModel @Inject constructor(
     private val plotDao: PlotDao,
     private val harvestDao: HarvestDao,
-    private val cropDao: CropDao
+    private val cropDao: CropDao,
+    private val weatherDao: WeatherDao
 ) : ViewModel() {
 
     val plots: StateFlow<List<Plot>> = plotDao.getAllPlots()
@@ -136,6 +139,28 @@ class CropsViewModel @Inject constructor(
     fun deleteHarvest(harvest: HarvestRecord) {
         viewModelScope.launch {
             harvestDao.delete(harvest)
+        }
+    }
+
+    // Weather methods
+    val weatherLogs: StateFlow<List<WeatherLog>> = weatherDao.getAllWeatherLogs()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    fun addWeatherLog(weatherLog: WeatherLog) {
+        viewModelScope.launch {
+            weatherDao.insert(weatherLog.copy(isSynced = false))
+        }
+    }
+
+    fun updateWeatherLog(weatherLog: WeatherLog) {
+        viewModelScope.launch {
+            weatherDao.update(weatherLog.copy(isSynced = false))
+        }
+    }
+
+    fun deleteWeatherLog(weatherLog: WeatherLog) {
+        viewModelScope.launch {
+            weatherDao.delete(weatherLog)
         }
     }
 }

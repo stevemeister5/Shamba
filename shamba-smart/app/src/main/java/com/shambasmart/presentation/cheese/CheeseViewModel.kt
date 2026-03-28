@@ -3,7 +3,9 @@ package com.shambasmart.presentation.cheese
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.shambasmart.data.local.dao.CheeseDao
+import com.shambasmart.data.local.dao.FinancialDao
 import com.shambasmart.data.local.entity.CheeseBatch
+import com.shambasmart.data.local.entity.Income
 import com.shambasmart.data.local.entity.MilkCollection
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
@@ -13,7 +15,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CheeseViewModel @Inject constructor(
-    private val cheeseDao: CheeseDao
+    private val cheeseDao: CheeseDao,
+    private val financialDao: FinancialDao
 ) : ViewModel() {
 
     val allCheeseBatches: StateFlow<List<CheeseBatch>> = cheeseDao.getAllCheeseBatches()
@@ -65,15 +68,14 @@ class CheeseViewModel @Inject constructor(
             
             // Create income record for the sale
             val totalSale = quantityKg * pricePerKg
-            val income = com.shambasmart.data.local.entity.Income(
+            val income = Income(
                 category = "cheese_sale",
                 amount = totalSale,
                 date = kotlinx.datetime.Clock.System.todayIn(kotlinx.datetime.TimeZone.currentSystemDefault()),
                 description = "Cheese sale: ${batch.batchId} - ${quantityKg}kg to $buyerName",
                 isSynced = false
             )
-            // Note: Income insertion would require FinancialDao injection
-            // For now, we just update the batch status
+            financialDao.insertIncome(income)
         }
     }
 }

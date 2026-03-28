@@ -29,8 +29,25 @@ fun SettingsScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val languages = listOf("English", "Kiswahili")
     val roles = listOf("Owner", "Farm Manager", "Worker")
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    // Show messages
+    LaunchedEffect(uiState.message, uiState.error) {
+        uiState.message?.let { message ->
+            snackbarHostState.showSnackbar(message)
+            viewModel.clearMessage()
+        }
+        uiState.error?.let { error ->
+            snackbarHostState.showSnackbar(error)
+            viewModel.clearMessage()
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize().background(SurfaceBase)) {
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -257,7 +274,7 @@ fun SettingsScreen(
                 icon = Icons.Outlined.CloudSync
             ) {
                 OutlinedButton(
-                    onClick = { /* TODO: Export data */ },
+                    onClick = { viewModel.exportData() },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.outlinedButtonColors(
                         contentColor = Neutral800
@@ -275,7 +292,7 @@ fun SettingsScreen(
                 }
                 Spacer(modifier = Modifier.height(12.dp))
                 Button(
-                    onClick = { /* TODO: Backup data */ },
+                    onClick = { viewModel.backupData() },
                     modifier = Modifier.fillMaxWidth(),
                     colors = ButtonDefaults.buttonColors(containerColor = Green500),
                     shape = RoundedCornerShape(10.dp)

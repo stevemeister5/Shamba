@@ -91,7 +91,7 @@ fun CheeseInventoryScreen(
                 selectedBatch = null
             },
             onSell = { quantity, price, buyer ->
-                // TODO: Process sale
+                viewModel.sellCheeseBatch(selectedBatch!!, quantity, price, buyer)
                 showSaleDialog = false
                 selectedBatch = null
             }

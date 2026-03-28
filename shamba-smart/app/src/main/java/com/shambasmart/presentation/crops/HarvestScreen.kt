@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.shambasmart.data.local.entity.CropPlanting
 import com.shambasmart.data.local.entity.HarvestRecord
 import com.shambasmart.data.local.entity.Plot
 import kotlinx.datetime.Clock
@@ -24,10 +25,19 @@ import kotlinx.datetime.todayIn
 fun HarvestScreen(
     viewModel: CropsViewModel = hiltViewModel()
 ) {
-    val plots by viewModel.allPlots.collectAsStateWithLifecycle()
-    var selectedPlot by remember { mutableStateOf<Plot?>(null) }
+    val cropPlantings by viewModel.allCropPlantings.collectAsStateWithLifecycle()
+    var selectedCropPlanting by remember { mutableStateOf<CropPlanting?>(null) }
     var showAddDialog by remember { mutableStateOf(false) }
-    var harvestRecords by remember { mutableStateOf<List<HarvestRecord>>(emptyList()) }
+    var dropdownExpanded by remember { mutableStateOf(false) }
+
+    // Get harvest records for selected crop planting
+    val harvestRecords by remember(selectedCropPlanting?.id) {
+        derivedStateOf {
+            selectedCropPlanting?.id?.let { cropPlantingId ->
+                viewModel.getHarvestRecordsByCropPlanting(cropPlantingId)
+            } ?: flowOf(emptyList())
+        }
+    }.collectAsStateWithLifecycle(emptyList())
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Text(
@@ -53,19 +63,33 @@ fun HarvestScreen(
         }
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Plot Selection
+        // Crop Planting Selection
         ExposedDropdownMenuBox(
-            expanded = false,
-            onExpandedChange = {}
+            expanded = dropdownExpanded,
+            onExpandedChange = { dropdownExpanded = it }
         ) {
             OutlinedTextField(
-                value = selectedPlot?.let { "${it.name} - ${it.sizeAcres} acres" } ?: "Select Plot",
+                value = selectedCropPlanting?.let { "${it.cropType} - ${it.variety ?: "No Variety"}" } ?: "Select Crop Planting",
                 onValueChange = { _ -> },
                 readOnly = true,
-                label = { Text("Plot") },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = false) },
+                label = { Text("Crop Planting") },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = dropdownExpanded) },
                 modifier = Modifier.fillMaxWidth().menuAnchor()
             )
+            ExposedDropdownMenu(
+                expanded = dropdownExpanded,
+                onDismissRequest = { dropdownExpanded = false }
+            ) {
+                cropPlantings.forEach { cropPlanting ->
+                    DropdownMenuItem(
+                        text = { Text("${cropPlanting.cropType} - ${cropPlanting.variety ?: "No Variety"}") },
+                        onClick = {
+                            selectedCropPlanting = cropPlanting
+                            dropdownExpanded = false
+                        }
+                    )
+                }
+            }
         }
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -116,9 +140,10 @@ fun HarvestScreen(
     // Add Harvest Dialog
     if (showAddDialog) {
         AddHarvestDialog(
+            cropPlantingId = selectedCropPlanting?.id ?: 0L,
             onDismiss = { showAddDialog = false },
             onAdd = { record ->
-                // TODO: Save to database
+                viewModel.addHarvest(record)
                 showAddDialog = false
             }
         )
@@ -179,6 +204,7 @@ private fun HarvestRecordCard(record: HarvestRecord) {
 
 @Composable
 private fun AddHarvestDialog(
+    cropPlantingId: Long,
     onDismiss: () -> Unit,
     onAdd: (HarvestRecord) -> Unit
 ) {
@@ -242,7 +268,7 @@ private fun AddHarvestDialog(
                 onClick = {
                     onAdd(
                         HarvestRecord(
-                            cropPlantingId = 0, // TODO: Get from selected crop
+                            cropPlantingId = cropPlantingId,
                             harvestDate = LocalDate.parse(harvestDate),
                             quantityKg = quantityKg.toDoubleOrNull() ?: 0.0,
                             qualityGrade = qualityGrade.ifBlank { null },

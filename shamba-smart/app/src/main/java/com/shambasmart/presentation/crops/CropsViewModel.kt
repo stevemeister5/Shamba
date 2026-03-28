@@ -117,9 +117,25 @@ class CropsViewModel @Inject constructor(
     }
 
     // Harvest methods
+    fun getHarvestRecordsByCropPlanting(cropPlantingId: Long): Flow<List<HarvestRecord>> {
+        return harvestDao.getHarvestsByCropPlantingId(cropPlantingId)
+    }
+
     fun addHarvest(harvest: HarvestRecord) {
         viewModelScope.launch {
-            harvestDao.insert(harvest)
+            harvestDao.insert(harvest.copy(isSynced = false))
+        }
+    }
+
+    fun updateHarvest(harvest: HarvestRecord) {
+        viewModelScope.launch {
+            harvestDao.update(harvest.copy(isSynced = false))
+        }
+    }
+
+    fun deleteHarvest(harvest: HarvestRecord) {
+        viewModelScope.launch {
+            harvestDao.delete(harvest)
         }
     }
 }

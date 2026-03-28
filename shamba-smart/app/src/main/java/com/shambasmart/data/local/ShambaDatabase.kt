@@ -52,13 +52,13 @@ import com.shambasmart.data.local.view.LivestockDashboardView
         MapTileCacheEntity::class,
         // Pest Scouting entities
         ScoutingReport::class,
-        // Database Views
+        // Dashboard KPI entities
         DashboardView::class,
         PlotAnalyticsView::class,
         LivestockDashboardView::class
     ],
-    version = 9,
-    exportSchema = true
+    version = 10,
+    exportSchema = false
 )
 @TypeConverters(Converters::class)
 abstract class ShambaDatabase : RoomDatabase() {
@@ -75,6 +75,7 @@ abstract class ShambaDatabase : RoomDatabase() {
     abstract fun feedDao(): FeedDao
     abstract fun storeDao(): StoreDao
     abstract fun financialDao(): FinancialDao
+    abstract fun loanDao(): LoanDao
     abstract fun workerDao(): WorkerDao
     abstract fun taskDao(): TaskDao
     abstract fun calendarDao(): CalendarDao

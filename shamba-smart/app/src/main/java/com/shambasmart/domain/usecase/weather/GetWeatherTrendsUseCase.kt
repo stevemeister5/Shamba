@@ -1,1 +1,19 @@
-package com.shambasmart.domain.usecase.weather`n`nimport com.shambasmart.data.local.entity.WeatherLog`nimport com.shambasmart.domain.repository.WeatherRepository`nimport kotlinx.coroutines.flow.Flow`nimport kotlinx.datetime.LocalDate`nimport javax.inject.Inject`n`nclass GetWeatherTrendsUseCase @Inject constructor(`n    private val weatherRepository: WeatherRepository`n) {`n    operator fun invoke(startDate: LocalDate, endDate: LocalDate): Flow<List<WeatherLog>> {`n        return weatherRepository.getWeatherLogsByDateRange(startDate, endDate)`n    }`n`n    fun getAll(): Flow<List<WeatherLog>> {`n        return weatherRepository.getAllWeatherLogs()`n    }`n}
+package com.shambasmart.domain.usecase.weather
+
+import com.shambasmart.data.local.entity.WeatherLog
+import com.shambasmart.domain.repository.WeatherRepository
+import kotlinx.coroutines.flow.Flow
+import kotlinx.datetime.LocalDate
+import javax.inject.Inject
+
+class GetWeatherTrendsUseCase @Inject constructor(
+    private val weatherRepository: WeatherRepository
+) {
+    operator fun invoke(startDate: LocalDate, endDate: LocalDate): Flow<List<WeatherLog>> {
+        return weatherRepository.getWeatherLogsByDateRange(startDate, endDate)
+    }
+
+    fun getAll(): Flow<List<WeatherLog>> {
+        return weatherRepository.getAllWeatherLogs()
+    }
+}

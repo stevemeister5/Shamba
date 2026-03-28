@@ -1,1 +1,35 @@
-package com.shambasmart.domain.usecase.feed`n`nimport com.shambasmart.data.local.entity.FeedInventory`nimport com.shambasmart.domain.repository.FeedRepository`nimport kotlinx.coroutines.flow.Flow`nimport javax.inject.Inject`n`nclass GetFeedInventoryUseCase @Inject constructor(`n    private val feedRepository: FeedRepository`n) {`n    operator fun invoke(): Flow<List<FeedInventory>> {`n        return feedRepository.getAllFeedInventory()`n    }`n`n    suspend fun getById(id: Long): Result<FeedInventory?> {`n        return try {`n            val feedInventory = feedRepository.getFeedInventoryById(id)`n            Result.success(feedInventory)`n        } catch (e: Exception) {`n            Result.failure(e)`n        }`n    }`n`n    fun getByType(feedType: String): Flow<List<FeedInventory>> {`n        return feedRepository.getFeedInventoryByType(feedType)`n    }`n`n    fun getLowStock(): Flow<List<FeedInventory>> {`n        return feedRepository.getLowStockFeed()`n    }`n`n    fun getTotalStockByType(): Flow<Map<String, Double>> {`n        return feedRepository.getTotalStockByType()`n    }`n}
+package com.shambasmart.domain.usecase.feed
+
+import com.shambasmart.data.local.entity.FeedInventory
+import com.shambasmart.domain.repository.FeedRepository
+import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
+
+class GetFeedInventoryUseCase @Inject constructor(
+    private val feedRepository: FeedRepository
+) {
+    operator fun invoke(): Flow<List<FeedInventory>> {
+        return feedRepository.getAllFeedInventory()
+    }
+
+    suspend fun getById(id: Long): Result<FeedInventory?> {
+        return try {
+            val feedInventory = feedRepository.getFeedInventoryById(id)
+            Result.success(feedInventory)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    fun getByType(feedType: String): Flow<List<FeedInventory>> {
+        return feedRepository.getFeedInventoryByType(feedType)
+    }
+
+    fun getLowStock(): Flow<List<FeedInventory>> {
+        return feedRepository.getLowStockFeed()
+    }
+
+    fun getTotalStockByType(): Flow<Map<String, Double>> {
+        return feedRepository.getTotalStockByType()
+    }
+}

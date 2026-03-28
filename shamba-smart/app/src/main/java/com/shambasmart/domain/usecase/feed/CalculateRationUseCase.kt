@@ -1,1 +1,36 @@
-package com.shambasmart.domain.usecase.feed`n`nimport com.shambasmart.data.local.entity.FeedInventory`nimport com.shambasmart.domain.repository.FeedRepository`nimport javax.inject.Inject`n`nclass CalculateRationUseCase @Inject constructor(`n    private val feedRepository: FeedRepository`n) {`n    suspend fun updateFeedStock(feedInventory: FeedInventory): Result<Unit> {`n        return try {`n            feedRepository.updateFeedInventory(feedInventory)`n            Result.success(Unit)`n        } catch (e: Exception) {`n            Result.failure(e)`n        }`n    }`n`n    suspend fun addFeedStock(feedInventory: FeedInventory): Result<Long> {`n        return try {`n            val id = feedRepository.insertFeedInventory(feedInventory)`n            Result.success(id)`n        } catch (e: Exception) {`n            Result.failure(e)`n        }`n    }`n`n    suspend fun deleteFeedStock(feedInventory: FeedInventory): Result<Unit> {`n        return try {`n            feedRepository.deleteFeedInventory(feedInventory)`n            Result.success(Unit)`n        } catch (e: Exception) {`n            Result.failure(e)`n        }`n    }`n}
+package com.shambasmart.domain.usecase.feed 
+ 
+import com.shambasmart.data.local.entity.FeedInventory 
+import com.shambasmart.domain.repository.FeedRepository 
+import javax.inject.Inject 
+ 
+class CalculateRationUseCase @Inject constructor( 
+    private val feedRepository: FeedRepository 
+) { 
+    suspend fun updateFeedStock(feedInventory: FeedInventory): Result<Unit> { 
+        return try { 
+            feedRepository.updateFeedInventory(feedInventory) 
+            Result.success(Unit) 
+        } catch (e: Exception) { 
+            Result.failure(e) 
+        } 
+    } 
+ 
+    suspend fun addFeedStock(feedInventory: FeedInventory): Result<Long> { 
+        return try { 
+            val id = feedRepository.insertFeedInventory(feedInventory) 
+            Result.success(id) 
+        } catch (e: Exception) { 
+            Result.failure(e) 
+        } 
+    } 
+ 
+    suspend fun deleteFeedStock(feedInventory: FeedInventory): Result<Unit> { 
+        return try { 
+            feedRepository.deleteFeedInventory(feedInventory) 
+            Result.success(Unit) 
+        } catch (e: Exception) { 
+            Result.failure(e) 
+        } 
+    } 
+}

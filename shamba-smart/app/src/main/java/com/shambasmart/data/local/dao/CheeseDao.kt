@@ -17,7 +17,7 @@ interface CheeseDao {
     @Query("SELECT * FROM cheese_batches WHERE id = :id")
     suspend fun getBatchById(id: Long): CheeseBatch?
 
-    @Query("SELECT SUM(currentTonnage) FROM cheese_batches WHERE status = 'available'")
+    @Query("SELECT SUM(yieldKg) FROM cheese_batches WHERE status = 'available'")
     suspend fun getTotalAvailableCheese(): Double?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

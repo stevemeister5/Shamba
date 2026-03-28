@@ -1,1 +1,15 @@
-package com.shambasmart.domain.repository`n`nimport com.shambasmart.data.local.entity.WeatherLog`nimport kotlinx.coroutines.flow.Flow`nimport kotlinx.datetime.LocalDate`n`ninterface WeatherRepository {`n    fun getAllWeatherLogs(): Flow<List<WeatherLog>>`n    suspend fun getWeatherLogById(id: Long): WeatherLog?`n    fun getWeatherLogsByDateRange(startDate: LocalDate, endDate: LocalDate): Flow<List<WeatherLog>>`n    fun getRecentWeatherLogs(limit: Int): Flow<List<WeatherLog>>`n    suspend fun insertWeatherLog(weatherLog: WeatherLog): Long`n    suspend fun updateWeatherLog(weatherLog: WeatherLog)`n    suspend fun deleteWeatherLog(weatherLog: WeatherLog)`n}
+package com.shambasmart.domain.repository
+
+import com.shambasmart.data.local.entity.WeatherLog
+import kotlinx.coroutines.flow.Flow
+import kotlinx.datetime.LocalDate
+
+interface WeatherRepository {
+    fun getAllWeatherLogs(): Flow<List<WeatherLog>>
+    suspend fun getWeatherLogById(id: Long): WeatherLog?
+    fun getWeatherLogsByDateRange(startDate: LocalDate, endDate: LocalDate): Flow<List<WeatherLog>>
+    fun getRecentWeatherLogs(limit: Int): Flow<List<WeatherLog>>
+    suspend fun insertWeatherLog(weatherLog: WeatherLog): Long
+    suspend fun updateWeatherLog(weatherLog: WeatherLog)
+    suspend fun deleteWeatherLog(weatherLog: WeatherLog)
+}

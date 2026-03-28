@@ -1,1 +1,31 @@
-package com.shambasmart.domain.usecase.cheese`n`nimport com.shambasmart.data.local.entity.CheeseBatch`nimport com.shambasmart.domain.repository.CheeseRepository`nimport kotlinx.coroutines.flow.Flow`nimport javax.inject.Inject`n`nclass GetCheeseInventoryUseCase @Inject constructor(`n    private val cheeseRepository: CheeseRepository`n) {`n    operator fun invoke(): Flow<List<CheeseBatch>> {`n        return cheeseRepository.getAllCheeseBatches()`n    }`n`n    suspend fun getById(id: Long): Result<CheeseBatch?> {`n        return try {`n            val batch = cheeseRepository.getCheeseBatchById(id)`n            Result.success(batch)`n        } catch (e: Exception) {`n            Result.failure(e)`n        }`n    }`n`n    fun getByStatus(status: String): Flow<List<CheeseBatch>> {`n        return cheeseRepository.getCheeseBatchesByStatus(status)`n    }`n`n    fun getTotalInventoryByCheeseType(): Flow<Map<String, Double>> {`n        return cheeseRepository.getTotalInventoryByCheeseType()`n    }`n}
+package com.shambasmart.domain.usecase.cheese
+
+import com.shambasmart.data.local.entity.CheeseBatch
+import com.shambasmart.domain.repository.CheeseRepository
+import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
+
+class GetCheeseInventoryUseCase @Inject constructor(
+    private val cheeseRepository: CheeseRepository
+) {
+    operator fun invoke(): Flow<List<CheeseBatch>> {
+        return cheeseRepository.getAllCheeseBatches()
+    }
+
+    suspend fun getById(id: Long): Result<CheeseBatch?> {
+        return try {
+            val batch = cheeseRepository.getCheeseBatchById(id)
+            Result.success(batch)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    fun getByStatus(status: String): Flow<List<CheeseBatch>> {
+        return cheeseRepository.getCheeseBatchesByStatus(status)
+    }
+
+    fun getTotalInventoryByCheeseType(): Flow<Map<String, Double>> {
+        return cheeseRepository.getTotalInventoryByCheeseType()
+    }
+}

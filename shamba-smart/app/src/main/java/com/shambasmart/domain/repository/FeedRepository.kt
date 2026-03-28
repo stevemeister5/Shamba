@@ -1,1 +1,16 @@
-package com.shambasmart.domain.repository`n`nimport com.shambasmart.data.local.entity.FeedInventory`nimport kotlinx.coroutines.flow.Flow`nimport kotlinx.datetime.LocalDate`n`ninterface FeedRepository {`n    fun getAllFeedInventory(): Flow<List<FeedInventory>>`n    suspend fun getFeedInventoryById(id: Long): FeedInventory?`n    fun getFeedInventoryByType(feedType: String): Flow<List<FeedInventory>>`n    fun getLowStockFeed(): Flow<List<FeedInventory>>`n    fun getTotalStockByType(): Flow<Map<String, Double>>`n    suspend fun insertFeedInventory(feedInventory: FeedInventory): Long`n    suspend fun updateFeedInventory(feedInventory: FeedInventory)`n    suspend fun deleteFeedInventory(feedInventory: FeedInventory)`n}
+package com.shambasmart.domain.repository
+
+import com.shambasmart.data.local.entity.FeedInventory
+import kotlinx.coroutines.flow.Flow
+import kotlinx.datetime.LocalDate
+
+interface FeedRepository {
+    fun getAllFeedInventory(): Flow<List<FeedInventory>>
+    suspend fun getFeedInventoryById(id: Long): FeedInventory?
+    fun getFeedInventoryByType(feedType: String): Flow<List<FeedInventory>>
+    fun getLowStockFeed(): Flow<List<FeedInventory>>
+    fun getTotalStockByType(): Flow<Map<String, Double>>
+    suspend fun insertFeedInventory(feedInventory: FeedInventory): Long
+    suspend fun updateFeedInventory(feedInventory: FeedInventory)
+    suspend fun deleteFeedInventory(feedInventory: FeedInventory)
+}

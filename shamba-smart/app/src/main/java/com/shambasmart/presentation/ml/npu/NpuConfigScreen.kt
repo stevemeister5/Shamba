@@ -18,6 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.shambasmart.ml.QuantizationType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -306,7 +307,7 @@ private fun DelegateSelectionCard(
             Slider(
                 value = config.numThreads.toFloat(),
                 onValueChange = { onConfigChange(config.copy(numThreads = it.toInt())) },
-                valueRange = 1f...4f,
+                valueRange = 1f..4f,
                 steps = 2,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -687,6 +688,3 @@ private fun BatteryImpactCard(metrics: PerformanceMetrics?) {
         }
     }
 }
-
-// Import for QuantizationType
-import com.shambasmart.ml.QuantizationType

@@ -1,1 +1,27 @@
-package com.shambasmart.domain.usecase.weather`n`nimport com.shambasmart.data.local.entity.WeatherLog`nimport com.shambasmart.domain.repository.WeatherRepository`nimport javax.inject.Inject`n`nclass LogWeatherEventUseCase @Inject constructor(`n    private val weatherRepository: WeatherRepository`n) {`n    suspend operator fun invoke(weatherLog: WeatherLog): Result<Long> {`n        return try {`n            val id = weatherRepository.insertWeatherLog(weatherLog)`n            Result.success(id)`n        } catch (e: Exception) {`n            Result.failure(e)`n        }`n    }`n`n    suspend fun delete(weatherLog: WeatherLog): Result<Unit> {`n        return try {`n            weatherRepository.deleteWeatherLog(weatherLog)`n            Result.success(Unit)`n        } catch (e: Exception) {`n            Result.failure(e)`n        }`n    }`n}
+package com.shambasmart.domain.usecase.weather
+
+import com.shambasmart.data.local.entity.WeatherLog
+import com.shambasmart.domain.repository.WeatherRepository
+import javax.inject.Inject
+
+class LogWeatherEventUseCase @Inject constructor(
+    private val weatherRepository: WeatherRepository
+) {
+    suspend operator fun invoke(weatherLog: WeatherLog): Result<Long> {
+        return try {
+            val id = weatherRepository.insertWeatherLog(weatherLog)
+            Result.success(id)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun delete(weatherLog: WeatherLog): Result<Unit> {
+        return try {
+            weatherRepository.deleteWeatherLog(weatherLog)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+}

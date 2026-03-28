@@ -1,1 +1,36 @@
-package com.shambasmart.domain.usecase.cheese`n`nimport com.shambasmart.data.local.entity.CheeseBatch`nimport com.shambasmart.domain.repository.CheeseRepository`nimport javax.inject.Inject`n`nclass AddCheeseBatchUseCase @Inject constructor(`n    private val cheeseRepository: CheeseRepository`n) {`n    suspend operator fun invoke(batch: CheeseBatch): Result<Long> {`n        return try {`n            val id = cheeseRepository.insertCheeseBatch(batch)`n            Result.success(id)`n        } catch (e: Exception) {`n            Result.failure(e)`n        }`n    }`n`n    suspend fun update(batch: CheeseBatch): Result<Unit> {`n        return try {`n            cheeseRepository.updateCheeseBatch(batch)`n            Result.success(Unit)`n        } catch (e: Exception) {`n            Result.failure(e)`n        }`n    }`n`n    suspend fun delete(batch: CheeseBatch): Result<Unit> {`n        return try {`n            cheeseRepository.deleteCheeseBatch(batch)`n            Result.success(Unit)`n        } catch (e: Exception) {`n            Result.failure(e)`n        }`n    }`n}
+﻿package com.shambasmart.domain.usecase.cheese
+
+import com.shambasmart.data.local.entity.CheeseBatch
+import com.shambasmart.domain.repository.CheeseRepository
+import javax.inject.Inject
+
+class AddCheeseBatchUseCase @Inject constructor(
+    private val cheeseRepository: CheeseRepository
+) {
+    suspend operator fun invoke(batch: CheeseBatch): Result<Long> {
+        return try {
+            val id = cheeseRepository.insertCheeseBatch(batch)
+            Result.success(id)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun update(batch: CheeseBatch): Result<Unit> {
+        return try {
+            cheeseRepository.updateCheeseBatch(batch)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    suspend fun delete(batch: CheeseBatch): Result<Unit> {
+        return try {
+            cheeseRepository.deleteCheeseBatch(batch)
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+}

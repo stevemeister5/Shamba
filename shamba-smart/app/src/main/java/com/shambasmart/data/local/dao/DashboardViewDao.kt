@@ -7,29 +7,39 @@ import com.shambasmart.data.local.view.LivestockDashboardView
 import kotlinx.coroutines.flow.Flow
 
 /**
- * DAO for database views - provides optimized read access to pre-joined data.
+ * DAO for dashboard KPI data - provides access to pre-computed dashboard metrics.
  */
 @Dao
 interface DashboardViewDao {
 
-    @Query("SELECT * FROM DashboardView WHERE id = 1")
+    @Query("SELECT * FROM dashboard_kpi WHERE id = 1")
     fun getDashboardData(): Flow<DashboardView?>
 
-    @Query("SELECT * FROM DashboardView WHERE id = 1")
+    @Query("SELECT * FROM dashboard_kpi WHERE id = 1")
     suspend fun getDashboardDataSync(): DashboardView?
 
-    @Query("SELECT * FROM PlotAnalyticsView ORDER BY plot_name ASC")
+    @Query("SELECT * FROM plot_analytics ORDER BY plotName ASC")
     fun getAllPlotAnalytics(): Flow<List<PlotAnalyticsView>>
 
-    @Query("SELECT * FROM PlotAnalyticsView WHERE plot_id = :plotId")
+    @Query("SELECT * FROM plot_analytics WHERE plotId = :plotId")
     suspend fun getPlotAnalyticsById(plotId: Long): PlotAnalyticsView?
 
-    @Query("SELECT * FROM PlotAnalyticsView WHERE active_pest_reports > 0 ORDER BY max_pest_severity DESC")
+    @Query("SELECT * FROM plot_analytics WHERE activePestReports > 0 ORDER BY maxPestSeverity DESC")
     fun getPlotsWithActivePests(): Flow<List<PlotAnalyticsView>>
 
-    @Query("SELECT * FROM LivestockDashboardView WHERE id = 1")
+    @Query("SELECT * FROM livestock_dashboard WHERE id = 1")
     fun getLivestockDashboardData(): Flow<LivestockDashboardView?>
 
-    @Query("SELECT * FROM LivestockDashboardView WHERE id = 1")
+    @Query("SELECT * FROM livestock_dashboard WHERE id = 1")
     suspend fun getLivestockDashboardDataSync(): LivestockDashboardView?
+    
+    // Insert/Update operations
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertOrUpdateDashboard(data: DashboardView)
+    
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertOrUpdatePlotAnalytics(data: PlotAnalyticsView)
+    
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertOrUpdateLivestockDashboard(data: LivestockDashboardView)
 }

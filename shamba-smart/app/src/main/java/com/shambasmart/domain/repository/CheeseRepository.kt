@@ -1,1 +1,16 @@
-package com.shambasmart.domain.repository`n`nimport com.shambasmart.data.local.entity.CheeseBatch`nimport kotlinx.coroutines.flow.Flow`nimport kotlinx.datetime.LocalDate`n`ninterface CheeseRepository {`n    fun getAllCheeseBatches(): Flow<List<CheeseBatch>>`n    suspend fun getCheeseBatchById(id: Long): CheeseBatch?`n    fun getCheeseBatchesByStatus(status: String): Flow<List<CheeseBatch>>`n    fun getCheeseBatchesByDateRange(startDate: LocalDate, endDate: LocalDate): Flow<List<CheeseBatch>>`n    fun getTotalInventoryByCheeseType(): Flow<Map<String, Double>>`n    suspend fun insertCheeseBatch(batch: CheeseBatch): Long`n    suspend fun updateCheeseBatch(batch: CheeseBatch)`n    suspend fun deleteCheeseBatch(batch: CheeseBatch)`n}
+package com.shambasmart.domain.repository
+
+import com.shambasmart.data.local.entity.CheeseBatch
+import kotlinx.coroutines.flow.Flow
+import kotlinx.datetime.LocalDate
+
+interface CheeseRepository {
+    fun getAllCheeseBatches(): Flow<List<CheeseBatch>>
+    suspend fun getCheeseBatchById(id: Long): CheeseBatch?
+    fun getCheeseBatchesByStatus(status: String): Flow<List<CheeseBatch>>
+    fun getCheeseBatchesByDateRange(startDate: LocalDate, endDate: LocalDate): Flow<List<CheeseBatch>>
+    fun getTotalInventoryByCheeseType(): Flow<Map<String, Double>>
+    suspend fun insertCheeseBatch(batch: CheeseBatch): Long
+    suspend fun updateCheeseBatch(batch: CheeseBatch)
+    suspend fun deleteCheeseBatch(batch: CheeseBatch)
+}

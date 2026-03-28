@@ -2,42 +2,72 @@ package com.shambasmart.presentation.settings
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.shambasmart.data.preferences.SettingsPreferences
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class SettingsViewModel @Inject constructor() : ViewModel() {
+class SettingsViewModel @Inject constructor(
+    private val settingsPreferences: SettingsPreferences
+) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
     val uiState: StateFlow<SettingsUiState> = _uiState.asStateFlow()
 
+    init {
+        // Load saved settings on initialization
+        viewModelScope.launch {
+            combine(
+                settingsPreferences.selectedLanguage,
+                settingsPreferences.userRole,
+                settingsPreferences.notificationsEnabled,
+                settingsPreferences.farmName,
+                settingsPreferences.farmLocation,
+                settingsPreferences.farmSize
+            ) { language, role, notifications, farmName, farmLocation, farmSize ->
+                SettingsUiState(
+                    selectedLanguage = language,
+                    userRole = role,
+                    notificationsEnabled = notifications,
+                    farmProfile = FarmProfile(
+                        name = farmName,
+                        location = farmLocation,
+                        size = farmSize
+                    )
+                )
+            }.collect { state ->
+                _uiState.value = state
+            }
+        }
+    }
+
     fun updateLanguage(language: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(selectedLanguage = language) }
-            // TODO: Save to DataStore
+            settingsPreferences.updateLanguage(language)
         }
     }
 
     fun updateNotificationsEnabled(enabled: Boolean) {
         viewModelScope.launch {
             _uiState.update { it.copy(notificationsEnabled = enabled) }
-            // TODO: Save to DataStore
+            settingsPreferences.updateNotificationsEnabled(enabled)
         }
     }
 
     fun updateUserRole(role: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(userRole = role) }
-            // TODO: Save to DataStore
+            settingsPreferences.updateUserRole(role)
         }
     }
 
     fun updateFarmProfile(profile: FarmProfile) {
         viewModelScope.launch {
             _uiState.update { it.copy(farmProfile = profile) }
-            // TODO: Save to DataStore
+            settingsPreferences.updateFarmProfile(profile.name, profile.location, profile.size)
         }
     }
 }

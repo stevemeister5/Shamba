@@ -1,13 +1,20 @@
 package com.shambasmart.presentation.ml.acoustic
 
 import android.app.Application
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.media.AudioManager
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
+import androidx.core.app.NotificationCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.shambasmart.MainActivity
+import com.shambasmart.R
 import com.shambasmart.data.local.dao.AudioEventDao
 import com.shambasmart.data.local.dao.HealthRecordDao
 import com.shambasmart.data.local.entity.AudioEvent
@@ -170,9 +177,55 @@ class AudioAlertViewModel @Inject constructor(
 
             audioEventDao.insert(audioEvent)
 
-            // TODO: Show notification or alert dialog
-            // This would typically trigger a system notification
+            // Show notification
+            showDistressNotification(result)
         }
+    }
+
+    private fun showDistressNotification(result: AudioClassificationResult) {
+        val context = getApplication<Application>()
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        
+        // Create notification channel for Android O+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                CHANNEL_ID,
+                "Acoustic Alerts",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = "Alerts for livestock distress sounds"
+                enableVibration(true)
+            }
+            notificationManager.createNotificationChannel(channel)
+        }
+
+        // Create intent to open app
+        val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val pendingIntent = PendingIntent.getActivity(
+            context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        // Format sound class for display
+        val soundClassDisplay = result.soundClass.split("_").joinToString(" ") { word ->
+            word.replaceFirstChar { it.uppercase() }
+        }
+
+        // Build notification
+        val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+            .setSmallIcon(R.drawable.ic_notification) // Assuming notification icon exists
+            .setContentTitle("⚠️ Livestock Distress Detected")
+            .setContentText("$soundClassDisplay (${(result.confidence * 100).toInt()}% confidence)")
+            .setStyle(NotificationCompat.BigTextStyle()
+                .bigText("Sound: $soundClassDisplay\nConfidence: ${(result.confidence * 100).toInt()}%\nTime: ${java.text.SimpleDateFormat("HH:mm:ss", java.util.Locale.getDefault()).format(java.util.Date(result.timestamp))}"))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .setVibrate(longArrayOf(0, 500, 200, 500))
+            .build()
+
+        notificationManager.notify(NOTIFICATION_ID, notification)
     }
 
     private fun vibrateDevice() {
@@ -236,5 +289,10 @@ class AudioAlertViewModel @Inject constructor(
     override fun onCleared() {
         super.onCleared()
         soundClassifier.release()
+    }
+
+    companion object {
+        private const val CHANNEL_ID = "acoustic_alerts"
+        private const val NOTIFICATION_ID = 1001
     }
 }

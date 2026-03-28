@@ -35,6 +35,11 @@ fun LivestockScreen(
     val herdSize by viewModel.herdSize.collectAsStateWithLifecycle()
     val goatCount by viewModel.goatCount.collectAsStateWithLifecycle()
     val sheepCount by viewModel.sheepCount.collectAsStateWithLifecycle()
+    val cattleCount by viewModel.cattleCount.collectAsStateWithLifecycle()
+    val chickenLayerCount by viewModel.chickenLayerCount.collectAsStateWithLifecycle()
+    val chickenBroilerCount by viewModel.chickenBroilerCount.collectAsStateWithLifecycle()
+    val pigCount by viewModel.pigCount.collectAsStateWithLifecycle()
+    val duckCount by viewModel.duckCount.collectAsStateWithLifecycle()
     var showAddDialog by remember { mutableStateOf(false) }
     var selectedAnimal by remember { mutableStateOf<Animal?>(null) }
     var searchQuery by remember { mutableStateOf("") }
@@ -55,6 +60,11 @@ fun LivestockScreen(
                     herdSize = herdSize,
                     goatCount = goatCount,
                     sheepCount = sheepCount,
+                    cattleCount = cattleCount,
+                    chickenLayerCount = chickenLayerCount,
+                    chickenBroilerCount = chickenBroilerCount,
+                    pigCount = pigCount,
+                    duckCount = duckCount,
                     onAddClick = { showAddDialog = true }
                 )
                 
@@ -118,6 +128,11 @@ private fun LivestockHeader(
     herdSize: Int,
     goatCount: Int,
     sheepCount: Int,
+    cattleCount: Int,
+    chickenLayerCount: Int,
+    chickenBroilerCount: Int,
+    pigCount: Int,
+    duckCount: Int,
     onAddClick: () -> Unit
 ) {
     Row(
@@ -132,7 +147,7 @@ private fun LivestockHeader(
                 color = Neutral950
             )
             Text(
-                text = "Herd: $herdSize total | Goats: $goatCount | Sheep: $sheepCount",
+                text = "Total: $herdSize | Goats: $goatCount | Sheep: $sheepCount | Cattle: $cattleCount | Layers: $chickenLayerCount | Broilers: $chickenBroilerCount | Pigs: $pigCount | Ducks: $duckCount",
                 style = MaterialTheme.typography.bodyMedium,
                 color = Neutral600
             )

@@ -38,7 +38,22 @@ class LivestockViewModel @Inject constructor(
     val goatCount: StateFlow<Int> = animalRepository.getCountBySpecies("goat")
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
-    val sheepCount: StateFlow<Int> = animalRepository.getCountBySpecies("sheep")
+    val sheepCount: StateFlow<Int> = animalRepository.getCountBySpecies("Sheep")
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    val cattleCount: StateFlow<Int> = animalRepository.getCountBySpecies("Cattle")
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    val chickenLayerCount: StateFlow<Int> = animalRepository.getCountBySpecies("Chicken (Layer)")
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    val chickenBroilerCount: StateFlow<Int> = animalRepository.getCountBySpecies("Chicken (Broiler)")
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    val pigCount: StateFlow<Int> = animalRepository.getCountBySpecies("Pig")
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    val duckCount: StateFlow<Int> = animalRepository.getCountBySpecies("Duck")
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
     // Milk Production tracking

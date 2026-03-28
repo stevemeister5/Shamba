@@ -2,9 +2,11 @@ package com.shambasmart.presentation.livestock
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.shambasmart.data.local.dao.MilkProductionDao
 import com.shambasmart.data.local.dao.ReproductionDao
 import com.shambasmart.data.local.entity.Animal
 import com.shambasmart.data.local.entity.HealthRecord
+import com.shambasmart.data.local.entity.MilkProduction
 import com.shambasmart.data.local.entity.ReproductionRecord
 import com.shambasmart.domain.repository.AnimalRepository
 import com.shambasmart.domain.repository.HealthRecordRepository
@@ -17,7 +19,8 @@ import javax.inject.Inject
 class LivestockViewModel @Inject constructor(
     private val animalRepository: AnimalRepository,
     private val healthRecordRepository: HealthRecordRepository,
-    private val reproductionDao: ReproductionDao
+    private val reproductionDao: ReproductionDao,
+    private val milkProductionDao: MilkProductionDao
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LivestockUiState())
@@ -35,9 +38,12 @@ class LivestockViewModel @Inject constructor(
     val sheepCount: StateFlow<Int> = animalRepository.getCountBySpecies("sheep")
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
-    // TODO: Implement milk production tracking with repository
-    val todayMilkYield: StateFlow<Double?> = flow<Double?> { emit(0.0) }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0.0)
+    // Milk Production tracking
+    val todayMilkYield: StateFlow<Double?> = flow {
+        emit(milkProductionDao.getTotalYieldByDate(
+            kotlinx.datetime.Clock.System.todayIn(kotlinx.datetime.TimeZone.currentSystemDefault())
+        ))
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0.0)
 
     fun addAnimal(animal: Animal) {
         viewModelScope.launch {
@@ -166,6 +172,47 @@ class LivestockViewModel @Inject constructor(
                 _uiState.update { it.copy(isLoading = true) }
                 reproductionDao.delete(record)
                 _uiState.update { it.copy(isLoading = false, message = "Reproduction record deleted successfully") }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
+            }
+        }
+    }
+
+    // Milk Production methods
+    fun getMilkRecordsByAnimal(animalId: Long): Flow<List<MilkProduction>> {
+        return milkProductionDao.getRecordsByAnimalId(animalId)
+    }
+
+    fun addMilkRecord(record: MilkProduction) {
+        viewModelScope.launch {
+            try {
+                _uiState.update { it.copy(isLoading = true) }
+                milkProductionDao.insert(record.copy(isSynced = false))
+                _uiState.update { it.copy(isLoading = false, message = "Milk record added successfully") }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
+            }
+        }
+    }
+
+    fun updateMilkRecord(record: MilkProduction) {
+        viewModelScope.launch {
+            try {
+                _uiState.update { it.copy(isLoading = true) }
+                milkProductionDao.update(record.copy(isSynced = false))
+                _uiState.update { it.copy(isLoading = false, message = "Milk record updated successfully") }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
+            }
+        }
+    }
+
+    fun deleteMilkRecord(record: MilkProduction) {
+        viewModelScope.launch {
+            try {
+                _uiState.update { it.copy(isLoading = true) }
+                milkProductionDao.delete(record)
+                _uiState.update { it.copy(isLoading = false, message = "Milk record deleted successfully") }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.message) }
             }

@@ -28,7 +28,16 @@ fun MilkProductionScreen(
     val todayMilkYield by viewModel.todayMilkYield.collectAsStateWithLifecycle()
     var selectedDoe by remember { mutableStateOf<Animal?>(null) }
     var showAddDialog by remember { mutableStateOf(false) }
-    var milkRecords by remember { mutableStateOf<List<MilkProduction>>(emptyList()) }
+    var dropdownExpanded by remember { mutableStateOf(false) }
+
+    // Get milk records for selected doe
+    val milkRecords by remember(selectedDoe?.id) {
+        derivedStateOf {
+            selectedDoe?.id?.let { doeId ->
+                viewModel.getMilkRecordsByAnimal(doeId)
+            } ?: flowOf(emptyList())
+        }
+    }.collectAsStateWithLifecycle(emptyList())
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Text(
@@ -55,17 +64,31 @@ fun MilkProductionScreen(
 
         // Doe Selection
         ExposedDropdownMenuBox(
-            expanded = false,
-            onExpandedChange = {}
+            expanded = dropdownExpanded,
+            onExpandedChange = { dropdownExpanded = it }
         ) {
             OutlinedTextField(
                 value = selectedDoe?.let { "Doe: ${it.tagId ?: "No Tag"} - ${it.species}" } ?: "Select Doe (Female Goat)",
                 onValueChange = { _ -> },
                 readOnly = true,
                 label = { Text("Doe (Female Goat)") },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = false) },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = dropdownExpanded) },
                 modifier = Modifier.fillMaxWidth().menuAnchor()
             )
+            ExposedDropdownMenu(
+                expanded = dropdownExpanded,
+                onDismissRequest = { dropdownExpanded = false }
+            ) {
+                animals.filter { it.sex == "female" && it.species == "goat" }.forEach { animal ->
+                    DropdownMenuItem(
+                        text = { Text("${animal.tagId ?: "No Tag"} - ${animal.species}") },
+                        onClick = {
+                            selectedDoe = animal
+                            dropdownExpanded = false
+                        }
+                    )
+                }
+            }
         }
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -116,9 +139,10 @@ fun MilkProductionScreen(
     // Add Milk Production Dialog
     if (showAddDialog) {
         AddMilkProductionDialog(
+            animalId = selectedDoe?.id ?: 0L,
             onDismiss = { showAddDialog = false },
             onAdd = { record ->
-                // TODO: Save to database
+                viewModel.addMilkRecord(record)
                 showAddDialog = false
             }
         )
@@ -192,6 +216,7 @@ private fun MilkYieldItem(label: String, value: String) {
 
 @Composable
 private fun AddMilkProductionDialog(
+    animalId: Long,
     onDismiss: () -> Unit,
     onAdd: (MilkProduction) -> Unit
 ) {
@@ -243,7 +268,7 @@ private fun AddMilkProductionDialog(
                     val evening = eveningYield.toDoubleOrNull() ?: 0.0
                     onAdd(
                         MilkProduction(
-                            animalId = 0, // TODO: Get from selected doe
+                            animalId = animalId,
                             date = LocalDate.parse(date),
                             morningYield = if (morning > 0) morning else null,
                             eveningYield = if (evening > 0) evening else null,

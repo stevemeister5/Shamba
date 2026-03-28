@@ -67,6 +67,7 @@ abstract class ShambaDatabase : RoomDatabase() {
     abstract fun healthRecordDao(): HealthRecordDao
     abstract fun reproductionDao(): ReproductionDao
     abstract fun milkProductionDao(): MilkProductionDao
+    abstract fun weightDao(): WeightDao
     abstract fun plotDao(): PlotDao
     abstract fun cropDao(): CropDao
     abstract fun harvestDao(): HarvestDao

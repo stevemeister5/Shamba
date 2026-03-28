@@ -4,10 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.shambasmart.data.local.dao.MilkProductionDao
 import com.shambasmart.data.local.dao.ReproductionDao
+import com.shambasmart.data.local.dao.WeightDao
 import com.shambasmart.data.local.entity.Animal
 import com.shambasmart.data.local.entity.HealthRecord
 import com.shambasmart.data.local.entity.MilkProduction
 import com.shambasmart.data.local.entity.ReproductionRecord
+import com.shambasmart.data.local.entity.WeightEntry
 import com.shambasmart.domain.repository.AnimalRepository
 import com.shambasmart.domain.repository.HealthRecordRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,7 +22,8 @@ class LivestockViewModel @Inject constructor(
     private val animalRepository: AnimalRepository,
     private val healthRecordRepository: HealthRecordRepository,
     private val reproductionDao: ReproductionDao,
-    private val milkProductionDao: MilkProductionDao
+    private val milkProductionDao: MilkProductionDao,
+    private val weightDao: WeightDao
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LivestockUiState())
@@ -213,6 +216,47 @@ class LivestockViewModel @Inject constructor(
                 _uiState.update { it.copy(isLoading = true) }
                 milkProductionDao.delete(record)
                 _uiState.update { it.copy(isLoading = false, message = "Milk record deleted successfully") }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
+            }
+        }
+    }
+
+    // Weight Entry methods
+    fun getWeightEntriesByAnimal(animalId: Long): Flow<List<WeightEntry>> {
+        return weightDao.getWeightEntriesByAnimalId(animalId)
+    }
+
+    fun addWeightEntry(entry: WeightEntry) {
+        viewModelScope.launch {
+            try {
+                _uiState.update { it.copy(isLoading = true) }
+                weightDao.insert(entry.copy(isSynced = false))
+                _uiState.update { it.copy(isLoading = false, message = "Weight entry added successfully") }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
+            }
+        }
+    }
+
+    fun updateWeightEntry(entry: WeightEntry) {
+        viewModelScope.launch {
+            try {
+                _uiState.update { it.copy(isLoading = true) }
+                weightDao.update(entry.copy(isSynced = false))
+                _uiState.update { it.copy(isLoading = false, message = "Weight entry updated successfully") }
+            } catch (e: Exception) {
+                _uiState.update { it.copy(isLoading = false, error = e.message) }
+            }
+        }
+    }
+
+    fun deleteWeightEntry(entry: WeightEntry) {
+        viewModelScope.launch {
+            try {
+                _uiState.update { it.copy(isLoading = true) }
+                weightDao.delete(entry)
+                _uiState.update { it.copy(isLoading = false, message = "Weight entry deleted successfully") }
             } catch (e: Exception) {
                 _uiState.update { it.copy(isLoading = false, error = e.message) }
             }

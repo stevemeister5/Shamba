@@ -27,7 +27,16 @@ fun GrowthTrackingScreen(
     val animals by viewModel.allAnimals.collectAsStateWithLifecycle()
     var selectedAnimal by remember { mutableStateOf<Animal?>(null) }
     var showAddDialog by remember { mutableStateOf(false) }
-    var weightRecords by remember { mutableStateOf<List<WeightEntry>>(emptyList()) }
+    var dropdownExpanded by remember { mutableStateOf(false) }
+
+    // Get weight entries for selected animal
+    val weightRecords by remember(selectedAnimal?.id) {
+        derivedStateOf {
+            selectedAnimal?.id?.let { animalId ->
+                viewModel.getWeightEntriesByAnimal(animalId)
+            } ?: flowOf(emptyList())
+        }
+    }.collectAsStateWithLifecycle(emptyList())
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Text(
@@ -38,17 +47,31 @@ fun GrowthTrackingScreen(
 
         // Animal Selection
         ExposedDropdownMenuBox(
-            expanded = false,
-            onExpandedChange = {}
+            expanded = dropdownExpanded,
+            onExpandedChange = { dropdownExpanded = it }
         ) {
             OutlinedTextField(
                 value = selectedAnimal?.let { "${it.tagId ?: "No Tag"} - ${it.species}" } ?: "Select Animal",
                 onValueChange = { _ -> },
                 readOnly = true,
                 label = { Text("Animal") },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = false) },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = dropdownExpanded) },
                 modifier = Modifier.fillMaxWidth().menuAnchor()
             )
+            ExposedDropdownMenu(
+                expanded = dropdownExpanded,
+                onDismissRequest = { dropdownExpanded = false }
+            ) {
+                animals.forEach { animal ->
+                    DropdownMenuItem(
+                        text = { Text("${animal.tagId ?: "No Tag"} - ${animal.species}") },
+                        onClick = {
+                            selectedAnimal = animal
+                            dropdownExpanded = false
+                        }
+                    )
+                }
+            }
         }
         Spacer(modifier = Modifier.height(16.dp))
 
@@ -124,9 +147,10 @@ fun GrowthTrackingScreen(
     // Add Weight Entry Dialog
     if (showAddDialog) {
         AddWeightEntryDialog(
+            animalId = selectedAnimal?.id ?: 0L,
             onDismiss = { showAddDialog = false },
             onAdd = { entry ->
-                // TODO: Save to database
+                viewModel.addWeightEntry(entry)
                 showAddDialog = false
             }
         )
@@ -177,6 +201,7 @@ private fun WeightEntryCard(record: WeightEntry) {
 
 @Composable
 private fun AddWeightEntryDialog(
+    animalId: Long,
     onDismiss: () -> Unit,
     onAdd: (WeightEntry) -> Unit
 ) {
@@ -216,7 +241,7 @@ private fun AddWeightEntryDialog(
                 onClick = {
                     onAdd(
                         WeightEntry(
-                            animalId = 0, // TODO: Get from selected animal
+                            animalId = animalId,
                             date = LocalDate.parse(date),
                             weight = weight.toDoubleOrNull() ?: 0.0,
                             notes = notes.ifBlank { null }

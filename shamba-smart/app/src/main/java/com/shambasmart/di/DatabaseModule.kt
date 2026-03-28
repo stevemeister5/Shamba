@@ -68,6 +68,9 @@ object DatabaseModule {
     fun provideMilkProductionDao(database: ShambaDatabase): MilkProductionDao = database.milkProductionDao()
 
     @Provides
+    fun provideWeightDao(database: ShambaDatabase): WeightDao = database.weightDao()
+
+    @Provides
     fun providePlotDao(database: ShambaDatabase): PlotDao = database.plotDao()
 
     @Provides

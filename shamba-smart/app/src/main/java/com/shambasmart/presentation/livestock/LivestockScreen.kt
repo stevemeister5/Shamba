@@ -5,6 +5,7 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -22,6 +23,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.shambasmart.data.local.entity.Animal
+import com.shambasmart.data.local.entity.LivestockType
 import com.shambasmart.presentation.common.theme.*
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -213,14 +215,38 @@ private fun FilterBar(
             )
             
             // Species Filter
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                listOf("All", "goat", "sheep").forEach { species ->
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                item {
+                    FilterChip(
+                        selected = selectedSpecies == "All",
+                        onClick = { onSpeciesChange("All") },
+                        label = {
+                            Text(
+                                text = "All",
+                                style = MaterialTheme.typography.labelSmall
+                            )
+                        },
+                        colors = FilterChipDefaults.filterChipColors(
+                            containerColor = SurfaceSunken,
+                            selectedContainerColor = Green800.copy(alpha = 0.3f),
+                            labelColor = Neutral800,
+                            selectedLabelColor = Green300
+                        ),
+                        border = FilterChipDefaults.filterChipBorder(
+                            borderColor = Neutral200,
+                            selectedBorderColor = Green700,
+                            enabled = true,
+                            selected = selectedSpecies == "All"
+                        )
+                    )
+                }
+                items(LivestockType.getAllSpecies()) { species ->
                     FilterChip(
                         selected = selectedSpecies == species,
                         onClick = { onSpeciesChange(species) },
                         label = {
                             Text(
-                                text = species.replaceFirstChar { it.uppercase() },
+                                text = species,
                                 style = MaterialTheme.typography.labelSmall
                             )
                         },
@@ -770,16 +796,20 @@ private fun AddAnimalDialog(
                     shape = RoundedCornerShape(10.dp)
                 )
                 
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
+                // Species Selection
+                Text(
+                    text = "Species",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Neutral600
+                )
+                LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    listOf("goat", "sheep").forEach { s ->
+                    items(LivestockType.getAllSpecies()) { s ->
                         FilterChip(
                             selected = species == s,
                             onClick = { species = s },
-                            label = { Text(s.replaceFirstChar { it.uppercase() }) },
-                            modifier = Modifier.weight(1f),
+                            label = { Text(s) },
                             colors = FilterChipDefaults.filterChipColors(
                                 selectedContainerColor = Green800.copy(alpha = 0.3f),
                                 selectedLabelColor = Green300

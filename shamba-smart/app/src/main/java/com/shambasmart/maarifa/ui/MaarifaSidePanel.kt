@@ -190,7 +190,7 @@ private fun AskTabContent(
             OutlinedTextField(
                 value = queryText,
                 onValueChange = { queryText = it },
-                placeholder = { Text("Ask Maarifa anything...") },
+                placeholder = { Text("Ask about your farm...") },
                 modifier = Modifier.weight(1f),
                 singleLine = true,
                 shape = RoundedCornerShape(24.dp)
@@ -320,7 +320,7 @@ private fun BrowseTabContent(
                 if (it.length >= 2) viewModel.browseSearch(it)
                 else viewModel.clearBrowseSearch()
             },
-            placeholder = { Text("Search knowledge base...") },
+            placeholder = { Text("Search topics...") },
             leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
             modifier = Modifier
                 .fillMaxWidth()

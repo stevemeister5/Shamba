@@ -216,7 +216,7 @@ private fun FarmProfileStep(
             value = farmName,
             onValueChange = onFarmNameChange,
             label = { Text("Farm Name") },
-            placeholder = { Text("e.g., Shamba Smart Farm") },
+            placeholder = { Text("Enter your farm name") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
         )
@@ -226,7 +226,7 @@ private fun FarmProfileStep(
             value = farmLocation,
             onValueChange = onFarmLocationChange,
             label = { Text("Location") },
-            placeholder = { Text("e.g., Korogwe, Tanga") },
+            placeholder = { Text("Enter your farm location") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
         )
@@ -236,7 +236,7 @@ private fun FarmProfileStep(
             value = totalAcres,
             onValueChange = onTotalAcresChange,
             label = { Text("Total Acres") },
-            placeholder = { Text("e.g., 16") },
+            placeholder = { Text("Enter total acreage") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
         )

@@ -144,9 +144,98 @@ fun VisionGradingScreen(
                                    else "Grading Method: Time-Based Maturity",
                             style = MaterialTheme.typography.bodySmall
                         )
-                    }
-                }
+        }
+    }
+}
+
+/**
+ * Overlay composable that draws detection boxes on the camera preview.
+ * Supports bounding boxes with labels and confidence scores.
+ */
+@Composable
+fun DetectionBoxesOverlay(
+    detections: List<DetectedObject>,
+    imageWidth: Int,
+    imageHeight: Int
+) {
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        if (imageWidth <= 0 || imageHeight <= 0) return@Canvas
+
+        val scaleX = size.width / imageWidth
+        val scaleY = size.height / imageHeight
+
+        detections.forEach { detection ->
+            val scaledLeft = detection.boundingBox.left * scaleX
+            val scaledTop = detection.boundingBox.top * scaleY
+            val scaledWidth = detection.boundingBox.width() * scaleX
+            val scaledHeight = detection.boundingBox.height() * scaleY
+
+            // Determine box color based on detection type
+            val boxColor = when {
+                detection.label.contains("ripe", ignoreCase = true) -> Color(0xFF4CAF50) // Green for ripe
+                detection.label.contains("unripe", ignoreCase = true) -> Color(0xFFFF9800) // Orange for unripe
+                detection.label.contains("overripe", ignoreCase = true) -> Color(0xFFF44336) // Red for overripe
+                detection.label.contains("defect", ignoreCase = true) -> Color(0xFFE91E63) // Pink for defects
+                else -> Color(0xFF2196F3) // Blue for other detections
             }
+
+            // Draw bounding box
+            drawRect(
+                color = boxColor,
+                topLeft = androidx.compose.ui.geometry.Offset(scaledLeft, scaledTop),
+                size = androidx.compose.ui.geometry.Size(scaledWidth, scaledHeight),
+                style = androidx.compose.ui.graphics.drawscope.Stroke(width = 3.dp.toPx())
+            )
+
+            // Draw semi-transparent fill
+            drawRect(
+                color = boxColor.copy(alpha = 0.1f),
+                topLeft = androidx.compose.ui.geometry.Offset(scaledLeft, scaledTop),
+                size = androidx.compose.ui.geometry.Size(scaledWidth, scaledHeight)
+            )
+        }
+    }
+
+    // Draw labels on top of boxes
+    detections.forEach { detection ->
+        if (imageWidth <= 0 || imageHeight <= 0) return@forEach
+
+        val scaleX = 1f // Labels positioned relative to Composable coordinates
+        val scaleY = 1f
+
+        val scaledLeft = detection.boundingBox.left * scaleX
+        val scaledTop = detection.boundingBox.top * scaleY
+
+        val boxColor = when {
+            detection.label.contains("ripe", ignoreCase = true) -> Color(0xFF4CAF50)
+            detection.label.contains("unripe", ignoreCase = true) -> Color(0xFFFF9800)
+            detection.label.contains("overripe", ignoreCase = true) -> Color(0xFFF44336)
+            detection.label.contains("defect", ignoreCase = true) -> Color(0xFFE91E63)
+            else -> Color(0xFF2196F3)
+        }
+
+        // Label background
+        Box(
+            modifier = Modifier
+                .offset(
+                    x = scaledLeft.dp,
+                    y = (scaledTop - 24).dp
+                )
+                .background(
+                    color = boxColor,
+                    shape = RoundedCornerShape(4.dp)
+                )
+                .padding(horizontal = 6.dp, vertical = 2.dp)
+        ) {
+            Text(
+                text = "${detection.label} ${(detection.confidence * 100).toInt()}%",
+                color = Color.White,
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -193,6 +282,13 @@ fun VisionGradingScreen(
                                 }
                             },
                             modifier = Modifier.fillMaxSize()
+                        )
+                        
+                        // Detection boxes overlay
+                        DetectionBoxesOverlay(
+                            detections = uiState.detections,
+                            imageWidth = uiState.imageWidth,
+                            imageHeight = uiState.imageHeight
                         )
 
                         // Camera status overlay

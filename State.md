@@ -306,23 +306,23 @@ IngestedDocument (1) ──→ (N) KnowledgeChunk (FK→IngestedDocument CASCADE
 | **Disabled features** | Backup export/restore, remote sync, weather API sync |
 
 ### Implementation Status
-- [ ] Sprint 1: Foundation — Launch Choice Screen & Demo Mode Manager
-- [ ] Sprint 2: Demo Data Infrastructure — Hilt Module & Data Seeder
-- [ ] Sprint 3: Demo Data — Animals & Livestock Module
-- [ ] Sprint 4: Demo Data — Crops, Plots & Scouting
-- [ ] Sprint 5: Demo Data — Finance, Labour & Tasks
-- [ ] Demo Data — Remaining Modules
-- [ ] Sprint 7: Demo Banner & Exit Flow
+- [x] Sprint 1: Foundation — Launch Choice Screen & Demo Mode Manager
+- [x] Sprint 2: Demo Data Infrastructure — Hilt Module & Data Seeder
+- [x] Sprint 3: Demo Data — Animals & Livestock Module
+- [x] Sprint 4: Demo Data — Crops, Plots & Scouting
+- [x] Sprint 5: Demo Data — Finance, Labour & Tasks
+- [x] Demo Data — Remaining Modules (Feed, Cheese, Weather, Maintenance, Map, Maarifa)
+- [x] Sprint 7: Demo Banner & Exit Flow
 - [ ] Sprint 8: Integration, Testing & Polish
 
 ### Key Files
-- `presentation/onboarding/LaunchChoiceScreen.kt` — Entry point screen
-- `demo/DemoModeManager.kt` — Core demo mode logic
-- `demo/DemoModeModule.kt` — Hilt DI module for demo repositories
-- `demo/DemoDataSeeder.kt` — Seeds all demo data
-- `demo/DemoBanner.kt` — Persistent demo indicator
-- `demo/DemoFarm.kt` — Farm identity constants
-- `demo/data/` — Individual data files per module
+- `presentation/onboarding/LaunchChoiceScreen.kt` — Entry point screen ✅
+- `demo/DemoModeManager.kt` — Core demo mode logic ✅
+- `demo/DemoModeModule.kt` — Hilt DI module for demo repositories ✅
+- `demo/DemoDataSeeder.kt` — Seeds all demo data ✅
+- `demo/DemoBanner.kt` — Persistent demo indicator ✅
+- `demo/DemoFarm.kt` — Farm identity constants ✅
+- `demo/data/` — Individual data files per module ✅
 
 ---
 

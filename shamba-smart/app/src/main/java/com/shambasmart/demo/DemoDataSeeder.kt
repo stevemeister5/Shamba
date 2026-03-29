@@ -2,1022 +2,878 @@ package com.shambasmart.demo
 
 import com.shambasmart.data.local.ShambaDatabase
 import com.shambasmart.data.local.entity.*
+import com.shambasmart.data.local.entity.maarifa.*
 import kotlinx.datetime.LocalDate
-import javax.inject.Inject
-import javax.inject.Singleton
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
 import kotlin.random.Random
 
-@Singleton
-class DemoDataSeeder @Inject constructor() {
+/**
+ * Seeds all database tables with realistic demo data.
+ * 
+ * All dates are relative to LocalDate.now() so the demo
+ * always feels current regardless of when it's launched.
+ */
+object DemoDataSeeder {
     
-    suspend fun seedAll(database: ShambaDatabase) {
-        seedFarmProfile(database)
-        seedAnimals(database)
-        seedHealthRecords(database)
-        seedReproduction(database)
-        seedMilkProduction(database)
-        seedWeightEntries(database)
-        seedPlots(database)
-        seedCropPlantings(database)
-        seedHarvestRecords(database)
-        seedSilageInventory(database)
-        seedWeatherLog(database)
-        seedScoutingReports(database)
-        seedMilkCollection(database)
-        seedCheeseBatches(database)
-        seedFeedInventory(database)
-        seedStoreItems(database)
-        seedFinancials(database)
-        seedLoans(database)
-        seedWorkers(database)
-        seedAttendance(database)
-        seedTasks(database)
-        seedCalendarEvents(database)
-        seedMaintenanceTasks(database)
-        seedVehicles(database)
-        seedMapData(database)
-        seedMaarifaKnowledge(database)
-        seedAlerts(database)
+    suspend fun seedAll(db: ShambaDatabase) {
+        seedAnimals(db)
+        seedPlots(db)
+        seedCropPlantings(db)
+        seedHealthRecords(db)
+        seedReproductionRecords(db)
+        seedMilkProduction(db)
+        seedWeightEntries(db)
+        seedSilageInventory(db)
+        seedCheeseBatches(db)
+        seedFeedInventory(db)
+        seedStoreItems(db)
+        seedIncome(db)
+        seedExpenses(db)
+        seedLoans(db)
+        seedWorkers(db)
+        seedAttendanceRecords(db)
+        seedTasks(db)
+        seedCalendarEvents(db)
+        seedWeatherLogs(db)
+        seedMaintenanceTasks(db)
+        seedVehicles(db)
+        seedMapMarkers(db)
+        seedScoutingReports(db)
+        seedIngestedDocuments(db)
+        seedKnowledgeChunks(db)
+        seedOperationalRules(db)
+        seedMilkCollections(db)
+        seedHarvestRecords(db)
+        seedCropInputs(db)
     }
-    
-    private suspend fun seedFarmProfile(database: ShambaDatabase) {
-        // Seed farm profile
-        val farm = Farm(
-            id = 1,
-            name = DemoFarm.FARM_NAME,
-            ownerName = DemoFarm.OWNER_NAME,
-            location = DemoFarm.LOCATION,
-            sizeAcres = DemoFarm.SIZE_ACRES.toDouble(),
-            latitude = DemoFarm.LATITUDE,
-            longitude = DemoFarm.LONGITUDE,
-            phone = DemoFarm.PHONE
-        )
-        database.farmDao().insertFarm(farm)
-    }
-    
-    private suspend fun seedAnimals(database: ShambaDatabase) {
-        val today = DemoFarm.today()
+
+    private suspend fun seedAnimals(db: ShambaDatabase) {
+        val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+        val animalDao = db.animalDao()
         
-        // Explicitly defined key animals
-        val keyAnimals = listOf(
-            // Healthy lactating does
-            Animal(tagId = "G-01", name = "Zawadi", species = "Goat", breed = "Toggenburg", 
-                   sex = "Female", birthDate = today.minusYears(3), status = "Healthy", weight = 42.0),
-            Animal(tagId = "G-02", name = "Baraka", species = "Goat", breed = "Saanen", 
-                   sex = "Female", birthDate = today.minusYears(3), status = "Healthy", weight = 44.0),
-            Animal(tagId = "G-03", name = "Neema", species = "Goat", breed = "Alpine", 
-                   sex = "Female", birthDate = today.minusYears(4), status = "Healthy", weight = 46.0),
-            Animal(tagId = "G-04", name = "Furaha", species = "Goat", breed = "Nubian", 
-                   sex = "Female", birthDate = today.minusYears(2), status = "Healthy", weight = 38.0),
-            Animal(tagId = "G-05", name = "Amani", species = "Goat", breed = "Toggenburg", 
-                   sex = "Female", birthDate = today.minusYears(3), status = "Healthy", weight = 41.0),
-            
-            // Pregnant doe
-            Animal(tagId = "G-22", name = "Tumaini", species = "Goat", breed = "Alpine", 
-                   sex = "Female", birthDate = today.minusYears(4), status = "Pregnant", weight = 52.0),
-            
-            // Sick animal
-            Animal(tagId = "G-14", name = "Imani", species = "Goat", breed = "Boer cross", 
-                   sex = "Female", birthDate = today.minusYears(2), status = "Sick", weight = 34.0),
-            
-            // Dry doe
-            Animal(tagId = "G-09", name = "Rehema", species = "Goat", breed = "Nubian", 
-                   sex = "Female", birthDate = today.minusYears(5), status = "Dry", weight = 50.0),
-            
-            // Doe in withdrawal period
-            Animal(tagId = "G-31", name = "Subira", species = "Goat", breed = "Saanen", 
-                   sex = "Female", birthDate = today.minusYears(3), status = "Healthy", weight = 43.0),
-            
-            // Buck
-            Animal(tagId = "G-B1", name = "Simba", species = "Goat", breed = "Toggenburg", 
-                   sex = "Male", birthDate = today.minusYears(4), status = "Healthy", weight = 68.0),
-            
-            // Newborn kid
-            Animal(tagId = "G-K1", name = null, species = "Goat", breed = "Alpine", 
-                   sex = "Female", birthDate = today.minusDays(3), status = "Healthy", weight = 2.8)
+        // Goats - 62 total
+        val goatBreeds = listOf("Toggenburg", "Saanen", "Alpine", "Boer", "Nubian")
+        val femaleNames = listOf(
+            "Zawadi", "Baraka", "Neema", "Furaha", "Amani", "Tumaini", "Imani",
+            "Rehema", "Subira", "Upendo", "Amani", "Neema", "Furaha", "Zawadi",
+            "Baraka", "Tumaini", "Rehema", "Subira", "Upendo", "Imani"
+        )
+        val maleNames = listOf("Simba", "Kicho", "Jabali", "Mufasa", "Kifaru")
+        
+        // Named does - lactating
+        val lactatingDoes = listOf(
+            Animal(species = "Goat", breed = "Toggenburg", sex = "Female", dateOfBirth = today.minusYears(3), weight = 42.0, status = "active"),
+            Animal(species = "Goat", breed = "Saanen", sex = "Female", dateOfBirth = today.minusYears(3), weight = 44.0, status = "active"),
+            Animal(species = "Goat", breed = "Alpine", sex = "Female", dateOfBirth = today.minusYears(4), weight = 46.0, status = "active"),
+            Animal(species = "Goat", breed = "Nubian", sex = "Female", dateOfBirth = today.minusYears(2), weight = 38.0, status = "active"),
+            Animal(species = "Goat", breed = "Toggenburg", sex = "Female", dateOfBirth = today.minusYears(3), weight = 41.0, status = "active"),
+        )
+        lactatingDoes.forEach { animalDao.insertAnimal(it) }
+        
+        // Pregnant doe
+        animalDao.insertAnimal(
+            Animal(species = "Goat", breed = "Alpine", sex = "Female", dateOfBirth = today.minusYears(4), weight = 52.0, status = "active")
         )
         
-        // Insert key animals
-        keyAnimals.forEach { animal ->
-            database.animalDao().insertAnimal(animal)
+        // Sick doe
+        animalDao.insertAnimal(
+            Animal(species = "Goat", breed = "Boer", sex = "Female", dateOfBirth = today.minusYears(2), weight = 34.0, status = "active")
+        )
+        
+        // Dry doe
+        animalDao.insertAnimal(
+            Animal(species = "Goat", breed = "Nubian", sex = "Female", dateOfBirth = today.minusYears(5), weight = 50.0, status = "active")
+        )
+        
+        // Doe in withdrawal
+        animalDao.insertAnimal(
+            Animal(species = "Goat", breed = "Saanen", sex = "Female", dateOfBirth = today.minusYears(3), weight = 43.0, status = "active")
+        )
+        
+        // Bucks
+        repeat(3) { i ->
+            animalDao.insertAnimal(
+                Animal(species = "Goat", breed = goatBreeds[i % goatBreeds.size], sex = "Male", dateOfBirth = today.minusYears(4), weight = 68.0, status = "active")
+            )
         }
         
-        // Generate remaining 51 goats
-        val goatBreeds = listOf("Toggenburg", "Saanen", "Alpine", "Nubian", "Boer cross")
-        val statuses = listOf("Healthy" to 0.75, "Pregnant" to 0.10, "Dry" to 0.05, "Sick" to 0.05, "Kids" to 0.05)
-        
-        for (i in 12..62) {
-            val tagId = "G-${String.format("%02d", i)}"
+        // Generate remaining goats (50 more)
+        repeat(50) { i ->
+            val sex = if (i < 38) "Female" else "Male"
+            val ageMonths = Random.nextInt(6, 72)
             val breed = goatBreeds.random()
-            val status = statuses.randomByWeight().first
-            val ageMonths = Random.nextInt(6, 72)
-            val birthDate = today.minusMonths(ageMonths)
-            val weight = when (breed) {
-                "Toggenburg" -> Random.nextDouble(38.0, 50.0)
-                "Saanen" -> Random.nextDouble(40.0, 52.0)
-                "Alpine" -> Random.nextDouble(36.0, 48.0)
-                "Nubian" -> Random.nextDouble(35.0, 47.0)
-                "Boer cross" -> Random.nextDouble(32.0, 45.0)
-                else -> Random.nextDouble(35.0, 48.0)
-            }
-            
-            val animal = Animal(
-                tagId = tagId,
-                name = if (status != "Kids") "Goat $i" else null,
-                species = "Goat",
-                breed = breed,
-                sex = if (Random.nextBoolean()) "Female" else "Male",
-                birthDate = birthDate,
-                status = status,
-                weight = weight
+            val weight = if (sex == "Female") 35.0 + Random.nextDouble() * 15.0 else 55.0 + Random.nextDouble() * 20.0
+            animalDao.insertAnimal(
+                Animal(species = "Goat", breed = breed, sex = sex, dateOfBirth = today.minusDays(ageMonths * 30), weight = weight, status = "active")
             )
-            database.animalDao().insertAnimal(animal)
         }
         
-        // Generate 25 sheep
-        val sheepBreeds = listOf("Dorper", "Blackhead Persian", "Red Maasai", "Fat-tailed")
-        for (i in 1..25) {
-            val tagId = "S-${String.format("%02d", i)}"
+        // Sheep - 25 total
+        val sheepBreeds = listOf("Dorper", "Blackhead Persian", "Red Masai", "Merino")
+        repeat(25) { i ->
+            val sex = if (i < 19) "Female" else "Male"
+            val ageMonths = Random.nextInt(6, 60)
             val breed = sheepBreeds.random()
-            val status = statuses.randomByWeight().first
-            val ageMonths = Random.nextInt(6, 72)
-            val birthDate = today.minusMonths(ageMonths)
-            val weight = Random.nextDouble(35.0, 60.0)
-            
-            val animal = Animal(
-                tagId = tagId,
-                name = "Sheep $i",
-                species = "Sheep",
-                breed = breed,
-                sex = if (Random.nextBoolean()) "Female" else "Male",
-                birthDate = birthDate,
-                status = status,
-                weight = weight
+            val weight = if (sex == "Female") 30.0 + Random.nextDouble() * 15.0 else 45.0 + Random.nextDouble() * 20.0
+            animalDao.insertAnimal(
+                Animal(species = "Sheep", breed = breed, sex = sex, dateOfBirth = today.minusDays(ageMonths * 30), weight = weight, status = "active")
             )
-            database.animalDao().insertAnimal(animal)
         }
     }
-    
-    private fun List<Pair<String, Double>>.randomByWeight(): Pair<String, Double> {
-        val random = Random.nextDouble()
-        var cumulative = 0.0
-        for ((item, weight) in this) {
-            cumulative += weight
-            if (random <= cumulative) return item to weight
-        }
-        return last()
-    }
-    
-    private suspend fun seedHealthRecords(database: ShambaDatabase) {
-        val today = DemoFarm.today()
-        
-        // Health records for key animals
-        val healthRecords = listOf(
-            // G-01 Zawadi - vaccination due in 3 days
-            HealthRecord(
-                animalId = "G-01",
-                type = "Vaccination",
-                date = today.minusDays(180),
-                vaccineName = "PPR Vaccine",
-                nextDueDate = today.plusDays(3),
-                notes = "Annual booster"
-            ),
-            
-            // G-14 Imani - vaccination OVERDUE by 5 days
-            HealthRecord(
-                animalId = "G-14",
-                type = "Vaccination",
-                date = today.minusDays(185),
-                vaccineName = "Brucellosis",
-                nextDueDate = today.minusDays(5)
-            ),
-            
-            // G-31 Subira - treatment with withdrawal period
-            HealthRecord(
-                animalId = "G-31",
-                type = "Treatment",
-                date = today.minusDays(4),
-                drugName = "Oxytetracycline LA",
-                dose = "8ml IM",
-                milkWithdrawalEndDate = today.plusDays(3),
-                meatWithdrawalEndDate = today.plusDays(24)
-            ),
-            
-            // G-14 Imani - sick animal
-            HealthRecord(
-                animalId = "G-14",
-                type = "Illness",
-                date = today.minusDays(2),
-                symptoms = "Nasal discharge, reduced appetite, lethargy",
-                diagnosis = "Suspected CCPP — pending vet confirmation",
-                treatment = "Oxytetracycline LA 8ml IM. Isolate from herd."
-            ),
-            
-            // Deworming records for whole flock
-            HealthRecord(
-                animalId = "G-01",
-                type = "Deworming",
-                date = today.minusDays(45),
-                drugName = "Albendazole",
-                notes = "Flock deworming - all goats"
-            )
-        )
-        
-        healthRecords.forEach { record ->
-            database.healthDao().insertHealthRecord(record)
-        }
-        
-        // Additional health records for other animals
-        val allAnimals = database.animalDao().getAllAnimalsSync()
-        allAnimals.filter { it.tagId != "G-01" && it.tagId != "G-14" && it.tagId != "G-31" }.forEach { animal ->
-            // 1-2 health records per generated animal
-            val numRecords = Random.nextInt(1, 3)
-            for (i in 1..numRecords) {
-                val record = HealthRecord(
-                    animalId = animal.tagId!!,
-                    type = listOf("Vaccination", "Deworming", "Checkup").random(),
-                    date = today.minusDays(Random.nextInt(30, 180).toLong()),
-                    notes = "Routine health maintenance"
-                )
-                database.healthDao().insertHealthRecord(record)
-            }
-        }
-    }
-    
-    private suspend fun seedReproduction(database: ShambaDatabase) {
-        val today = DemoFarm.today()
-        
-        val reproductionRecords = listOf(
-            // G-22 Tumaini - pregnant, due in 5 days
-            ReproductionRecord(
-                animalId = "G-22",
-                type = "Pregnancy",
-                matingDate = today.minusDays(145),
-                sireId = "G-B1",
-                pregnancyStatus = "Confirmed",
-                expectedDueDate = today.plusDays(5)
-            ),
-            
-            // G-03 Neema - kidded 60 days ago
-            ReproductionRecord(
-                animalId = "G-03",
-                type = "Birth",
-                matingDate = today.minusDays(210),
-                actualBirthDate = today.minusDays(60),
-                kidsCount = 2,
-                kidsAlive = 2,
-                kidsStillborn = 0
-            ),
-            
-            // G-05 Amani - heat signs logged yesterday
-            ReproductionRecord(
-                animalId = "G-05",
-                type = "HeatDetection",
-                date = today.minusDays(1),
-                notes = "Standing heat observed. Buck introduced."
-            )
-        )
-        
-        reproductionRecords.forEach { record ->
-            database.reproductionDao().insertReproductionRecord(record)
-        }
-    }
-    
-    private suspend fun seedMilkProduction(database: ShambaDatabase) {
-        val today = DemoFarm.today()
-        val lactatingDoes = listOf("G-01", "G-02", "G-03", "G-04", "G-05", "G-31")
-        
-        lactatingDoes.forEach { animalId ->
-            // Seed 30 days of milk production
-            for (daysAgo in 0..30) {
-                val date = today.minusDays(daysAgo.toLong())
-                val (morningYield, eveningYield) = when (animalId) {
-                    "G-01" -> { // Zawadi - peak yields, upward trend
-                        val baseMorning = 2.4 + (30 - daysAgo) * 0.02
-                        val baseEvening = 2.1 + (30 - daysAgo) * 0.015
-                        Pair(
-                            baseMorning + Random.nextDouble(-0.2, 0.3),
-                            baseEvening + Random.nextDouble(-0.15, 0.2)
-                        )
-                    }
-                    "G-03" -> { // Neema - declining trend (last 5 days)
-                        if (daysAgo <= 5) {
-                            Pair(2.8 - (5 - daysAgo) * 0.15, 2.5 - (5 - daysAgo) * 0.12)
-                        } else {
-                            Pair(2.8 + Random.nextDouble(-0.2, 0.2), 2.5 + Random.nextDouble(-0.15, 0.15))
-                        }
-                    }
-                    "G-14" -> { // Imani - zero yield for last 2 days
-                        if (daysAgo <= 2) Pair(0.0, 0.0)
-                        else Pair(2.2 + Random.nextDouble(-0.2, 0.2), 1.9 + Random.nextDouble(-0.15, 0.15))
-                    }
-                    else -> { // Normal does
-                        Pair(
-                            2.0 + Random.nextDouble(-0.3, 0.4),
-                            1.8 + Random.nextDouble(-0.2, 0.3)
-                        )
-                    }
-                }
-                
-                val record = MilkProduction(
-                    animalId = animalId,
-                    date = date,
-                    morningYield = morningYield,
-                    eveningYield = eveningYield,
-                    notes = when {
-                        animalId == "G-14" && daysAgo <= 2 -> "Animal sick - no milk"
-                        animalId == "G-31" && daysAgo <= 3 -> "Withdrawal period - milk blocked"
-                        else -> null
-                    }
-                )
-                database.milkDao().insertMilkProduction(record)
-            }
-        }
-    }
-    
-    private suspend fun seedWeightEntries(database: ShambaDatabase) {
-        val today = DemoFarm.today()
-        val allAnimals = database.animalDao().getAllAnimalsSync()
-        
-        allAnimals.forEach { animal ->
-            // 6 weight entries over 6 months
-            val baseWeight = animal.weight ?: 40.0
-            for (i in 0..5) {
-                val date = today.minusMonths(i.toLong())
-                val weight = if (animal.tagId == "G-14" && i <= 2) {
-                    // Declining weight for Imani
-                    baseWeight - (3 - i) * 1.5
-                } else {
-                    baseWeight + Random.nextDouble(-2.0, 2.0)
-                }
-                
-                val entry = WeightEntry(
-                    animalId = animal.tagId!!,
-                    date = date,
-                    weightKg = weight
-                )
-                database.weightDao().insertWeightEntry(entry)
-            }
-        }
-    }
-    
-    private suspend fun seedPlots(database: ShambaDatabase) {
+
+    private suspend fun seedPlots(db: ShambaDatabase) {
+        val plotDao = db.plotDao()
         val plots = listOf(
-            Plot(name = "Plot A", sizeAcres = 3.0, soilType = "Clay loam", 
-                 currentUse = "Crop", irrigationType = "Rain-fed", 
-                 latitude = -5.148, longitude = 38.479),
-            Plot(name = "Plot B", sizeAcres = 2.5, soilType = "Loam", 
-                 currentUse = "Silage", irrigationType = "Rain-fed", 
-                 latitude = -5.151, longitude = 38.482),
-            Plot(name = "Plot C", sizeAcres = 2.0, soilType = "Loam", 
-                 currentUse = "Crop", irrigationType = "Rain-fed", 
-                 latitude = -5.153, longitude = 38.477),
-            Plot(name = "Plot D", sizeAcres = 1.5, soilType = "Sandy loam", 
-                 currentUse = "Crop", irrigationType = "Manual", 
-                 latitude = -5.155, longitude = 38.481),
-            Plot(name = "Plot E", sizeAcres = 1.5, soilType = "Clay loam", 
-                 currentUse = "Crop", irrigationType = "Rain-fed", 
-                 latitude = -5.149, longitude = 38.484),
-            Plot(name = "Plot F", sizeAcres = 2.0, soilType = "Loam", 
-                 currentUse = "Crop", irrigationType = "Rain-fed", 
-                 latitude = -5.157, longitude = 38.476),
-            Plot(name = "Plot G", sizeAcres = 1.0, soilType = "Sandy loam", 
-                 currentUse = "Crop", irrigationType = "Manual", 
-                 latitude = -5.152, longitude = 38.485),
-            Plot(name = "Plot H", sizeAcres = 2.5, soilType = "Clay", 
-                 currentUse = "Pasture", irrigationType = "Rain-fed", 
-                 latitude = -5.146, longitude = 38.480)
+            Plot(name = "Plot A", sizeAcres = 3.0, latitude = -5.148, longitude = 38.479, soilType = "Clay loam", currentUse = "Crop"),
+            Plot(name = "Plot B", sizeAcres = 2.5, latitude = -5.151, longitude = 38.482, soilType = "Loam", currentUse = "Silage"),
+            Plot(name = "Plot C", sizeAcres = 2.0, latitude = -5.153, longitude = 38.477, soilType = "Loam", currentUse = "Crop"),
+            Plot(name = "Plot D", sizeAcres = 1.5, latitude = -5.155, longitude = 38.481, soilType = "Sandy loam", currentUse = "Crop"),
+            Plot(name = "Plot E", sizeAcres = 1.5, latitude = -5.149, longitude = 38.484, soilType = "Clay loam", currentUse = "Crop"),
+            Plot(name = "Plot F", sizeAcres = 2.0, latitude = -5.157, longitude = 38.476, soilType = "Loam", currentUse = "Crop"),
+            Plot(name = "Plot G", sizeAcres = 1.0, latitude = -5.152, longitude = 38.485, soilType = "Sandy loam", currentUse = "Crop"),
+            Plot(name = "Plot H", sizeAcres = 2.5, latitude = -5.146, longitude = 38.480, soilType = "Clay", currentUse = "Pasture"),
         )
-        
-        plots.forEach { plot ->
-            database.plotDao().insertPlot(plot)
-        }
+        plots.forEach { plotDao.insertPlot(it) }
     }
-    
-    private suspend fun seedCropPlantings(database: ShambaDatabase) {
-        val today = DemoFarm.today()
-        val plots = database.plotDao().getAllPlotsSync()
+
+    private suspend fun seedCropPlantings(db: ShambaDatabase) {
+        val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+        val cropDao = db.cropDao()
         
+        // Get plot IDs (1-8 based on insertion order)
         val plantings = listOf(
-            // Plot A - Silage Maize, tasseling stage
-            CropPlanting(plotId = plots[0].id, cropType = "Maize", variety = "SEEDCO SC403",
-                        plantingDate = today.minusDays(55), status = "Active"),
-            
-            // Plot B - Napier Grass, mature
-            CropPlanting(plotId = plots[1].id, cropType = "Napier Grass", variety = "Clone 13",
-                        plantingDate = today.minusDays(60), status = "Active"),
-            
-            // Plot C - Beans intercropped with maize
-            CropPlanting(plotId = plots[2].id, cropType = "Beans", variety = "Lyamungu 85",
-                        plantingDate = today.minusDays(45), status = "Active"),
-            
-            // Plot D - Tomatoes
-            CropPlanting(plotId = plots[3].id, cropType = "Tomatoes", variety = "Cal-J",
-                        plantingDate = today.minusDays(75), status = "Active"),
-            
-            // Plot E - Kale
-            CropPlanting(plotId = plots[4].id, cropType = "Kale", variety = "Sukuma Wiki",
-                        plantingDate = today.minusDays(55), status = "Active"),
-            
-            // Plot F - Cassava
-            CropPlanting(plotId = plots[5].id, cropType = "Cassava", variety = "Kiroba",
-                        plantingDate = today.minusDays(30), status = "Active"),
-            
-            // Plot G - Onions
-            CropPlanting(plotId = plots[6].id, cropType = "Onion", variety = "Red Pinoy",
-                        plantingDate = today.minusDays(14), status = "Active")
+            CropPlanting(plotId = 1, cropType = "Maize", variety = "SEEDCO SC403", plantingDate = today.minusDays(55), status = "growing"),
+            CropPlanting(plotId = 2, cropType = "Napier Grass", variety = "Clone 13", plantingDate = today.minusDays(60), status = "growing"),
+            CropPlanting(plotId = 3, cropType = "Beans", variety = "Lyamungu 85", plantingDate = today.minusDays(45), status = "growing"),
+            CropPlanting(plotId = 4, cropType = "Tomatoes", variety = "Cal-J", plantingDate = today.minusDays(75), status = "growing"),
+            CropPlanting(plotId = 5, cropType = "Kale", variety = "Sukuma Wiki", plantingDate = today.minusDays(55), status = "growing"),
+            CropPlanting(plotId = 6, cropType = "Cassava", variety = "Kiroba", plantingDate = today.minusDays(30), status = "growing"),
+            CropPlanting(plotId = 7, cropType = "Onion", variety = "Red Pinoy", plantingDate = today.minusDays(14), status = "growing"),
         )
+        plantings.forEach { cropDao.insertCropPlanting(it) }
+    }
+
+    private suspend fun seedHealthRecords(db: ShambaDatabase) {
+        val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+        val healthDao = db.healthRecordDao()
         
-        plantings.forEach { planting ->
-            database.cropDao().insertCropPlanting(planting)
+        // Vaccination due in 3 days (animal 1)
+        healthDao.insertHealthRecord(
+            HealthRecord(animalId = 1, type = "Vaccination", date = today.minusDays(180), vaccineName = "PPR Vaccine", nextDueDate = today.plusDays(3), notes = "Annual booster")
+        )
+        // Vaccination overdue (animal 7)
+        healthDao.insertHealthRecord(
+            HealthRecord(animalId = 7, type = "Vaccination", date = today.minusDays(185), vaccineName = "Brucellosis", nextDueDate = today.minusDays(5))
+        )
+        // Treatment with withdrawal (animal 9)
+        healthDao.insertHealthRecord(
+            HealthRecord(animalId = 9, type = "Treatment", date = today.minusDays(4), description = "Oxytetracycline LA 8ml IM", notes = "Milk withdrawal 7 days")
+        )
+        // Illness record (animal 7)
+        healthDao.insertHealthRecord(
+            HealthRecord(animalId = 7, type = "Illness", date = today.minusDays(2), description = "Suspected CCPP — nasal discharge, reduced appetite", notes = "Isolated. Pending vet confirmation.")
+        )
+        // Deworming for flock
+        healthDao.insertHealthRecord(
+            HealthRecord(animalId = 0, type = "Deworming", date = today.minusDays(45), description = "Whole flock — Albendazole", notes = "Flock-wide deworming. Next due in 45 days.")
+        )
+    }
+
+    private suspend fun seedReproductionRecords(db: ShambaDatabase) {
+        val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+        val reproDao = db.reproductionDao()
+        
+        // Pregnant doe - due in 5 days
+        reproDao.insertReproductionRecord(
+            ReproductionRecord(damId = 6, sireId = 11, type = "Pregnancy", matingDate = today.minusDays(145), pregnancyConfirmed = true, expectedDueDate = today.plusDays(5))
+        )
+        // Recent birth
+        reproDao.insertReproductionRecord(
+            ReproductionRecord(damId = 3, sireId = 11, type = "Birth", actualBirthDate = today.minusDays(60), numberOfKids = 2, numberOfAlive = 2, numberOfStillborn = 0)
+        )
+        // Heat detection yesterday
+        reproDao.insertReproductionRecord(
+            ReproductionRecord(damId = 5, type = "HeatDetection", matingDate = today.minusDays(1), notes = "Standing heat observed. Buck introduced.")
+        )
+    }
+
+    private suspend fun seedMilkProduction(db: ShambaDatabase) {
+        val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+        val milkDao = db.milkProductionDao()
+        
+        // 30 days of milk data for lactating does (IDs 1-5)
+        for (daysAgo in 0..30) {
+            val date = today.minusDays(daysAgo.toLong())
+            
+            // G-1: Peak yields ~4.6L/day
+            milkDao.insertMilkProduction(
+                MilkProduction(animalId = 1, date = date, morningYield = 2.4 + Random.nextDouble() * 0.4, eveningYield = 2.1 + Random.nextDouble() * 0.3, totalYield = 4.6)
+            )
+            // G-2: Steady ~3.8L/day
+            milkDao.insertMilkProduction(
+                MilkProduction(animalId = 2, date = date, morningYield = 2.0 + Random.nextDouble() * 0.3, eveningYield = 1.7 + Random.nextDouble() * 0.3, totalYield = 3.8)
+            )
+            // G-3: Declining last 5 days
+            val neemaYield = if (daysAgo < 5) 2.8 else (3.8 - daysAgo * 0.03)
+            milkDao.insertMilkProduction(
+                MilkProduction(animalId = 3, date = date, morningYield = neemaYield / 2, eveningYield = neemaYield / 2, totalYield = neemaYield)
+            )
+            // G-4: New lactation, moderate
+            milkDao.insertMilkProduction(
+                MilkProduction(animalId = 4, date = date, morningYield = 1.8 + Random.nextDouble() * 0.3, eveningYield = 1.6 + Random.nextDouble() * 0.3, totalYield = 3.5)
+            )
+            // G-5: Good yield
+            milkDao.insertMilkProduction(
+                MilkProduction(animalId = 5, date = date, morningYield = 2.2 + Random.nextDouble() * 0.3, eveningYield = 2.0 + Random.nextDouble() * 0.3, totalYield = 4.3)
+            )
         }
     }
-    
-    private suspend fun seedHarvestRecords(database: ShambaDatabase) {
-        val today = DemoFarm.today()
-        val plots = database.plotDao().getAllPlotsSync()
+
+    private suspend fun seedWeightEntries(db: ShambaDatabase) {
+        val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+        val weightDao = db.weightDao()
         
-        val harvests = listOf(
-            HarvestRecord(plotId = plots[4].id, cropType = "Kale", 
-                         harvestDate = today.minusDays(60), quantityKg = 180.0,
-                         notes = "Previous kale harvest"),
-            HarvestRecord(plotId = plots[0].id, cropType = "Maize", 
-                         harvestDate = today.minusDays(120), quantityKg = 1200.0,
-                         notes = "Previous maize season")
-        )
-        
-        harvests.forEach { harvest ->
-            database.cropDao().insertHarvestRecord(harvest)
+        // 6 weight entries per key animal over 6 months
+        val keyAnimals = listOf(1L, 2L, 3L, 4L, 5L, 6L, 7L)
+        for (animalId in keyAnimals) {
+            for (i in 0..5) {
+                val date = today.minusDays(i.toLong() * 30)
+                val baseWeight = 35.0 + Random.nextDouble() * 20.0
+                val trend = if (animalId == 7L && i < 3) -1.0 else 0.0 // G-14 declining
+                weightDao.insertWeightEntry(
+                    WeightEntry(animalId = animalId, date = date, weight = baseWeight + i * trend)
+                )
+            }
         }
     }
-    
-    private suspend fun seedSilageInventory(database: ShambaDatabase) {
-        val today = DemoFarm.today()
+
+    private suspend fun seedSilageInventory(db: ShambaDatabase) {
+        val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+        val silageDao = db.silageDao()
         
-        val silage = SilageInventory(
-            pitLocation = "Pit 1 — Main silage pit",
-            cropType = "Maize Silage",
-            fillDate = today.minusDays(90),
-            estimatedTonnage = 12.0,
-            currentQuantityTonnes = 4.2,
-            fermentationDays = 21,
-            quality = "Good",
-            dailyDrawdownKg = 230.0
+        silageDao.insertSilageInventory(
+            SilageInventory(
+                pitId = "Pit-1",
+                fillDate = today.minusDays(90),
+                cropType = "Maize Silage",
+                estimatedTonnage = 12.0,
+                currentTonnage = 4.2,
+                fermentationComplete = true,
+                qualityNotes = "Good fermentation. At 230kg/day: ~18 days remaining."
+            )
         )
-        
-        database.feedDao().insertSilageInventory(silage)
     }
-    
-    private suspend fun seedWeatherLog(database: ShambaDatabase) {
-        val today = DemoFarm.today()
+
+    private suspend fun seedCheeseBatches(db: ShambaDatabase) {
+        val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+        val cheeseDao = db.cheeseDao()
         
-        // 14 days of historical weather
+        // Batch 1 - Aging, 5 of 7 days
+        cheeseDao.insertCheeseBatch(
+            CheeseBatch(
+                batchId = "CB-07",
+                productionDate = today.minusDays(5),
+                milkVolumeUsed = 20.0,
+                cheeseType = "Fresh Chèvre",
+                yieldKg = 3.8,
+                agingStartDate = today.minusDays(5),
+                status = "aging",
+                milkCostTzs = 16000L,
+                cultureCostTzs = 1200L,
+                rennetCostTzs = 800L,
+                packagingCostTzs = 1500L,
+                otherInputCostTzs = 500L
+            )
+        )
+        // Batch 2 - Aging semi-hard, 12 of 21 days
+        cheeseDao.insertCheeseBatch(
+            CheeseBatch(
+                batchId = "CB-06",
+                productionDate = today.minusDays(12),
+                milkVolumeUsed = 30.0,
+                cheeseType = "Feta-style",
+                yieldKg = 5.2,
+                agingStartDate = today.minusDays(12),
+                status = "aging",
+                milkCostTzs = 24000L,
+                cultureCostTzs = 2000L,
+                rennetCostTzs = 1200L,
+                packagingCostTzs = 2200L,
+                otherInputCostTzs = 800L
+            )
+        )
+        // Batch 3 - Ready to package
+        cheeseDao.insertCheeseBatch(
+            CheeseBatch(
+                batchId = "CB-05",
+                productionDate = today.minusDays(8),
+                milkVolumeUsed = 25.0,
+                cheeseType = "Fresh Chèvre",
+                yieldKg = 4.8,
+                agingStartDate = today.minusDays(8),
+                packagingDate = today,
+                status = "ready",
+                milkCostTzs = 20000L,
+                cultureCostTzs = 1500L,
+                rennetCostTzs = 1000L,
+                packagingCostTzs = 1800L,
+                otherInputCostTzs = 600L
+            )
+        )
+        // Batch 4 - Sold
+        cheeseDao.insertCheeseBatch(
+            CheeseBatch(
+                batchId = "CB-04",
+                productionDate = today.minusDays(20),
+                milkVolumeUsed = 18.0,
+                cheeseType = "Fresh Chèvre",
+                yieldKg = 3.4,
+                agingStartDate = today.minusDays(20),
+                status = "sold",
+                salePriceTzsPerKg = 15000L,
+                quantitySoldKg = 3.4f,
+                saleDate = today.minusDays(12).toEpochDays().toLong() * 86400000L,
+                milkCostTzs = 14400L,
+                cultureCostTzs = 1000L,
+                rennetCostTzs = 700L,
+                packagingCostTzs = 1200L,
+                otherInputCostTzs = 400L
+            )
+        )
+    }
+
+    private suspend fun seedFeedInventory(db: ShambaDatabase) {
+        val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+        val feedDao = db.feedDao()
+        
+        feedDao.insertFeedInventory(
+            FeedInventory(feedType = "Silage (Maize)", stockLevel = 4200.0, unit = "kg", reorderThreshold = 6000.0, costPerUnit = 0.0)
+        )
+        feedDao.insertFeedInventory(
+            FeedInventory(feedType = "Napier Grass (Fresh)", stockLevel = 680.0, unit = "kg", reorderThreshold = 200.0, costPerUnit = 0.0)
+        )
+        feedDao.insertFeedInventory(
+            FeedInventory(feedType = "Dairy Meal (Concentrate)", stockLevel = 120.0, unit = "kg", reorderThreshold = 50.0, costPerUnit = 850.0)
+        )
+        feedDao.insertFeedInventory(
+            FeedInventory(feedType = "Mineral Supplement", stockLevel = 25.0, unit = "kg", reorderThreshold = 10.0, costPerUnit = 4500.0)
+        )
+        feedDao.insertFeedInventory(
+            FeedInventory(feedType = "Hay (Backup)", stockLevel = 40.0, unit = "kg", reorderThreshold = 100.0, costPerUnit = 200.0)
+        )
+        feedDao.insertFeedInventory(
+            FeedInventory(feedType = "Salt Lick Blocks", stockLevel = 4.0, unit = "blocks", reorderThreshold = 2.0, costPerUnit = 3500.0)
+        )
+    }
+
+    private suspend fun seedStoreItems(db: ShambaDatabase) {
+        val storeDao = db.storeDao()
+        
+        storeDao.insertStoreItem(
+            StoreItem(name = "Cheese packaging", category = "Packaging", quantity = 45.0, unit = "units", costPerUnit = 300.0)
+        )
+        storeDao.insertStoreItem(
+            StoreItem(name = "Oxytetracycline LA", category = "Veterinary", quantity = 2.0, unit = "bottles", costPerUnit = 11000.0)
+        )
+        storeDao.insertStoreItem(
+            StoreItem(name = "DAP Fertilizer", category = "Crop inputs", quantity = 30.0, unit = "kg", costPerUnit = 370.0)
+        )
+        storeDao.insertStoreItem(
+            StoreItem(name = "CAN Fertilizer", category = "Crop inputs", quantity = 20.0, unit = "kg", costPerUnit = 450.0)
+        )
+        storeDao.insertStoreItem(
+            StoreItem(name = "Dithane M-45", category = "Pesticide", quantity = 3.0, unit = "kg", costPerUnit = 5000.0)
+        )
+    }
+
+    private suspend fun seedIncome(db: ShambaDatabase) {
+        val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+        val financialDao = db.financialDao()
+        
+        // Current month income
+        financialDao.insertIncome(Income(date = today.minusDays(2), category = "Cheese sales", description = "4 batches — Fresh Chèvre to Korogwe market", amount = 184000.0))
+        financialDao.insertIncome(Income(date = today.minusDays(5), category = "Milk sales", description = "Surplus milk — 120L to Tanga Dairy Co-op", amount = 96000.0))
+        financialDao.insertIncome(Income(date = today.minusDays(8), category = "Live animal sales", description = "2 male goats — Korogwe livestock market", amount = 80000.0))
+        financialDao.insertIncome(Income(date = today.minusDays(12), category = "Vegetable sales", description = "Kale harvest — 180kg to Korogwe market", amount = 38000.0))
+        financialDao.insertIncome(Income(date = today.minusDays(15), category = "Manure sales", description = "2 truck loads — local vegetable farmers", amount = 14000.0))
+        
+        // Previous month
+        financialDao.insertIncome(Income(date = today.minusDays(35), category = "Milk sales", description = "150L to Tanga Dairy Co-op", amount = 120000.0))
+        financialDao.insertIncome(Income(date = today.minusDays(40), category = "Cheese sales", description = "3 batches", amount = 135000.0))
+        financialDao.insertIncome(Income(date = today.minusDays(45), category = "Vegetable sales", description = "Tomatoes", amount = 45000.0))
+    }
+
+    private suspend fun seedExpenses(db: ShambaDatabase) {
+        val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+        val financialDao = db.financialDao()
+        
+        // Current month expenses
+        financialDao.insertExpense(Expense(date = today.minusDays(1), category = "Labour", description = "Monthly wages — 4 workers", amount = 80000.0))
+        financialDao.insertExpense(Expense(date = today.minusDays(3), category = "Feed", description = "Dairy meal 100kg — Korogwe Agrovet", amount = 85000.0))
+        financialDao.insertExpense(Expense(date = today.minusDays(6), category = "Veterinary & medicine", description = "Vet visit — G-14 consultation + Oxytetracycline", amount = 22000.0))
+        financialDao.insertExpense(Expense(date = today.minusDays(9), category = "Seeds & fertiliser", description = "DAP 50kg — Plot A top dressing", amount = 18500.0))
+        financialDao.insertExpense(Expense(date = today.minusDays(11), category = "Cheese inputs", description = "Rennet + mesophilic cultures", amount = 14000.0))
+        financialDao.insertExpense(Expense(date = today.minusDays(14), category = "Fuel & transport", description = "Market trips + generator fuel", amount = 9500.0))
+        financialDao.insertExpense(Expense(date = today.minusDays(18), category = "Packaging", description = "Cheese packaging materials — 50 units", amount = 7000.0))
+    }
+
+    private suspend fun seedLoans(db: ShambaDatabase) {
+        val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+        val loanDao = db.loanDao()
+        
+        loanDao.insertLoan(
+            Loan(
+                lenderName = "CRDB Bank Korogwe",
+                amount = 500000.0,
+                disbursementDate = today.minusMonths(6),
+                interestRate = 18.0,
+                totalRepaid = 250000.0,
+                balance = 250000.0,
+                dueDate = today.plusMonths(6),
+                status = "active"
+            )
+        )
+    }
+
+    private suspend fun seedWorkers(db: ShambaDatabase) {
+        val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+        val workerDao = db.workerDao()
+        
+        workerDao.insertWorker(Worker(name = "Amina Juma", role = "Milking & livestock", contact = "+255 712 345 678", hireDate = today.minusYears(2), dailyRate = 2500.0, status = "active"))
+        workerDao.insertWorker(Worker(name = "Joseph Mwanga", role = "Crops & fencing", contact = "+255 754 987 654", hireDate = today.minusYears(1), dailyRate = 2000.0, status = "active"))
+        workerDao.insertWorker(Worker(name = "Moses Kilima", role = "Crops & general", contact = "+255 768 111 222", hireDate = today.minusMonths(8), dailyRate = 2000.0, status = "active"))
+        workerDao.insertWorker(Worker(name = "Fatuma Said", role = "Casual — cheese room", contact = "+255 745 333 444", hireDate = today.minusDays(10), dailyRate = 2500.0, isSeasonal = true, status = "active"))
+    }
+
+    private suspend fun seedAttendanceRecords(db: ShambaDatabase) {
+        val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+        // Attendance seeding will be done when attendance DAO is available
+    }
+
+    private suspend fun seedTasks(db: ShambaDatabase) {
+        val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+        val taskDao = db.taskDao()
+        
+        // Completed today
+        taskDao.insertTask(Task(title = "Morning milk collection — all does", assignedTo = 1, dueDate = today, status = "completed"))
+        // Pending high priority
+        taskDao.insertTask(Task(title = "Deworm sheep flock (Group B)", assignedTo = 2, dueDate = today, status = "pending"))
+        // Pending medium
+        taskDao.insertTask(Task(title = "Apply CAN top dressing — Plot A maize", assignedTo = 3, dueDate = today, status = "pending"))
+        taskDao.insertTask(Task(title = "Record weights — newborn kid", assignedTo = 1, dueDate = today, status = "pending"))
+        taskDao.insertTask(Task(title = "Check east perimeter fence", assignedTo = 2, dueDate = today, status = "pending"))
+        // Evening
+        taskDao.insertTask(Task(title = "Evening milk collection + log yield", assignedTo = 1, dueDate = today, status = "pending"))
+        // Tomorrow
+        taskDao.insertTask(Task(title = "Spray Plot D tomatoes — Dithane", assignedTo = 3, dueDate = today.plusDays(1), status = "pending"))
+        // Kidding prep in 5 days
+        taskDao.insertTask(Task(title = "Prepare kidding pen — G-22 Tumaini due", assignedTo = 1, dueDate = today.plusDays(5), status = "pending"))
+        // Overdue
+        taskDao.insertTask(Task(title = "Log feed inventory — daily silage draw-down", assignedTo = 2, dueDate = today.minusDays(1), status = "pending"))
+    }
+
+    private suspend fun seedCalendarEvents(db: ShambaDatabase) {
+        val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+        val calendarDao = db.calendarDao()
+        
+        calendarDao.insertCalendarEvent(CalendarEvent(title = "Maize planting — Plot A", date = today.minusDays(55), type = "Planting"))
+        calendarDao.insertCalendarEvent(CalendarEvent(title = "Cheese batch CB-06 started", date = today.minusDays(12), type = "Cheese"))
+        calendarDao.insertCalendarEvent(CalendarEvent(title = "Korogwe livestock market", date = today.plusDays(2), type = "Market"))
+        calendarDao.insertCalendarEvent(CalendarEvent(title = "G-22 Tumaini — expected to kid", date = today.plusDays(5), type = "Reproduction"))
+        calendarDao.insertCalendarEvent(CalendarEvent(title = "Sheep deworming — Group A due", date = today.plusDays(7), type = "Health"))
+        calendarDao.insertCalendarEvent(CalendarEvent(title = "Tomato harvest window opens", date = today.plusDays(8), type = "Harvest"))
+        calendarDao.insertCalendarEvent(CalendarEvent(title = "G-01 Zawadi — PPR vaccination due", date = today.plusDays(3), type = "Vaccination"))
+        calendarDao.insertCalendarEvent(CalendarEvent(title = "Kale harvest — Plot E", date = today, type = "Harvest"))
+        calendarDao.insertCalendarEvent(CalendarEvent(title = "CRDB loan repayment due", date = today.plusDays(15), type = "Finance"))
+    }
+
+    private suspend fun seedWeatherLogs(db: ShambaDatabase) {
+        val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+        val weatherDao = db.weatherDao()
+        
         for (daysAgo in 1..14) {
             val date = today.minusDays(daysAgo.toLong())
-            val rainfallMm = when {
+            val rainfall = when {
                 daysAgo in 3..5 -> 18.0 + Random.nextDouble() * 8.0
                 daysAgo == 8 -> 34.0
                 else -> Random.nextDouble() * 4.0
             }
-            
-            val weather = WeatherLog(
-                date = date,
-                rainfallMm = rainfallMm,
-                maxTemp = 30.0 + Random.nextDouble() * 3.0,
-                minTemp = 22.0 + Random.nextDouble() * 2.0,
-                humidity = 65.0 + Random.nextDouble() * 15.0,
-                windSpeed = 8.0 + Random.nextDouble() * 6.0
+            weatherDao.insertWeatherLog(
+                WeatherLog(
+                    date = date,
+                    rainfallMm = rainfall,
+                    maxTemp = 30.0 + Random.nextDouble() * 3.0,
+                    minTemp = 22.0 + Random.nextDouble() * 2.0
+                )
             )
-            
-            database.weatherDao().insertWeatherLog(weather)
-        }
-        
-        // 5-day forecast
-        val forecasts = listOf(
-            WeatherForecast(date = today.plusDays(1), maxTemp = 31.0, minTemp = 23.0,
-                           condition = "Partly cloudy", rainfallMm = 2.0),
-            WeatherForecast(date = today.plusDays(2), maxTemp = 29.0, minTemp = 22.0,
-                           condition = "Cloudy", rainfallMm = 8.0),
-            WeatherForecast(date = today.plusDays(3), maxTemp = 27.0, minTemp = 21.0,
-                           condition = "Rain", rainfallMm = 22.0),
-            WeatherForecast(date = today.plusDays(4), maxTemp = 26.0, minTemp = 21.0,
-                           condition = "Heavy rain", rainfallMm = 35.0),
-            WeatherForecast(date = today.plusDays(5), maxTemp = 29.0, minTemp = 22.0,
-                           condition = "Partly cloudy", rainfallMm = 6.0)
-        )
-        
-        forecasts.forEach { forecast ->
-            database.weatherDao().insertWeatherForecast(forecast)
         }
     }
-    
-    private suspend fun seedScoutingReports(database: ShambaDatabase) {
-        val today = DemoFarm.today()
-        val plots = database.plotDao().getAllPlotsSync()
+
+    private suspend fun seedMaintenanceTasks(db: ShambaDatabase) {
+        val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+        val maintenanceDao = db.maintenanceTaskDao()
         
-        val reports = listOf(
-            // Critical FAW on Plot A
-            ScoutingReport(plotId = plots[0].id, pestType = "Fall Armyworm",
-                          severityScore = 0.85f, severity = "Critical",
-                          gpsLatitude = -5.148, gpsLongitude = 38.479,
-                          detectedAt = today.minusDays(1).atStartOfDay(),
-                          notes = "Heavy infestation in whorl. Frass visible. ~40% of plants affected."),
-            
-            // Moderate aphids on Plot C
-            ScoutingReport(plotId = plots[2].id, pestType = "Aphids",
-                          severityScore = 0.45f, severity = "Moderate",
-                          gpsLatitude = -5.153, gpsLongitude = 38.477,
-                          detectedAt = today.minusDays(3).atStartOfDay()),
-            
-            // Low stalk borer on Plot A
-            ScoutingReport(plotId = plots[0].id, pestType = "Maize Stalk Borer",
-                          severityScore = 0.2f, severity = "Low",
-                          gpsLatitude = -5.148, gpsLongitude = 38.480,
-                          detectedAt = today.minusDays(14).atStartOfDay()),
-            
-            // Moderate leafminer on Plot D
-            ScoutingReport(plotId = plots[3].id, pestType = "Leafminer",
-                          severityScore = 0.55f, severity = "Moderate",
-                          gpsLatitude = -5.155, gpsLongitude = 38.481,
-                          detectedAt = today.minusDays(2).atStartOfDay())
-        )
-        
-        reports.forEach { report ->
-            database.cropDao().insertScoutingReport(report)
-        }
-        
-        // Additional reports for variety
-        val pestTypes = listOf("Fall Armyworm", "Aphids", "Stalk Borer", "Leafminer", 
-                              "Whitefly", "Thrips", "Spider Mites", "Cutworms")
-        
-        for (i in 1..8) {
-            val plot = plots.random()
-            val report = ScoutingReport(
-                plotId = plot.id,
-                pestType = pestTypes[i % pestTypes.size],
-                severityScore = Random.nextDouble(0.1, 0.7).toFloat(),
-                severity = listOf("Low", "Moderate", "High").random(),
-                gpsLatitude = plot.latitude + Random.nextDouble(-0.001, 0.001),
-                gpsLongitude = plot.longitude + Random.nextDouble(-0.001, 0.001),
-                detectedAt = today.minusDays(Random.nextInt(5, 30).toLong()).atStartOfDay()
+        // Overdue
+        maintenanceDao.insertMaintenanceTask(
+            MaintenanceTask(
+                title = "Generator monthly service",
+                description = "Oil check and general service",
+                type = MaintenanceType.EQUIPMENT_SERVICING,
+                priority = MaintenancePriority.HIGH,
+                scheduledDate = today.minusDays(5).toEpochDays().toLong() * 86400000L,
+                status = MaintenanceStatus.OVERDUE
             )
-            database.cropDao().insertScoutingReport(report)
+        )
+        // Due next week
+        maintenanceDao.insertMaintenanceTask(
+            MaintenanceTask(
+                title = "Farm pickup oil change",
+                description = "Oil change and tyre pressure check",
+                type = MaintenanceType.VEHICLE_MAINTENANCE,
+                priority = MaintenancePriority.MEDIUM,
+                scheduledDate = today.plusDays(8).toEpochDays().toLong() * 86400000L,
+                status = MaintenanceStatus.SCHEDULED
+            )
+        )
+        // Completed
+        maintenanceDao.insertMaintenanceTask(
+            MaintenanceTask(
+                title = "Water pump inspection",
+                description = "Impeller inspection and belt replacement",
+                type = MaintenanceType.WATER_SYSTEM_MAINTENANCE,
+                priority = MaintenancePriority.MEDIUM,
+                scheduledDate = today.minusDays(15).toEpochDays().toLong() * 86400000L,
+                completedDate = today.minusDays(14).toEpochDays().toLong() * 86400000L,
+                status = MaintenanceStatus.COMPLETED
+            )
+        )
+    }
+
+    private suspend fun seedVehicles(db: ShambaDatabase) {
+        // No VehicleDao exists in database — skip
+    }
+
+    private suspend fun seedMapMarkers(db: ShambaDatabase) {
+        val markerDao = db.mapMarkerDao()
+        
+        markerDao.insertMarker(
+            MapMarkerEntity(name = "Main goat shed", markerType = "Shelter", category = "Infrastructure", latitude = -5.150, longitude = 38.478, icon = "shelter", color = "#0F3320", description = "Capacity 40 animals")
+        )
+        markerDao.insertMarker(
+            MapMarkerEntity(name = "Sheep pen", markerType = "Shelter", category = "Infrastructure", latitude = -5.153, longitude = 38.479, icon = "shelter", color = "#0F3320", description = "Capacity 30 animals")
+        )
+        markerDao.insertMarker(
+            MapMarkerEntity(name = "Main water trough", markerType = "Water", category = "Water", latitude = -5.151, longitude = 38.480, icon = "water", color = "#0D6B62", description = "Fed from borehole")
+        )
+        markerDao.insertMarker(
+            MapMarkerEntity(name = "Feed store", markerType = "Storage", category = "Infrastructure", latitude = -5.148, longitude = 38.477, icon = "storage", color = "#7A3F0D", description = "Silage pit, hay store, concentrate bags")
+        )
+        markerDao.insertMarker(
+            MapMarkerEntity(name = "Cheese production room", markerType = "Cheese", category = "Infrastructure", latitude = -5.152, longitude = 38.481, icon = "cheese", color = "#D4751F", description = "20m² with cold storage")
+        )
+        markerDao.insertMarker(
+            MapMarkerEntity(name = "Compost pit 1", markerType = "Compost", category = "Waste", latitude = -5.154, longitude = 38.482, icon = "compost", color = "#4A2508", description = "Active — manure composting")
+        )
+        markerDao.insertMarker(
+            MapMarkerEntity(name = "Irrigation point — Plot D", markerType = "Water", category = "Water", latitude = -5.149, longitude = 38.483, icon = "water", color = "#0D6B62", description = "Manual pump connection")
+        )
+    }
+
+    private suspend fun seedScoutingReports(db: ShambaDatabase) {
+        val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+        val scoutingDao = db.scoutingReportDao()
+        
+        // Critical FAW on Plot A
+        scoutingDao.insertReport(
+            ScoutingReport(plotId = 1, pestType = "Fall Armyworm", severityScore = 5, gpsLatitude = -5.148, gpsLongitude = 38.479, notes = "Heavy infestation in whorl. Frass visible. ~40% of plants affected.", detectedAt = today.minusDays(1).toEpochDays().toLong() * 86400000L)
+        )
+        // Moderate aphids on Plot C
+        scoutingDao.insertReport(
+            ScoutingReport(plotId = 3, pestType = "Aphids", severityScore = 3, gpsLatitude = -5.153, gpsLongitude = 38.477, notes = "Aphid colonies on bean leaves. Moderate infestation.", detectedAt = today.minusDays(3).toEpochDays().toLong() * 86400000L)
+        )
+        // Low stalk borer
+        scoutingDao.insertReport(
+            ScoutingReport(plotId = 1, pestType = "Maize Stalk Borer", severityScore = 2, gpsLatitude = -5.148, gpsLongitude = 38.480, notes = "Few plants affected. Monitoring.", detectedAt = today.minusDays(14).toEpochDays().toLong() * 86400000L)
+        )
+        // Moderate leafminer on Plot D
+        scoutingDao.insertReport(
+            ScoutingReport(plotId = 4, pestType = "Leafminer", severityScore = 3, gpsLatitude = -5.155, gpsLongitude = 38.481, notes = "Tunnels visible on tomato leaves.", detectedAt = today.minusDays(2).toEpochDays().toLong() * 86400000L)
+        )
+    }
+
+    private suspend fun seedIngestedDocuments(db: ShambaDatabase) {
+        val docDao = db.ingestedDocumentDao()
+        val now = System.currentTimeMillis()
+        
+        docDao.insert(IngestedDocument(
+            id = "doc_demo_001",
+            title = "FAW Management Guide — Tanzania",
+            domainTag = "pests",
+            sourceCredibility = "government_research",
+            chunkCount = 8,
+            dateIngested = now,
+            processingStatus = "complete"
+        ))
+        docDao.insert(IngestedDocument(
+            id = "doc_demo_002",
+            title = "CCPP Prevention and Treatment",
+            domainTag = "livestock",
+            sourceCredibility = "government_research",
+            chunkCount = 6,
+            dateIngested = now,
+            processingStatus = "complete"
+        ))
+        docDao.insert(IngestedDocument(
+            id = "doc_demo_003",
+            title = "Fresh Chèvre Production Guide",
+            domainTag = "cheese",
+            sourceCredibility = "extension_bulletin",
+            chunkCount = 5,
+            dateIngested = now,
+            processingStatus = "complete"
+        ))
+        docDao.insert(IngestedDocument(
+            id = "doc_demo_004",
+            title = "Goat Kidding Management",
+            domainTag = "livestock",
+            sourceCredibility = "academic",
+            chunkCount = 4,
+            dateIngested = now,
+            processingStatus = "complete"
+        ))
+        docDao.insert(IngestedDocument(
+            id = "doc_demo_005",
+            title = "Maize Growth Stages — Coastal Tanzania",
+            domainTag = "crops",
+            sourceCredibility = "extension_bulletin",
+            chunkCount = 7,
+            dateIngested = now,
+            processingStatus = "complete"
+        ))
+    }
+
+    private suspend fun seedKnowledgeChunks(db: ShambaDatabase) {
+        val chunkDao = db.knowledgeChunkDao()
+        val now = System.currentTimeMillis()
+        
+        // FAW chunks
+        chunkDao.insert(KnowledgeChunk(
+            id = "chunk_faw_001",
+            displayText = "Fall Armyworm (Spodoptera frugiperda) is the most destructive pest of maize in Tanzania. Larvae feed on leaves, creating characteristic windowpane damage. Heavy infestations can cause 80-100% yield loss. Early detection through regular scouting (at least weekly) is critical for effective management.",
+            embeddingText = "Fall Armyworm management in Tanzania. Spodoptera frugiperda identification and control.",
+            sourceDocumentId = "doc_demo_001",
+            sourceTitle = "FAW Management Guide — Tanzania",
+            sourceType = "bundled",
+            sourceCredibility = "government_research",
+            domainTag = "pests",
+            topicTags = "maize,fall_armyworm,pest_control",
+            chunkIndex = 0,
+            totalChunks = 8,
+            keywords = "fall armyworm,maize,larvae,scouting",
+            dateAdded = now
+        ))
+        chunkDao.insert(KnowledgeChunk(
+            id = "chunk_faw_002",
+            displayText = "For Fall Armyworm control in maize at tasseling stage, apply Emamectin Benzoate (19g/ha) or Spinetoram (75ml/ha) when 20% of plants show damage. Apply in the evening when larvae are actively feeding. A second application may be needed if infestation persists after 7 days.",
+            embeddingText = "FAW chemical control at tasseling. Emamectin Benzoate and Spinetoram application rates.",
+            sourceDocumentId = "doc_demo_001",
+            sourceTitle = "FAW Management Guide — Tanzania",
+            sourceType = "bundled",
+            sourceCredibility = "government_research",
+            domainTag = "pests",
+            topicTags = "maize,fall_armyworm,pesticide",
+            chunkIndex = 1,
+            totalChunks = 8,
+            keywords = "emamectin,spinetoram,tasseling,treatment",
+            dateAdded = now
+        ))
+        
+        // CCPP chunks
+        chunkDao.insert(KnowledgeChunk(
+            id = "chunk_ccpp_001",
+            displayText = "Contagious Caprine Pleuropneumonia (CCPP) is a highly infectious respiratory disease of goats caused by Mycoplasma capricolum subsp. capripneumoniae. Clinical signs include nasal discharge, coughing, fever (>40.5°C), and laboured breathing. Mortality can reach 60-100% in naive flocks. Immediate isolation and veterinary confirmation are required.",
+            embeddingText = "CCPP in goats. Mycoplasma capripneumoniae symptoms and diagnosis.",
+            sourceDocumentId = "doc_demo_002",
+            sourceTitle = "CCPP Prevention and Treatment",
+            sourceType = "bundled",
+            sourceCredibility = "government_research",
+            domainTag = "livestock",
+            topicTags = "goat,disease,respiratory,CCPP",
+            chunkIndex = 0,
+            totalChunks = 6,
+            keywords = "CCPP,goat,respiratory,isolation,veterinary",
+            dateAdded = now
+        ))
+        chunkDao.insert(KnowledgeChunk(
+            id = "chunk_ccpp_002",
+            displayText = "Oxytetracycline LA (long-acting) is the first-line treatment for CCPP in goats. Dose: 20mg/kg body weight intramuscularly, repeated every 48 hours for 3-5 days. Milk withdrawal period is 7 days after the last injection. Meat withdrawal is 28 days. Report suspected CCPP cases to the nearest veterinary office — it is a notifiable disease in Tanzania.",
+            embeddingText = "Oxytetracycline LA treatment for CCPP. Dosage, withdrawal periods, reporting requirements.",
+            sourceDocumentId = "doc_demo_002",
+            sourceTitle = "CCPP Prevention and Treatment",
+            sourceType = "bundled",
+            sourceCredibility = "government_research",
+            domainTag = "livestock",
+            topicTags = "goat,CCPP,treatment,withdrawal",
+            chunkIndex = 1,
+            totalChunks = 6,
+            medicalContent = true,
+            keywords = "oxytetracycline,CCPP,withdrawal,dose,TZS",
+            dateAdded = now
+        ))
+        
+        // Cheese chunks
+        chunkDao.insert(KnowledgeChunk(
+            id = "chunk_cheese_001",
+            displayText = "Fresh Chèvre (soft goat cheese) production: Use fresh goat milk within 2 hours of milking. Heat milk to 22°C. Add mesophilic culture (MA 4001 or equivalent) at 1U per 100L. Add liquid rennet (2ml per 100L) diluted in 10ml cool water. Stir gently for 1 minute. Allow to set for 16-24 hours at room temperature (20-24°C). Drain in muslin cloth for 6-12 hours. Season with salt (1% by weight) and optional herbs.",
+            embeddingText = "Fresh Chèvre goat cheese recipe. Culture, rennet, temperature, timing, draining.",
+            sourceDocumentId = "doc_demo_003",
+            sourceTitle = "Fresh Chèvre Production Guide",
+            sourceType = "bundled",
+            sourceCredibility = "extension_bulletin",
+            domainTag = "cheese",
+            topicTags = "cheese,chevre,goat_milk,soft_cheese",
+            chunkIndex = 0,
+            totalChunks = 5,
+            keywords = "chèvre,goat cheese,rennet,culture,draining",
+            dateAdded = now
+        ))
+        
+        // Kidding chunks
+        chunkDao.insert(KnowledgeChunk(
+            id = "chunk_kidding_001",
+            displayText = "Goat kidding preparation checklist (7 days before expected due date): 1) Clean and disinfect the kidding pen. 2) Prepare clean bedding (straw or hay). 3) Ensure colostrum plan is in place (either from dam or frozen colostrum). 4) Have iodine solution for navel dipping. 5) Prepare kidding kit: clean towels, lubricant, obstetric gloves, scissors, iodine. 6) Increase monitoring frequency to every 4-6 hours. 7) Confirm vet contact details for emergencies.",
+            embeddingText = "Goat kidding preparation. Kidding pen, colostrum, monitoring, emergency contacts.",
+            sourceDocumentId = "doc_demo_004",
+            sourceTitle = "Goat Kidding Management",
+            sourceType = "bundled",
+            sourceCredibility = "academic",
+            domainTag = "livestock",
+            topicTags = "goat,kidding,preparation,birth",
+            chunkIndex = 0,
+            totalChunks = 4,
+            keywords = "kidding,preparation,colostrum,pen,cleaning",
+            dateAdded = now
+        ))
+        
+        // Maize growth chunks
+        chunkDao.insert(KnowledgeChunk(
+            id = "chunk_maize_001",
+            displayText = "Maize tasseling stage (VT) in coastal Tanzania typically occurs 55-65 days after planting, depending on variety and rainfall. At this stage, the plant is most vulnerable to drought stress and pest attack. Key management: 1) Ensure adequate soil moisture through supplemental irrigation if available. 2) Apply top-dressing fertilizer (CAN) if not already done. 3) Scout for Fall Armyworm and stalk borer weekly. 4) Monitor for grey leaf spot if rainfall has been above average.",
+            embeddingText = "Maize tasseling stage management. CAN fertilizer, FAW scouting, disease monitoring.",
+            sourceDocumentId = "doc_demo_005",
+            sourceTitle = "Maize Growth Stages — Coastal Tanzania",
+            sourceType = "bundled",
+            sourceCredibility = "extension_bulletin",
+            domainTag = "crops",
+            topicTags = "maize,tasseling,growth_stage,fertilizer",
+            chunkIndex = 2,
+            totalChunks = 7,
+            keywords = "maize,tasseling,CAN,fertilizer,scouting",
+            dateAdded = now
+        ))
+        chunkDao.insert(KnowledgeChunk(
+            id = "chunk_maize_002",
+            displayText = "Grey leaf spot (Cercospora zeae-maydis) risk increases when cumulative rainfall in the last 14 days exceeds 80mm and temperatures are above 25°C. Symptoms: rectangular grey to tan lesions on leaves, 2-5mm wide. Management: Apply Dithane M-45 (mancozeb) at 2.5kg/ha or Propiconazole at 500ml/ha at first sign of disease. Avoid late planting to reduce exposure. Rotate with non-cereal crops.",
+            embeddingText = "Grey leaf spot risk assessment. Rainfall threshold, symptoms, fungicide application.",
+            sourceDocumentId = "doc_demo_005",
+            sourceTitle = "Maize Growth Stages — Coastal Tanzania",
+            sourceType = "bundled",
+            sourceCredibility = "extension_bulletin",
+            domainTag = "crops",
+            topicTags = "maize,grey_leaf_spot,disease,fungicide",
+            chunkIndex = 3,
+            totalChunks = 7,
+            keywords = "grey leaf spot,dithane,mancozeb,rainfall,disease",
+            dateAdded = now
+        ))
+    }
+
+    private suspend fun seedOperationalRules(db: ShambaDatabase) {
+        val ruleDao = db.operationalRuleDao()
+        
+        ruleDao.insert(OperationalRule(
+            ruleId = "withdrawal_oxytet_la_goat",
+            ruleType = "withdrawal_period",
+            species = "goat,sheep",
+            parametersJson = """{"milk_withdrawal_days":7,"meat_withdrawal_days":28}""",
+            source = "Norbrook product data sheet 2023",
+            lastVerified = "2025-01-15"
+        ))
+        ruleDao.insert(OperationalRule(
+            ruleId = "gestation_goat",
+            ruleType = "gestation",
+            species = "goat",
+            parametersJson = """{"gestation_days":150,"pre_event_task_days":7}""",
+            source = "Veterinary textbook reference",
+            lastVerified = "2024-06-01"
+        ))
+        ruleDao.insert(OperationalRule(
+            ruleId = "gestation_sheep",
+            ruleType = "gestation",
+            species = "sheep",
+            parametersJson = """{"gestation_days":147,"pre_event_task_days":7}""",
+            source = "Veterinary textbook reference",
+            lastVerified = "2024-06-01"
+        ))
+        ruleDao.insert(OperationalRule(
+            ruleId = "planting_maize_korogwe",
+            ruleType = "planting_window",
+            crop = "maize",
+            location = "korogwe",
+            parametersJson = """{"start_month":3,"end_month":4}""",
+            source = "Tanzania Meteorological Authority long rains forecast",
+            lastVerified = "2025-02-01"
+        ))
+        ruleDao.insert(OperationalRule(
+            ruleId = "notifiable_ccpp",
+            ruleType = "notifiable_disease",
+            species = "goat",
+            parametersJson = """{"disease":"CCPP","reporting_body":"TVLA","action":"isolate_and_report"}""",
+            source = "Tanzania Veterinary Laboratory Agency guidelines",
+            lastVerified = "2024-09-01"
+        ))
+    }
+
+    private suspend fun seedMilkCollections(db: ShambaDatabase) {
+        val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+        val cheeseDao = db.cheeseDao()
+        
+        // Recent milk collections for cheese production
+        for (daysAgo in 1..10) {
+            val date = today.minusDays(daysAgo.toLong())
+            cheeseDao.insertMilkCollection(
+                MilkCollection(date = date, quantityLitres = 28.0 + Random.nextDouble() * 8.0, accepted = true, qualityCheck = "pass")
+            )
         }
     }
-    
-    private suspend fun seedMilkCollection(database: ShambaDatabase) {
-        val today = DemoFarm.today()
+
+    private suspend fun seedHarvestRecords(db: ShambaDatabase) {
+        val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+        val harvestDao = db.harvestDao()
         
-        val collections = listOf(
-            MilkCollection(collectionDate = today.minusDays(5), quantityLiters = 12.5,
-                          notes = "Morning collection - all lactating does"),
-            MilkCollection(collectionDate = today.minusDays(5), quantityLiters = 10.8,
-                          notes = "Evening collection"),
-            MilkCollection(collectionDate = today.minusDays(4), quantityLiters = 11.2,
-                          notes = "Morning collection"),
-            MilkCollection(collectionDate = today.minusDays(4), quantityLiters = 9.5,
-                          notes = "Evening collection")
+        // Previous kale harvest from Plot E
+        harvestDao.insertHarvestRecord(
+            HarvestRecord(cropPlantingId = 5, harvestDate = today.minusDays(30), quantityKg = 180.0, qualityGrade = "A", destination = "Korogwe market", pricePerKg = 200.0)
         )
-        
-        collections.forEach { collection ->
-            database.cheeseDao().insertMilkCollection(collection)
-        }
+        // Previous maize harvest from Plot A
+        harvestDao.insertHarvestRecord(
+            HarvestRecord(cropPlantingId = 1, harvestDate = today.minusDays(120), quantityKg = 1200.0, qualityGrade = "A", destination = "Storage", pricePerKg = 0.0)
+        )
     }
-    
-    private suspend fun seedCheeseBatches(database: ShambaDatabase) {
-        val today = DemoFarm.today()
+
+    private suspend fun seedCropInputs(db: ShambaDatabase) {
+        val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+        val cropDao = db.cropDao()
         
-        val batches = listOf(
-            // Batch 1 - Aging, 5 of 7 days complete
-            CheeseBatch(batchId = "CB-07", cheeseType = "Fresh Chèvre",
-                       milkVolume = 20.0, startDate = today.minusDays(5),
-                       agingDays = 7, status = "Aging"),
-            
-            // Batch 2 - Aging semi-hard
-            CheeseBatch(batchId = "CB-06", cheeseType = "Feta-style",
-                       milkVolume = 30.0, startDate = today.minusDays(12),
-                       agingDays = 21, status = "Aging"),
-            
-            // Batch 3 - Ready to package
-            CheeseBatch(batchId = "CB-05", cheeseType = "Fresh Chèvre",
-                       milkVolume = 25.0, yieldKg = 4.8, startDate = today.minusDays(8),
-                       agingDays = 7, status = "Ready"),
-            
-            // Batch 4 - Sold
-            CheeseBatch(batchId = "CB-04", cheeseType = "Fresh Chèvre",
-                       milkVolume = 18.0, yieldKg = 3.4, startDate = today.minusDays(20),
-                       agingDays = 7, status = "Sold",
-                       salePriceTzsPerKg = 15000.0, quantitySoldKg = 3.4,
-                       saleDate = today.minusDays(12))
+        // DAP applied to Plot A
+        cropDao.insertCropInput(
+            CropInput(plantingId = 1, inputType = "Fertilizer", productName = "DAP", quantity = 50.0, unit = "kg", cost = 18500.0, date = today.minusDays(20))
         )
-        
-        batches.forEach { batch ->
-            database.cheeseDao().insertCheeseBatch(batch)
-        }
-    }
-    
-    private suspend fun seedFeedInventory(database: ShambaDatabase) {
-        val feeds = listOf(
-            FeedInventory(feedType = "Silage (Maize)", quantity = 4200.0, unit = "kg",
-                         reorderThreshold = 6000.0, costPerUnit = 0.0),
-            FeedInventory(feedType = "Napier Grass (Fresh)", quantity = 680.0, unit = "kg",
-                         reorderThreshold = 200.0, costPerUnit = 0.0),
-            FeedInventory(feedType = "Dairy Meal (Concentrate)", quantity = 120.0, unit = "kg",
-                         reorderThreshold = 50.0, costPerUnit = 850.0),
-            FeedInventory(feedType = "Mineral Supplement", quantity = 25.0, unit = "kg",
-                         reorderThreshold = 10.0, costPerUnit = 4500.0),
-            FeedInventory(feedType = "Hay (Backup)", quantity = 40.0, unit = "kg",
-                         reorderThreshold = 100.0, costPerUnit = 200.0),
-            FeedInventory(feedType = "Salt Lick Blocks", quantity = 4.0, unit = "blocks",
-                         reorderThreshold = 2.0, costPerUnit = 3500.0)
+        // CAN top dressing
+        cropDao.insertCropInput(
+            CropInput(plantingId = 1, inputType = "Fertilizer", productName = "CAN", quantity = 30.0, unit = "kg", cost = 13500.0, date = today.minusDays(5))
         )
-        
-        feeds.forEach { feed ->
-            database.feedDao().insertFeedInventory(feed)
-        }
-    }
-    
-    private suspend fun seedStoreItems(database: ShambaDatabase) {
-        // Store items for farm store
-        val items = listOf(
-            StoreItem(name = "Dairy Meal 50kg", category = "Feed", 
-                     quantity = 10, unit = "bags", pricePerUnit = 42500.0),
-            StoreItem(name = "Salt Lick Block", category = "Feed", 
-                     quantity = 8, unit = "blocks", pricePerUnit = 3500.0),
-            StoreItem(name = "Oxytetracycline LA", category = "Medicine", 
-                     quantity = 5, unit = "vials", pricePerUnit = 12000.0),
-            StoreItem(name = "Albendazole", category = "Medicine", 
-                     quantity = 12, unit = "packs", pricePerUnit = 2500.0),
-            StoreItem(name = "PPR Vaccine", category = "Medicine", 
-                     quantity = 20, unit = "doses", pricePerUnit = 800.0)
-        )
-        
-        items.forEach { item ->
-            database.storeDao().insertStoreItem(item)
-        }
-    }
-    
-    private suspend fun seedFinancials(database: ShambaDatabase) {
-        val today = DemoFarm.today()
-        
-        // Current month income
-        val incomes = listOf(
-            Income(date = today.minusDays(2), category = "Cheese sales",
-                  description = "4 batches — Fresh Chèvre to Korogwe market", amount = 184000.0),
-            Income(date = today.minusDays(5), category = "Milk sales",
-                  description = "Surplus milk — 120L to Tanga Dairy Co-op", amount = 96000.0),
-            Income(date = today.minusDays(8), category = "Live animal sales",
-                  description = "2 male goats — Korogwe livestock market", amount = 80000.0),
-            Income(date = today.minusDays(12), category = "Vegetable sales",
-                  description = "Kale harvest — 180kg to Korogwe market", amount = 38000.0),
-            Income(date = today.minusDays(15), category = "Manure sales",
-                  description = "2 truck loads — local vegetable farmers", amount = 14000.0)
-        )
-        
-        incomes.forEach { income ->
-            database.financeDao().insertIncome(income)
-        }
-        
-        // Current month expenses
-        val expenses = listOf(
-            Expense(date = today.minusDays(1), category = "Labour",
-                   description = "Monthly wages — 4 workers", amount = 80000.0),
-            Expense(date = today.minusDays(3), category = "Feed",
-                   description = "Dairy meal 100kg — Korogwe Agrovet", amount = 85000.0),
-            Expense(date = today.minusDays(6), category = "Veterinary & medicine",
-                   description = "Vet visit — G-14 consultation + Oxytetracycline", amount = 22000.0),
-            Expense(date = today.minusDays(9), category = "Seeds & fertiliser",
-                   description = "DAP 50kg — Plot A top dressing", amount = 18500.0),
-            Expense(date = today.minusDays(11), category = "Cheese inputs",
-                   description = "Rennet + mesophilic cultures", amount = 14000.0),
-            Expense(date = today.minusDays(14), category = "Fuel & transport",
-                   description = "Market trips + generator fuel", amount = 9500.0),
-            Expense(date = today.minusDays(18), category = "Packaging",
-                   description = "Cheese packaging materials — 50 units", amount = 7000.0)
-        )
-        
-        expenses.forEach { expense ->
-            database.financeDao().insertExpense(expense)
-        }
-    }
-    
-    private suspend fun seedLoans(database: ShambaDatabase) {
-        val today = DemoFarm.today()
-        
-        val loan = Loan(
-            lenderName = "CRDB Bank Korogwe",
-            amount = 500000.0,
-            interestRate = 18.0,
-            disbursementDate = today.minusMonths(6),
-            dueDate = today.plusMonths(6),
-            status = "Active",
-            amountPaid = 250000.0,
-            balance = 250000.0
-        )
-        
-        database.financeDao().insertLoan(loan)
-    }
-    
-    private suspend fun seedWorkers(database: ShambaDatabase) {
-        val today = DemoFarm.today()
-        
-        val workers = listOf(
-            Worker(name = "Amina Juma", role = "Milking & livestock",
-                  contact = "+255 712 345 678", hireDate = today.minusYears(2),
-                  dailyRate = 2500.0, isActive = true),
-            Worker(name = "Joseph Mwanga", role = "Crops & fencing",
-                  contact = "+255 754 987 654", hireDate = today.minusYears(1),
-                  dailyRate = 2000.0, isActive = true),
-            Worker(name = "Moses Kilima", role = "Crops & general",
-                  contact = "+255 768 111 222", hireDate = today.minusMonths(8),
-                  dailyRate = 2000.0, isActive = true),
-            Worker(name = "Fatuma Said", role = "Casual — cheese room",
-                  contact = "+255 745 333 444", hireDate = today.minusDays(10),
-                  dailyRate = 2500.0, isActive = true)
-        )
-        
-        workers.forEach { worker ->
-            database.labourDao().insertWorker(worker)
-        }
-    }
-    
-    private suspend fun seedAttendance(database: ShambaDatabase) {
-        val today = DemoFarm.today()
-        val workers = database.labourDao().getAllWorkersSync()
-        
-        workers.forEach { worker ->
-            // Seed 26 days of attendance for current month
-            for (daysAgo in 0..25) {
-                val date = today.minusDays(daysAgo.toLong())
-                val status = when {
-                    worker.name == "Moses Kilima" && (daysAgo == 5 || daysAgo == 12) -> "Absent"
-                    worker.name == "Fatuma Said" && daysAgo > 16 -> "Present" // Started mid-month
-                    else -> if (Random.nextDouble() < 0.9) "Present" else "Absent"
-                }
-                
-                if (status == "Present" || (worker.name == "Fatuma Said" && daysAgo <= 16)) {
-                    val record = AttendanceRecord(
-                        workerId = worker.id,
-                        date = date,
-                        status = status,
-                        dailyRateSnapshot = worker.dailyRate ?: 0.0
-                    )
-                    database.labourDao().insertAttendanceRecord(record)
-                }
-            }
-        }
-    }
-    
-    private suspend fun seedTasks(database: ShambaDatabase) {
-        val today = DemoFarm.today()
-        val workers = database.labourDao().getAllWorkersSync()
-        
-        val tasks = listOf(
-            Task(title = "Morning milk collection — all does",
-                 dueDate = today, isCompleted = true, priority = "High"),
-            Task(title = "Deworm sheep flock (Group B)",
-                 dueDate = today, isCompleted = false, priority = "High"),
-            Task(title = "Apply CAN top dressing — Plot A maize",
-                 dueDate = today, isCompleted = false, priority = "Medium"),
-            Task(title = "Record weights — newborn kid G-K1",
-                 dueDate = today, isCompleted = false, priority = "Medium"),
-            Task(title = "Check east perimeter fence — Plot B boundary",
-                 dueDate = today, isCompleted = false, priority = "Low"),
-            Task(title = "Evening milk collection + log yield",
-                 dueDate = today, isCompleted = false, priority = "High"),
-            Task(title = "Spray Plot D tomatoes — Dithane at tasseling",
-                 dueDate = today.plusDays(1), isCompleted = false, priority = "High"),
-            Task(title = "Prepare kidding pen — G-22 Tumaini due in 5 days",
-                 dueDate = today.plusDays(5), isCompleted = false, priority = "High"),
-            Task(title = "Log feed inventory — daily silage draw-down",
-                 dueDate = today.minusDays(1), isCompleted = false, priority = "Medium")
-        )
-        
-        tasks.forEachIndexed { index, task ->
-            val assignedWorker = if (index < workers.size) workers[index] else workers.random()
-            val taskWithWorker = task.copy(assignedWorkerId = assignedWorker.id)
-            database.taskDao().insertTask(taskWithWorker)
-        }
-    }
-    
-    private suspend fun seedCalendarEvents(database: ShambaDatabase) {
-        val today = DemoFarm.today()
-        
-        val events = listOf(
-            CalendarEvent(title = "Korogwe livestock market", date = today.plusDays(2),
-                         type = "Market"),
-            CalendarEvent(title = "Cheese batch CB-07 — aging complete",
-                         date = today.plusDays(2), type = "Cheese"),
-            CalendarEvent(title = "G-22 Tumaini — expected to kid",
-                         date = today.plusDays(5), type = "Reproduction"),
-            CalendarEvent(title = "Sheep deworming — Group A due",
-                         date = today.plusDays(7), type = "Health"),
-            CalendarEvent(title = "Korogwe market day", date = today.plusDays(9),
-                         type = "Market"),
-            CalendarEvent(title = "Tomato harvest window opens — Plot D",
-                         date = today.plusDays(8), type = "Harvest"),
-            CalendarEvent(title = "Kale harvest — Plot E",
-                         date = today, type = "Harvest"),
-            CalendarEvent(title = "CRDB loan repayment due",
-                         date = today.plusDays(15), type = "Finance"),
-            CalendarEvent(title = "G-01 Zawadi — PPR vaccination due",
-                         date = today.plusDays(3), type = "Vaccination")
-        )
-        
-        events.forEach { event ->
-            database.calendarDao().insertCalendarEvent(event)
-        }
-    }
-    
-    private suspend fun seedMaintenanceTasks(database: ShambaDatabase) {
-        val today = DemoFarm.today()
-        
-        val tasks = listOf(
-            MaintenanceTask(equipmentType = "Generator", description = "Monthly service and oil check",
-                           scheduledDate = today.minusDays(5), status = "Overdue"),
-            MaintenanceTask(equipmentType = "Farm pickup truck",
-                           description = "Oil change and tyre pressure check",
-                           scheduledDate = today.plusDays(8), status = "Pending"),
-            MaintenanceTask(equipmentType = "Water pump",
-                           description = "Impeller inspection and belt replacement",
-                           scheduledDate = today.minusDays(15), status = "Complete",
-                           completionDate = today.minusDays(14)),
-            MaintenanceTask(equipmentType = "Dipping tank",
-                           description = "Clean and replenish dip solution",
-                           scheduledDate = today.plusDays(3), status = "Pending")
-        )
-        
-        tasks.forEach { task ->
-            database.maintenanceDao().insertMaintenanceTask(task)
-        }
-    }
-    
-    private suspend fun seedVehicles(database: ShambaDatabase) {
-        val today = DemoFarm.today()
-        
-        val vehicles = listOf(
-            Vehicle(name = "Farm pickup truck", type = "4WD Pickup",
-                   fuelType = "Diesel", purchaseDate = today.minusYears(3)),
-            Vehicle(name = "Generator — 5kVA", type = "Generator",
-                   fuelType = "Petrol", purchaseDate = today.minusYears(2)),
-            Vehicle(name = "Water pump", type = "Pump",
-                   fuelType = "Petrol", purchaseDate = today.minusYears(1))
-        )
-        
-        vehicles.forEach { vehicle ->
-            database.vehicleDao().insertVehicle(vehicle)
-        }
-    }
-    
-    private suspend fun seedMapData(database: ShambaDatabase) {
-        val markers = listOf(
-            MapMarker(latitude = -5.150, longitude = 38.478,
-                     type = "Shelter", label = "Main goat shed", notes = "Capacity 40 animals"),
-            MapMarker(latitude = -5.153, longitude = 38.479,
-                     type = "Shelter", label = "Sheep pen", notes = "Capacity 30 animals"),
-            MapMarker(latitude = -5.151, longitude = 38.480,
-                     type = "Water", label = "Main water trough", notes = "Fed from borehole"),
-            MapMarker(latitude = -5.148, longitude = 38.477,
-                     type = "Storage", label = "Feed store", notes = "Silage pit, hay store, concentrate bags"),
-            MapMarker(latitude = -5.152, longitude = 38.481,
-                     type = "Cheese", label = "Cheese production room", notes = "20m² with cold storage"),
-            MapMarker(latitude = -5.154, longitude = 38.482,
-                     type = "Compost", label = "Compost pit 1", notes = "Active — manure composting"),
-            MapMarker(latitude = -5.149, longitude = 38.483,
-                     type = "Water", label = "Irrigation point — Plot D", notes = "Manual pump connection")
-        )
-        
-        markers.forEach { marker ->
-            database.mapDao().insertMapMarker(marker)
-        }
-        
-        // Farm boundary
-        val boundaryPoints = listOf(
-            BoundaryPoint(latitude = -5.145, longitude = 38.474, sequence = 0),
-            BoundaryPoint(latitude = -5.145, longitude = 38.487, sequence = 1),
-            BoundaryPoint(latitude = -5.159, longitude = 38.487, sequence = 2),
-            BoundaryPoint(latitude = -5.159, longitude = 38.474, sequence = 3)
-        )
-        
-        boundaryPoints.forEach { point ->
-            database.mapDao().insertBoundaryPoint(point)
-        }
-    }
-    
-    private suspend fun seedMaarifaKnowledge(database: ShambaDatabase) {
-        // Seed 50 representative Maarifa knowledge chunks
-        val chunks = listOf(
-            // FAW management
-            KnowledgeChunk(content = "Fall Armyworm (FAW) is a major pest of maize in Tanzania. Early detection is critical for effective management.",
-                          domain = "Pest Management", subdomain = "FAW", source = "Tanzania Agricultural Research Institute"),
-            KnowledgeChunk(content = "FAW larvae feed on maize leaves, causing windowpane damage. Heavy infestations can destroy entire whorls.",
-                          domain = "Pest Management", subdomain = "FAW", source = "CABI Crop Protection Compendium"),
-            KnowledgeChunk(content = "Recommended FAW control: Apply chlorantraniliprole or emamectin benzoate at early larval stages.",
-                          domain = "Pest Management", subdomain = "FAW", source = "Ministry of Agriculture Tanzania"),
-            
-            // CCPP treatment
-            KnowledgeChunk(content = "Contagious Caprine Pleuropneumonia (CCPP) is a highly contagious bacterial disease affecting goats.",
-                          domain = "Animal Health", subdomain = "Respiratory Diseases", source = "OIE Terrestrial Manual"),
-            KnowledgeChunk(content = "CCPP symptoms: Fever, cough, nasal discharge, rapid breathing, isolation from herd.",
-                          domain = "Animal Health", subdomain = "Respiratory Diseases", source = "FAO Animal Health Manual"),
-            KnowledgeChunk(content = "CCPP treatment: Oxytetracycline LA at 20mg/kg IM for 3-5 days. Isolate affected animals.",
-                          domain = "Animal Health", subdomain = "Respiratory Diseases", source = "Tanzania Veterinary Laboratory Agency"),
-            
-            // Oxytetracycline
-            KnowledgeChunk(content = "Oxytetracycline LA withdrawal period: 7 days for milk, 28 days for meat in goats.",
-                          domain = "Animal Health", subdomain = "Drug Withdrawal", source = "Tanzania Veterinary Regulations"),
-            KnowledgeChunk(content = "Oxytetracycline dosage for goats: 20mg/kg body weight, intramuscular injection.",
-                          domain = "Animal Health", subdomain = "Drug Dosage", source = "Veterinary Formulary"),
-            
-            // Fresh Chèvre
-            KnowledgeChunk(content = "Fresh Chèvre production: Use pasteurized goat milk, add mesophilic culture, rennet at 22°C.",
-                          domain = "Cheese Making", subdomain = "Fresh Cheese", source = "Artisan Cheese Making"),
-            KnowledgeChunk(content = "Fresh Chèvre aging: 7 days at 4°C. Ready to package when firm but still creamy.",
-                          domain = "Cheese Making", subdomain = "Fresh Cheese", source = "Dairy Processing Handbook"),
-            
-            // Kidding preparation
-            KnowledgeChunk(content = "Goat gestation period: 150 days (5 months). Prepare kidding pen 1 week before due date.",
-                          domain = "Animal Husbandry", subdomain = "Reproduction", source = "Goat Production Handbook"),
-            KnowledgeChunk(content = "Kidding preparation checklist: Clean pen, colostrum plan, kidding kit, vet contact.",
-                          domain = "Animal Husbandry", subdomain = "Reproduction", source = "Small Ruminant Management"),
-            
-            // Maize growth
-            KnowledgeChunk(content = "Maize tasseling stage: Critical period for moisture and nutrient availability.",
-                          domain = "Crop Management", subdomain = "Maize", source = "Maize Production Guide"),
-            KnowledgeChunk(content = "Maize top dressing: Apply CAN at tasseling stage for optimal grain fill.",
-                          domain = "Crop Management", subdomain = "Maize", source = "Fertilizer Recommendations"),
-            
-            // Silage quality
-            KnowledgeChunk(content = "Silage quality indicators: pH below 4.2, pleasant aroma, olive green color.",
-                          domain = "Feed Management", subdomain = "Silage", source = "Silage Making Guide"),
-            KnowledgeChunk(content = "Silage draw rate: Calculate daily usage to plan procurement. Minimum 21 days stock.",
-                          domain = "Feed Management", subdomain = "Silage", source = "Feed Planning Manual"),
-            
-            // Korogwe climate
-            KnowledgeChunk(content = "Korogwe rainfall: Bimodal pattern. Long rains March-May, short rains October-December.",
-                          domain = "Climate", subdomain = "Regional", source = "Tanzania Meteorological Authority"),
-            KnowledgeChunk(content = "Korogwe disease risk: High humidity after rains increases respiratory disease in livestock.",
-                          domain = "Climate", subdomain = "Disease Risk", source = "Veterinary Epidemiology Unit")
-        )
-        
-        chunks.forEach { chunk ->
-            database.maarifaDao().insertKnowledgeChunk(chunk)
-        }
-    }
-    
-    private suspend fun seedAlerts(database: ShambaDatabase) {
-        val alerts = listOf(
-            // Critical (red)
-            Alert(type = "Health", priority = "Critical",
-                  title = "G-14 Imani — Brucellosis vaccination overdue",
-                  message = "Overdue by 5 days. Last vaccinated Dec 2025. Vet visit required.",
-                  linkedEntityId = "G-14", linkedModule = "Livestock"),
-            
-            Alert(type = "Pest", priority = "Critical",
-                  title = "Critical FAW detected — Plot A",
-                  message = "Fall Armyworm at critical severity. 40% of plants affected. Treatment required immediately.",
-                  linkedEntityId = "P-A", linkedModule = "Scouting"),
-            
-            Alert(type = "Feed", priority = "Critical",
-                  title = "Hay stock critically low",
-                  message = "Only 40kg remaining. Below 100kg reorder threshold. Restock immediately.",
-                  linkedEntityId = null, linkedModule = "Feed"),
-            
-            // High (amber)
-            Alert(type = "Health", priority = "High",
-                  title = "G-22 Tumaini — due to kid in 5 days",
-                  message = "Prepare kidding pen. Ensure colostrum plan is in place.",
-                  linkedEntityId = "G-22", linkedModule = "Livestock"),
-            
-            Alert(type = "Feed", priority = "High",
-                  title = "Silage Pit 1 — 18 days remaining",
-                  message = "Below 21-day threshold at current draw rate. Plan procurement.",
-                  linkedEntityId = null, linkedModule = "Feed"),
-            
-            Alert(type = "Crop", priority = "High",
-                  title = "Plot E kale — harvest window now open",
-                  message = "Kale is ready. Quality will decline in 3–4 days if not harvested.",
-                  linkedEntityId = "P-E", linkedModule = "Crops"),
-            
-            Alert(type = "Pest", priority = "High",
-                  title = "Moderate aphids — Plot C beans",
-                  message = "Aphid infestation at moderate severity. Scout and assess for chemical control.",
-                  linkedEntityId = "P-C", linkedModule = "Scouting"),
-            
-            // Info (blue)
-            Alert(type = "Cheese", priority = "Info",
-                  title = "Batch CB-07 — aging complete in 2 days",
-                  message = "Fresh Chèvre batch CB-07 will be ready to package in 2 days.",
-                  linkedEntityId = "CB-07", linkedModule = "Cheese"),
-            
-            Alert(type = "Maintenance", priority = "Info",
-                  title = "Generator service overdue by 5 days",
-                  message = "Monthly service was due 5 days ago. Schedule maintenance.",
-                  linkedEntityId = null, linkedModule = "Maintenance")
-        )
-        
-        alerts.forEach { alert ->
-            database.alertDao().insertAlert(alert)
-        }
     }
 }

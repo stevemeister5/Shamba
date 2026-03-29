@@ -36,6 +36,7 @@ import com.shambasmart.presentation.crops.ScoutingCaptureScreen
 import com.shambasmart.presentation.onboarding.OnboardingScreen
 import com.shambasmart.presentation.onboarding.LaunchChoiceScreen
 import com.shambasmart.maarifa.MaarifaViewModel
+import com.shambasmart.demo.DemoModeManager
 import androidx.hilt.navigation.compose.hiltViewModel
 
 sealed class Screen(val route: String) {
@@ -97,18 +98,21 @@ fun ShambaNavGraph(
         }
         
         composable(Screen.LaunchChoice.route) {
+            val demoModeManager = hiltViewModel<com.shambasmart.demo.DemoModeManager>()
             LaunchChoiceScreen(
                 onSetupFarm = {
                     navController.navigate(Screen.FarmSetup.route) {
                         popUpTo(Screen.LaunchChoice.route) { inclusive = true }
                     }
                 },
-                onExploreDemo = {
-                    // Set up demo mode and navigate to dashboard
-                    navController.navigate(Screen.Dashboard.route) {
-                        popUpTo(Screen.LaunchChoice.route) { inclusive = true }
+                onLaunchDemo = {
+                    demoModeManager.launchDemo {
+                        navController.navigate(Screen.Dashboard.route) {
+                            popUpTo(Screen.LaunchChoice.route) { inclusive = true }
+                        }
                     }
-                }
+                },
+                demoModeManager = demoModeManager
             )
         }
         

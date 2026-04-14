@@ -12,8 +12,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.shambasmart.data.local.entity.MilkProduction
 import com.shambasmart.data.local.entity.Animal
+import com.shambasmart.data.local.entity.MilkProduction
+import kotlinx.coroutines.flow.*
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -32,11 +33,9 @@ fun MilkProductionScreen(
 
     // Get milk records for selected doe
     val milkRecords by remember(selectedDoe?.id) {
-        derivedStateOf {
-            selectedDoe?.id?.let { doeId ->
-                viewModel.getMilkRecordsByAnimal(doeId)
-            } ?: flowOf(emptyList())
-        }
+        selectedDoe?.id?.let { doeId ->
+            viewModel.getMilkRecordsByAnimal(doeId)
+        } ?: flowOf(emptyList())
     }.collectAsStateWithLifecycle(emptyList())
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {

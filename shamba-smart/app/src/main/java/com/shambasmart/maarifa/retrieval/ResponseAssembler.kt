@@ -109,8 +109,8 @@ class ResponseAssembler(
             if (speciesMatched.isNotEmpty()) filtered = speciesMatched
         }
 
-        // Deduplicate by chunkId
-        filtered = filtered.distinctBy { it.chunk.chunkId }
+        // Deduplicate by id
+        filtered = filtered.distinctBy { it.chunk.id }
 
         return filtered
     }
@@ -166,7 +166,7 @@ class ResponseAssembler(
         for (sc in guidanceChunks) {
             sections.add(AnswerSection(
                 sc.chunk.sourceTitle,
-                sc.chunk.text,
+                sc.chunk.displayText,
                 true
             ))
         }
@@ -237,7 +237,7 @@ class ResponseAssembler(
         }
 
         for (sc in chunks.take(3)) {
-            sections.add(AnswerSection(sc.chunk.sourceTitle, sc.chunk.text, true))
+            sections.add(AnswerSection(sc.chunk.sourceTitle, sc.chunk.displayText, true))
         }
 
         return MaarifaAnswer(
@@ -274,13 +274,13 @@ class ResponseAssembler(
             "African Swine Fever", "Rabies", "Lumpy Skin Disease")
 
         val diseaseChunks = chunks.filter { sc ->
-            val text = sc.chunk.text.lowercase()
+            val text = sc.chunk.displayText.lowercase()
             notifiableDiseases.any { text.contains(it.lowercase()) }
         }
 
         if (diseaseChunks.isNotEmpty()) {
             val foundDiseases = notifiableDiseases.filter { disease ->
-                diseaseChunks.any { it.chunk.text.lowercase().contains(disease.lowercase()) }
+                diseaseChunks.any { it.chunk.displayText.lowercase().contains(disease.lowercase()) }
             }
             warnings.add(Warning(
                 WarningType.NOTIFIABLE_DISEASE,
@@ -300,7 +300,7 @@ class ResponseAssembler(
             }
             sections.add(AnswerSection(
                 "Possible cause ${index + 1}: $confidence confidence",
-                sc.chunk.text,
+                sc.chunk.displayText,
                 true
             ))
         }
@@ -362,7 +362,7 @@ class ResponseAssembler(
         }
 
         for (sc in chunks.take(3)) {
-            sections.add(AnswerSection(sc.chunk.sourceTitle, sc.chunk.text, true))
+            sections.add(AnswerSection(sc.chunk.sourceTitle, sc.chunk.displayText, true))
         }
 
         warnings.add(Warning(
@@ -415,7 +415,7 @@ class ResponseAssembler(
         }
 
         for (sc in chunks.take(3)) {
-            sections.add(AnswerSection(sc.chunk.sourceTitle, sc.chunk.text, true))
+            sections.add(AnswerSection(sc.chunk.sourceTitle, sc.chunk.displayText, true))
         }
 
         return MaarifaAnswer(
@@ -443,7 +443,7 @@ class ResponseAssembler(
     ): MaarifaAnswer {
         val sections = mutableListOf<AnswerSection>()
         for (sc in chunks.take(5)) {
-            sections.add(AnswerSection(sc.chunk.sourceTitle, sc.chunk.text, true))
+            sections.add(AnswerSection(sc.chunk.sourceTitle, sc.chunk.displayText, true))
         }
 
         return MaarifaAnswer(
@@ -473,7 +473,7 @@ class ResponseAssembler(
         val warnings = mutableListOf<Warning>()
 
         for (sc in chunks.take(3)) {
-            sections.add(AnswerSection(sc.chunk.sourceTitle, sc.chunk.text, true))
+            sections.add(AnswerSection(sc.chunk.sourceTitle, sc.chunk.displayText, true))
         }
 
         context?.weatherContext?.let { weather ->
@@ -510,7 +510,7 @@ class ResponseAssembler(
     ): MaarifaAnswer {
         val sections = mutableListOf<AnswerSection>()
         for (sc in chunks.take(5)) {
-            sections.add(AnswerSection(sc.chunk.sourceTitle, sc.chunk.text, true))
+            sections.add(AnswerSection(sc.chunk.sourceTitle, sc.chunk.displayText, true))
         }
 
         return MaarifaAnswer(
@@ -538,7 +538,7 @@ class ResponseAssembler(
     ): MaarifaAnswer {
         val sections = mutableListOf<AnswerSection>()
         for (sc in chunks.take(5)) {
-            sections.add(AnswerSection(sc.chunk.sourceTitle, sc.chunk.text, true))
+            sections.add(AnswerSection(sc.chunk.sourceTitle, sc.chunk.displayText, true))
         }
 
         return MaarifaAnswer(

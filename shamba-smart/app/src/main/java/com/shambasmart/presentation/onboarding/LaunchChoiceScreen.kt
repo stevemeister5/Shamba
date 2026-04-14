@@ -1,6 +1,5 @@
 package com.shambasmart.presentation.onboarding
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.shambasmart.R
 import com.shambasmart.presentation.common.theme.*
+import kotlinx.coroutines.launch
 
 /**
  * Launch Choice Screen — shown after onboarding to let user choose
@@ -28,7 +28,8 @@ import com.shambasmart.presentation.common.theme.*
 fun LaunchChoiceScreen(
     onSetupFarm: () -> Unit,
     onLaunchDemo: () -> Unit,
-    demoModeManager: com.shambasmart.demo.DemoModeManager? = null
+    demoModeManager: com.shambasmart.demo.DemoModeManager? = null,
+    onChoiceMade: () -> Unit = {}
 ) {
     Box(
         modifier = Modifier
@@ -80,7 +81,10 @@ fun LaunchChoiceScreen(
                         containerColor = Green500,
                         contentColor = Green50
                     ),
-                    onClick = onSetupFarm
+                    onClick = {
+                        onChoiceMade()
+                        onSetupFarm()
+                    }
                 )
                 
                 Spacer(modifier = Modifier.width(32.dp))
@@ -97,7 +101,10 @@ fun LaunchChoiceScreen(
                         containerColor = Amber500,
                         contentColor = Amber100
                     ),
-                    onClick = onLaunchDemo
+                    onClick = {
+                        onChoiceMade()
+                        onLaunchDemo()
+                    }
                 )
             }
         }

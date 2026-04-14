@@ -59,4 +59,10 @@ class OnboardingViewModel @Inject constructor(
             _uiState.update { it.copy(permissionsGranted = granted) }
         }
     }
+
+    fun setLaunchChoiceMade() {
+        viewModelScope.launch {
+            onboardingPreferences.setLaunchChoiceMade()
+        }
+    }
 }

@@ -49,8 +49,9 @@ class KnowledgeBootstrapper(
 
     /**
      * Bootstrap all bundled knowledge. Call on first app launch.
+     * @param onProgress callback(current, total) for progress reporting
      */
-    suspend fun bootstrap() = withContext(Dispatchers.IO) {
+    suspend fun bootstrap(onProgress: ((Int, Int) -> Unit)? = null) = withContext(Dispatchers.IO) {
         // Check if already bootstrapped
         val existingCount = chunkDao.getBundledChunkCount()
         if (existingCount > 0) {
@@ -59,6 +60,8 @@ class KnowledgeBootstrapper(
         }
 
         android.util.Log.d("KnowledgeBootstrapper", "Starting knowledge bootstrap...")
+        val totalSteps = knowledgeFiles.size + 1 // +1 for rules
+        var currentStep = 0
 
         // Load knowledge chunks
         var totalChunks = 0
@@ -67,9 +70,13 @@ class KnowledgeBootstrapper(
                 val chunks = loadChunksFromFile(filePath)
                 chunkDao.insertAll(chunks)
                 totalChunks += chunks.size
+                currentStep++
+                onProgress?.invoke(currentStep, totalSteps)
                 android.util.Log.d("KnowledgeBootstrapper", "Loaded ${chunks.size} chunks from $filePath")
             } catch (e: Exception) {
                 android.util.Log.e("KnowledgeBootstrapper", "Failed to load $filePath: ${e.message}")
+                currentStep++
+                onProgress?.invoke(currentStep, totalSteps)
             }
         }
 
@@ -77,9 +84,13 @@ class KnowledgeBootstrapper(
         try {
             val rules = loadRulesFromFile(rulesFile)
             ruleDao.insertAll(rules)
+            currentStep++
+            onProgress?.invoke(currentStep, totalSteps)
             android.util.Log.d("KnowledgeBootstrapper", "Loaded ${rules.size} operational rules")
         } catch (e: Exception) {
             android.util.Log.e("KnowledgeBootstrapper", "Failed to load rules: ${e.message}")
+            currentStep++
+            onProgress?.invoke(currentStep, totalSteps)
         }
 
         android.util.Log.d("KnowledgeBootstrapper", "Bootstrap complete: $totalChunks chunks loaded")

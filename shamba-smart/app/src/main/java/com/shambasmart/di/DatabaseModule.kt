@@ -8,6 +8,7 @@ import com.shambasmart.data.local.ShambaDatabase
 import com.shambasmart.data.local.dao.*
 import com.shambasmart.data.local.dao.maarifa.KnowledgeChunkDao
 import com.shambasmart.data.local.dao.maarifa.OperationalRuleDao
+import com.shambasmart.data.local.fts.KnowledgeFts5Callback
 import com.shambasmart.security.HardwareKeyManager
 import com.shambasmart.security.KeystoreManager
 import dagger.Module
@@ -29,8 +30,7 @@ object DatabaseModule {
     @Singleton
     fun provideDatabase(
         @ApplicationContext context: Context,
-        keystoreManager: KeystoreManager,
-        hardwareKeyManager: HardwareKeyManager
+        keystoreManager: KeystoreManager
     ): ShambaDatabase {
         // Get or create secure passphrase using hardware-backed security
         val passphrase = if (keystoreManager.keyExists()) {
@@ -50,6 +50,7 @@ object DatabaseModule {
         )
             .openHelperFactory(factory)
             .fallbackToDestructiveMigration()
+            .addCallback(KnowledgeFts5Callback())
             .build()
         
         return database

@@ -20,11 +20,15 @@ class FinancialViewModel @Inject constructor(
     val allIncome: StateFlow<List<Income>> = financialDao.getAllIncome()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    val allIncomes: StateFlow<List<Income>> = allIncome // Alias for UI compatibility
+
     val allExpenses: StateFlow<List<Expense>> = financialDao.getAllExpenses()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     val activeLoans: StateFlow<List<Loan>> = financialDao.getActiveLoans()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    val allLoans: StateFlow<List<Loan>> = activeLoans // Alias for UI compatibility
 
     fun addIncome(income: Income) {
         viewModelScope.launch {
@@ -59,6 +63,12 @@ class FinancialViewModel @Inject constructor(
     fun updateLoan(loan: Loan) {
         viewModelScope.launch {
             financialDao.updateLoan(loan)
+        }
+    }
+
+    fun deleteLoan(loan: Loan) {
+        viewModelScope.launch {
+            financialDao.deleteLoan(loan)
         }
     }
 }

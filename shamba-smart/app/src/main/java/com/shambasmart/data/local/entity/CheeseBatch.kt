@@ -25,6 +25,27 @@ data class CheeseBatch(
     val status: String = "aging",
     val qualityNotes: String? = null,
     val outcomeRating: Int? = null,
+    // Cost fields (TZS)
+    @ColumnInfo(name = "milk_cost_tzs")
+    val milkCostTzs: Long = 0L,
+    @ColumnInfo(name = "culture_cost_tzs")
+    val cultureCostTzs: Long = 0L,
+    @ColumnInfo(name = "rennet_cost_tzs")
+    val rennetCostTzs: Long = 0L,
+    @ColumnInfo(name = "packaging_cost_tzs")
+    val packagingCostTzs: Long = 0L,
+    @ColumnInfo(name = "labour_cost_tzs")
+    val labourCostTzs: Long = 0L,
+    @ColumnInfo(name = "other_input_cost_tzs")
+    val otherInputCostTzs: Long = 0L,
+    // Sale fields
+    @ColumnInfo(name = "sale_price_tzs_per_kg")
+    val salePriceTzsPerKg: Long = 0L,
+    @ColumnInfo(name = "quantity_sold_kg")
+    val quantitySoldKg: Float = 0f,
+    @ColumnInfo(name = "sale_date")
+    val saleDate: Long? = null,
+    // Legacy cost fields (deprecated, use new TZS fields)
     val costMilk: Double? = null,
     val costInputs: Double? = null,
     val costLabour: Double? = null,

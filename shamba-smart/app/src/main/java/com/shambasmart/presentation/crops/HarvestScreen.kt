@@ -15,6 +15,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.shambasmart.data.local.entity.CropPlanting
 import com.shambasmart.data.local.entity.HarvestRecord
 import com.shambasmart.data.local.entity.Plot
+import kotlinx.coroutines.flow.*
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -32,11 +33,9 @@ fun HarvestScreen(
 
     // Get harvest records for selected crop planting
     val harvestRecords by remember(selectedCropPlanting?.id) {
-        derivedStateOf {
-            selectedCropPlanting?.id?.let { cropPlantingId ->
-                viewModel.getHarvestRecordsByCropPlanting(cropPlantingId)
-            } ?: flowOf(emptyList())
-        }
+        selectedCropPlanting?.id?.let { cropPlantingId ->
+            viewModel.getHarvestRecordsByCropPlanting(cropPlantingId)
+        } ?: flowOf(emptyList())
     }.collectAsStateWithLifecycle(emptyList())
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {

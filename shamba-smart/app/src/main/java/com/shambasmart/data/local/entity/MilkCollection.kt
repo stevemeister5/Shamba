@@ -2,11 +2,24 @@ package com.shambasmart.data.local.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import kotlinx.datetime.LocalDate
 import java.util.UUID
 
-@Entity(tableName = "milk_collections")
+@Entity(
+    tableName = "milk_collections",
+    foreignKeys = [
+        ForeignKey(
+            entity = Animal::class,
+            parentColumns = ["id"],
+            childColumns = ["source_animal_id"],
+            onDelete = ForeignKey.SET_NULL
+        )
+    ],
+    indices = [Index("source_animal_id")]
+)
 data class MilkCollection(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
@@ -18,6 +31,8 @@ data class MilkCollection(
     val phLevel: Double? = null,
     val accepted: Boolean = true,
     val rejectionReason: String? = null,
+    @ColumnInfo(name = "source_animal_id")
+    val sourceAnimalId: Long? = null,
     val notes: String? = null,
     val createdAt: Long = System.currentTimeMillis(),
     val isSynced: Boolean = false,

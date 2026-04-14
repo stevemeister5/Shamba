@@ -231,7 +231,7 @@ class MaarifaViewModel @Inject constructor(
     fun bookmarkEntry(chunk: KnowledgeChunk) {
         viewModelScope.launch {
             // Save to DataStore
-            saveBookmark(chunk.chunkId)
+            saveBookmark(chunk.id)
             _savedEntries.update { it + chunk }
         }
     }
@@ -240,7 +240,7 @@ class MaarifaViewModel @Inject constructor(
         viewModelScope.launch {
             // Remove from DataStore
             removeBookmarkId(chunkId)
-            _savedEntries.update { it.filter { c -> c.chunkId != chunkId } }
+            _savedEntries.update { it.filter { c -> c.id != chunkId } }
         }
     }
 

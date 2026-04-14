@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -51,12 +52,12 @@ fun GPSBoundaryScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 actions = {
                     IconButton(onClick = { showHelpDialog = true }) {
-                        Icon(Icons.Default.Help, contentDescription = "Help")
+                        Icon(Icons.AutoMirrored.Filled.Help, contentDescription = "Help")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -258,7 +259,7 @@ fun GPSBoundaryScreen(
                                 enabled = uiState.isGPSEnabled && !uiState.isMarking,
                                 modifier = Modifier.fillMaxWidth()
                             ) {
-                                Icon(Icons.Default.DirectionsWalk, contentDescription = null)
+                                Icon(Icons.AutoMirrored.Filled.DirectionsWalk, contentDescription = null)
                                 Spacer(modifier = Modifier.width(8.dp))
                                 Text("Start Walking Mode")
                             }
@@ -388,7 +389,7 @@ fun GPSBoundaryScreen(
                     enabled = uiState.boundaryPoints.isNotEmpty(),
                     modifier = Modifier.weight(1f)
                 ) {
-                    Icon(Icons.Default.Undo, contentDescription = null)
+                    Icon(Icons.AutoMirrored.Filled.Undo, contentDescription = null)
                     Spacer(modifier = Modifier.width(8.dp))
                     Text("Undo")
                 }

@@ -121,7 +121,7 @@ class CropsViewModel @Inject constructor(
 
     // Harvest methods
     fun getHarvestRecordsByCropPlanting(cropPlantingId: Long): Flow<List<HarvestRecord>> {
-        return harvestDao.getHarvestsByCropPlantingId(cropPlantingId)
+        return harvestDao.getHarvestsByCropId(cropPlantingId)
     }
 
     fun addHarvest(harvest: HarvestRecord) {

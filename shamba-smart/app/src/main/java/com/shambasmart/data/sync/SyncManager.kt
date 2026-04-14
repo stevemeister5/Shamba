@@ -2,7 +2,10 @@ package com.shambasmart.data.sync
 
 import android.content.Context
 import android.net.ConnectivityManager
+import android.net.Network
 import android.net.NetworkCapabilities
+import android.net.NetworkRequest
+import androidx.work.*
 import com.shambasmart.data.local.dao.*
 import com.shambasmart.data.local.entity.SyncStatus
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -30,10 +33,13 @@ data class SyncResult(
  * Strategy: Only sync rows where last_updated > local_max_timestamp.
  * Handles Tanga's unreliable connectivity with retry and exponential backoff.
  * Uses revision_id for conflict resolution on concurrent edits.
+ * 
+ * Sync is triggered by connectivity restoration, not periodic timers.
  */
 @Singleton
 class SyncManager @Inject constructor(
     @ApplicationContext private val context: Context,
+    private val workManager: WorkManager,
     private val animalDao: AnimalDao,
     private val healthRecordDao: HealthRecordDao,
     private val reproductionDao: ReproductionDao,
@@ -53,9 +59,10 @@ class SyncManager @Inject constructor(
     private val syncDao: SyncDao
 ) {
     
+    private var networkCallback: ConnectivityManager.NetworkCallback? = null
+    
     companion object {
-        const val SYNC_WORK_NAME = "shamba_smart_sync"
-        val SYNC_INTERVAL = TimeUnit.MINUTES.toMinutes(15)
+        const val SYNC_WORK_NAME = "shamba_sync_on_connect"
         const val MAX_RETRY_ATTEMPTS = 3
         const val BATCH_SIZE = 100
     }
@@ -192,11 +199,26 @@ class SyncManager @Inject constructor(
 
     /**
      * Handles conflict resolution for concurrent edits.
-     * Uses revision_id to determine which version wins.
+     * Uses last_updated timestamp to determine which version wins.
+     * revision_id is used as a change detection signal (if different, conflict exists).
      */
-    private fun resolveConflict(localRevisionId: String, remoteRevisionId: String): Boolean {
-        // Compare UUIDs lexicographically - last writer wins
-        return remoteRevisionId > localRevisionId
+    private fun resolveConflict(localLastUpdated: Long, remoteLastUpdated: Long, localRevisionId: String, remoteRevisionId: String): Boolean {
+        // Remote wins if its timestamp is newer
+        return if (remoteLastUpdated > localLastUpdated) {
+            true
+        } else if (localLastUpdated > remoteLastUpdated) {
+            false
+        } else {
+            // Same timestamp - use revision_id as deterministic tiebreaker
+            remoteRevisionId > localRevisionId
+        }
+    }
+    
+    /**
+     * Checks if a conflict exists by comparing revision IDs.
+     */
+    private fun hasConflict(localRevisionId: String, remoteRevisionId: String): Boolean {
+        return localRevisionId != remoteRevisionId
     }
 
     /**
@@ -222,5 +244,56 @@ class SyncManager @Inject constructor(
         val network = connectivityManager.activeNetwork ?: return false
         val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
         return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+    }
+    
+    /**
+     * Registers a network callback to trigger sync when connectivity is restored.
+     * This replaces periodic timer-based sync.
+     */
+    fun registerConnectivitySync() {
+        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        
+        networkCallback = object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                triggerSync()
+            }
+        }
+        
+        val request = NetworkRequest.Builder()
+            .addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+            .build()
+        
+        cm.registerNetworkCallback(request, networkCallback!!)
+    }
+    
+    /**
+     * Unregisters the network callback.
+     */
+    fun unregisterConnectivitySync() {
+        networkCallback?.let {
+            (context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager)
+                .unregisterNetworkCallback(it)
+        }
+        networkCallback = null
+    }
+    
+    /**
+     * Triggers a one-time sync when connectivity is available.
+     */
+    private fun triggerSync() {
+        val request = OneTimeWorkRequestBuilder<SyncWorker>()
+            .setConstraints(
+                Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .build()
+            )
+            .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 1, TimeUnit.SECONDS)
+            .build()
+        
+        workManager.enqueueUniqueWork(
+            SYNC_WORK_NAME,
+            ExistingWorkPolicy.KEEP,
+            request
+        )
     }
 }

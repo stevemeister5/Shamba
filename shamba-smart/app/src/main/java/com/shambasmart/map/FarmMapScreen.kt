@@ -1,3 +1,11 @@
+/**
+ * FarmMapScreen.kt - Interactive farm map with OSMDroid
+ * 
+ * BUG FIX HISTORY:
+ * - PolygonDrawingOverlay call was corrected (was using screen coordinates instead of map coordinates)
+ * - Polygon creation now properly calculates center from GeoPoints
+ * - All fixes were applied directly to source; Python patch scripts (fix_overlay.py, fix_poly.py) have been deleted
+ */
 package com.shambasmart.map
 
 import androidx.compose.foundation.background

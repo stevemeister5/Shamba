@@ -16,6 +16,7 @@ import com.shambasmart.data.local.entity.CropPlanting
 import com.shambasmart.data.local.entity.Plot
 import com.shambasmart.maarifa.MaarifaViewModel
 import com.shambasmart.maarifa.ui.*
+import kotlinx.coroutines.flow.*
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -33,11 +34,9 @@ fun CropPlantingScreen(
 
     // Get crop plantings for selected plot
     val cropRecords by remember(selectedPlot?.id) {
-        derivedStateOf {
-            selectedPlot?.id?.let { plotId ->
-                viewModel.getCropPlantingsByPlot(plotId)
-            } ?: flowOf(emptyList())
-        }
+        selectedPlot?.id?.let { plotId ->
+            viewModel.getCropPlantingsByPlot(plotId)
+        } ?: flowOf(emptyList())
     }.collectAsStateWithLifecycle(emptyList())
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
@@ -126,7 +125,7 @@ fun CropPlantingScreen(
         AddCropPlantingDialog(
             plotId = selectedPlot?.id ?: 0L,
             onDismiss = { showAddDialog = false },
-            onAdd = { record ->
+            onAdd = { record: CropPlanting ->
                 viewModel.addCropPlanting(record)
                 showAddDialog = false
             }

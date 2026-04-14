@@ -1,5 +1,6 @@
 package com.shambasmart.presentation.livestock
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.shambasmart.data.local.dao.MilkProductionDao
@@ -15,6 +16,9 @@ import com.shambasmart.domain.repository.HealthRecordRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
 import javax.inject.Inject
 
 @HiltViewModel
@@ -23,7 +27,8 @@ class LivestockViewModel @Inject constructor(
     private val healthRecordRepository: HealthRecordRepository,
     private val reproductionDao: ReproductionDao,
     private val milkProductionDao: MilkProductionDao,
-    private val weightDao: WeightDao
+    private val weightDao: WeightDao,
+    private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(LivestockUiState())
@@ -31,6 +36,12 @@ class LivestockViewModel @Inject constructor(
 
     val allAnimals: StateFlow<List<Animal>> = animalRepository.getAllActiveAnimals()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    // Handle Animal Selection for Detail View
+    private val _selectedAnimalId = MutableStateFlow<Long?>(savedStateHandle.get<Long>("animalId"))
+    val selectedAnimal: StateFlow<Animal?> = combine(_selectedAnimalId, allAnimals) { id, animals ->
+        id?.let { animals.find { a -> a.id == it } }
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     val herdSize: StateFlow<Int> = animalRepository.getActiveAnimalCount()
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
@@ -59,9 +70,13 @@ class LivestockViewModel @Inject constructor(
     // Milk Production tracking
     val todayMilkYield: StateFlow<Double?> = flow {
         emit(milkProductionDao.getTotalYieldByDate(
-            kotlinx.datetime.Clock.System.todayIn(kotlinx.datetime.TimeZone.currentSystemDefault())
+            Clock.System.todayIn(TimeZone.currentSystemDefault())
         ))
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0.0)
+
+    fun selectAnimal(id: Long?) {
+        _selectedAnimalId.value = id
+    }
 
     fun addAnimal(animal: Animal) {
         viewModelScope.launch {

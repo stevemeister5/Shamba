@@ -24,3 +24,6 @@ local.properties
 
 # Knowledge staging (raw PDFs and processing scripts - too large for git)
 knowledge_staging/
+
+# Python scripts (utility scripts should not be committed alongside Android source)
+*.py

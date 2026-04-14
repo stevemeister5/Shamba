@@ -59,67 +59,6 @@ fun SettingsScreen(
             
             Spacer(modifier = Modifier.height(24.dp))
             
-            // Language Section
-            SettingsSection(
-                title = "Language",
-                icon = Icons.Outlined.Language
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "App Language",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = Neutral950
-                    )
-                    var expanded by remember { mutableStateOf(false) }
-                    ExposedDropdownMenuBox(
-                        expanded = expanded,
-                        onExpandedChange = { expanded = !expanded }
-                    ) {
-                        TextField(
-                            value = uiState.selectedLanguage,
-                            onValueChange = {},
-                            readOnly = true,
-                            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                            modifier = Modifier.menuAnchor(),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = Green500,
-                                unfocusedBorderColor = Neutral200,
-                                focusedContainerColor = SurfaceSunken,
-                                unfocusedContainerColor = SurfaceSunken
-                            ),
-                            shape = RoundedCornerShape(10.dp)
-                        )
-                        ExposedDropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false },
-                            modifier = Modifier.background(SurfaceElevated)
-                        ) {
-                            languages.forEach { language ->
-                                DropdownMenuItem(
-                                    text = { 
-                                        Text(
-                                            text = language,
-                                            style = MaterialTheme.typography.bodyMedium,
-                                            color = Neutral950
-                                        ) 
-                                    },
-                                    onClick = {
-                                        viewModel.updateLanguage(language)
-                                        expanded = false
-                                    }
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
             // User Role Section
             SettingsSection(
                 title = "User Role",

@@ -42,8 +42,27 @@ class HSVAnalyzer @Inject constructor() {
     fun analyzeImage(bitmap: Bitmap): HSVAnalysisResult {
         val width = bitmap.width
         val height = bitmap.height
-        val pixels = IntArray(width * height)
-        bitmap.getPixels(pixels, 0, width, 0, 0, width, height)
+
+        // Downsample for analysis if the bitmap is too large to save memory and time
+        val sampleSize = if (width * height > 640 * 480) 4 else 2
+        val sampledWidth = width / sampleSize
+        val sampledHeight = height / sampleSize
+
+        val pixels = IntArray(sampledWidth * sampledHeight)
+
+        // Use a temporary downsampled bitmap if needed
+        val analysisBitmap = if (sampleSize > 1) {
+            Bitmap.createScaledBitmap(bitmap, sampledWidth, sampledHeight, false)
+        } else {
+            bitmap
+        }
+
+        analysisBitmap.getPixels(pixels, 0, sampledWidth, 0, 0, sampledWidth, sampledHeight)
+
+        // Clean up temporary bitmap if created
+        if (analysisBitmap != bitmap) {
+            analysisBitmap.recycle()
+        }
 
         val hsvValues = mutableListOf<HSVValues>()
         val hueDistribution = mutableMapOf<Int, Int>()
@@ -53,8 +72,8 @@ class HSVAnalyzer @Inject constructor() {
             hueDistribution[i * 10] = 0
         }
 
-        // Sample pixels (every 4th pixel for performance)
-        for (i in pixels.indices step 4) {
+        // Process sampled pixels
+        for (i in pixels.indices) {
             val pixel = pixels[i]
             val r = Color.red(pixel)
             val g = Color.green(pixel)
@@ -160,7 +179,12 @@ class HSVAnalyzer @Inject constructor() {
         // Extract region
         val regionBitmap = Bitmap.createBitmap(bitmap, startX, startY, regionWidth, regionHeight)
         
-        return analyzeImage(regionBitmap)
+        val result = analyzeImage(regionBitmap)
+
+        // Free the cropped bitmap
+        regionBitmap.recycle()
+
+        return result
     }
 
     /**

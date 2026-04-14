@@ -22,6 +22,9 @@ interface ScoutingReportDao {
     @Query("SELECT * FROM scouting_reports WHERE severityScore >= 4 ORDER BY detectedAt DESC")
     fun getCriticalReports(): Flow<List<ScoutingReport>>
 
+    @Query("SELECT COUNT(*) FROM scouting_reports WHERE severityScore >= 4 AND isResolved = 0")
+    suspend fun getCriticalPestCountSync(): Int
+
     @Query("SELECT * FROM scouting_reports WHERE detectedAt BETWEEN :startDate AND :endDate ORDER BY detectedAt DESC")
     fun getReportsInDateRange(startDate: Long, endDate: Long): Flow<List<ScoutingReport>>
 

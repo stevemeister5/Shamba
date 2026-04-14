@@ -1,14 +1,14 @@
 package com.shambasmart.data.local.converter
 
 import androidx.room.TypeConverter
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 
 class Converters {
-    private val gson = Gson()
+    private val json = Json { ignoreUnknownKeys = true }
 
     @TypeConverter
     fun fromTimestamp(value: Long?): Instant? {
@@ -43,26 +43,24 @@ class Converters {
     @TypeConverter
     fun fromStringList(value: String?): List<String>? {
         if (value == null) return null
-        val listType = object : TypeToken<List<String>>() {}.type
-        return gson.fromJson(value, listType)
+        return json.decodeFromString(value)
     }
 
     @TypeConverter
     fun toStringList(list: List<String>?): String? {
         if (list == null) return null
-        return gson.toJson(list)
+        return json.encodeToString(list)
     }
 
     @TypeConverter
     fun fromDoubleMap(value: String?): Map<String, Double>? {
         if (value == null) return null
-        val mapType = object : TypeToken<Map<String, Double>>() {}.type
-        return gson.fromJson(value, mapType)
+        return json.decodeFromString(value)
     }
 
     @TypeConverter
     fun toDoubleMap(map: Map<String, Double>?): String? {
         if (map == null) return null
-        return gson.toJson(map)
+        return json.encodeToString(map)
     }
 }

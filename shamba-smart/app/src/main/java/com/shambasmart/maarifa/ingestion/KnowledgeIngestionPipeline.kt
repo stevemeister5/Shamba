@@ -9,7 +9,6 @@ import com.shambasmart.maarifa.retrieval.VectorSearchEngine
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
-import java.time.LocalDate
 
 /**
  * Maarifa Knowledge Ingestion Pipeline — quality gates and chunk processing.
@@ -153,7 +152,7 @@ class KnowledgeIngestionPipeline(
         )
 
         val relevantChunks = chunks.count { chunk ->
-            val text = chunk.text.lowercase()
+            val text = chunk.displayText.lowercase()
             domainKeywords.any { text.contains(it) }
         }
 
@@ -177,7 +176,7 @@ class KnowledgeIngestionPipeline(
         )
 
         for (chunk in chunks) {
-            val text = chunk.text.lowercase()
+            val text = chunk.displayText.lowercase()
 
             for ((drug, field) in drugPatterns) {
                 if (text.contains(drug) && text.contains(field)) {
@@ -216,9 +215,17 @@ class KnowledgeIngestionPipeline(
 
         return chunks.map { chunk ->
             try {
-                val embedding = vectorEngine.generateEmbedding(chunk.embeddingText)
-                if (embedding != null) {
-                    chunk.copy(vector = embedding.contentToString())
+                val floats = vectorEngine.generateEmbedding(chunk.embeddingText)
+                if (floats != null) {
+                    val bytes = ByteArray(floats.size * 4)
+                    for (i in floats.indices) {
+                        val bits = floats[i].toRawBits()
+                        bytes[i * 4] = (bits and 0xFF).toByte()
+                        bytes[i * 4 + 1] = ((bits shr 8) and 0xFF).toByte()
+                        bytes[i * 4 + 2] = ((bits shr 16) and 0xFF).toByte()
+                        bytes[i * 4 + 3] = ((bits shr 24) and 0xFF).toByte()
+                    }
+                    chunk.copy(embedding = bytes)
                 } else {
                     chunk
                 }
@@ -232,7 +239,7 @@ class KnowledgeIngestionPipeline(
      * Delete an ingested document and all its chunks.
      */
     suspend fun deleteDocument(sourceTitle: String) {
-        chunkDao.deleteBySource(sourceTitle)
+        chunkDao.deleteBySourceDocument(sourceTitle)
     }
 
     /**
@@ -241,11 +248,11 @@ class KnowledgeIngestionPipeline(
     suspend fun getIngestedDocuments(): List<DocumentInfo> {
         val sources = chunkDao.getAllSourceTitles()
         return sources.map { title ->
-            val chunks = chunkDao.getChunksBySource(title)
+            val chunks = chunkDao.getChunksBySourceDocument(title)
             DocumentInfo(
                 title = title,
                 chunkCount = chunks.size,
-                dateAdded = chunks.firstOrNull()?.dateAdded ?: "unknown",
+                dateAdded = chunks.firstOrNull()?.dateAdded?.toString() ?: "unknown",
                 sourceType = chunks.firstOrNull()?.sourceType ?: "unknown"
             )
         }
@@ -299,15 +306,19 @@ class KnowledgeIngestionPipeline(
                             
                             val chunk = KnowledgeChunk(
                                 id = chunkJson.getString("id"),
-                                text = chunkJson.getString("text"),
-                                vector = embedding.contentToString(),
-                                sourceType = "bundled",
+                                displayText = chunkJson.getString("text"),
+                                embeddingText = chunkJson.getString("text"),
+                                sourceDocumentId = "",
                                 sourceTitle = "$domain/$fileName",
+                                sourceType = "bundled",
                                 sourceCredibility = "fao",
+                                domainTag = domain,
                                 topicTags = "$domain,$topic",
-                                dateAdded = LocalDate.now().toString(),
-                                lastVerified = LocalDate.now().toString(),
-                                isCritical = false
+                                keywords = "",
+                                embedding = null,
+                                dateAdded = System.currentTimeMillis(),
+                                lastVerified = System.currentTimeMillis(),
+                                medicalContent = false
                             )
                             chunks.add(chunk)
                         }

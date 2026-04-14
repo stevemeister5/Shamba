@@ -36,7 +36,13 @@ class SettingsViewModel @Inject constructor(
                 settingsPreferences.farmName,
                 settingsPreferences.farmLocation,
                 settingsPreferences.farmSize
-            ) { language, role, notifications, farmName, farmLocation, farmSize ->
+            ) { values: Array<Any> ->
+                val language = values[0] as String
+                val role = values[1] as String
+                val notifications = values[2] as Boolean
+                val farmName = values[3] as String
+                val farmLocation = values[4] as String
+                val farmSize = values[5] as String
                 SettingsUiState(
                     selectedLanguage = language,
                     userRole = role,
@@ -162,8 +168,6 @@ class SettingsViewModel @Inject constructor(
                             put("sex", animal.sex)
                             put("dateOfBirth", animal.dateOfBirth?.toString())
                             put("status", animal.status)
-                            put("source", animal.source)
-                            put("purchasePrice", animal.purchasePrice)
                             put("notes", animal.notes)
                         })
                     }

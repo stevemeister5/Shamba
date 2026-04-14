@@ -1,7 +1,6 @@
 package com.shambasmart.maarifa.chunker
 
 import com.shambasmart.data.local.entity.maarifa.KnowledgeChunk
-import java.time.LocalDate
 
 class SemanticChunker {
     companion object {
@@ -40,23 +39,36 @@ class SemanticChunker {
                     }
                 }
             }
+            val domainTag = topicTags.split(",").firstOrNull()?.trim() ?: "general"
             return rawChunks.mapIndexed { index, raw ->
-                val chunkId = generateChunkId(sourceTitle, index)
-                val text = raw.text.trim()
+                val id = generateChunkId(sourceTitle, index)
+                val displayText = raw.text.trim()
                 val sectionTag = raw.sectionHeader?.let { " [Section: $it]" } ?: ""
-                val embText = "[Source: $sourceTitle] [Tags: $topicTags]$sectionTag [Content follows:] $text"
+                val embText = "[Source: $sourceTitle] [Tags: $topicTags]$sectionTag [Content follows:] $displayText"
                 val prevTail = if (index > 0) getLastWords(rawChunks[index-1].text, CONTEXT_WINDOW_WORDS) else null
                 val nextHead = if (index < rawChunks.size-1) getFirstWords(rawChunks[index+1].text, CONTEXT_WINDOW_WORDS) else null
+                val keywords = extractKeywords(displayText)
                 KnowledgeChunk(
-                    chunkId = chunkId, text = text, embeddingText = embText,
-                    sourceTitle = sourceTitle, sourceType = sourceType,
-                    sourceCredibility = sourceCredibility, topicTags = topicTags,
-                    sectionHeader = raw.sectionHeader, chunkIndex = index,
-                    totalChunksInSource = rawChunks.size,
-                    prevChunkTail = prevTail, nextChunkHead = nextHead,
-                    medicalContent = detectMedicalContent(text),
-                    dateAdded = LocalDate.now().toString(),
-                    lastVerified = lastVerified, vector = null
+                    id = id,
+                    displayText = displayText,
+                    embeddingText = embText,
+                    sourceDocumentId = "",
+                    sourceTitle = sourceTitle,
+                    sourceType = sourceType,
+                    sourceCredibility = sourceCredibility,
+                    domainTag = domainTag,
+                    topicTags = topicTags,
+                    sectionHeader = raw.sectionHeader,
+                    chunkIndex = index,
+                    totalChunks = rawChunks.size,
+                    prevChunkTail = prevTail,
+                    nextChunkHead = nextHead,
+                    medicalContent = detectMedicalContent(displayText),
+                    language = "en",
+                    keywords = keywords,
+                    embedding = null,
+                    dateAdded = System.currentTimeMillis(),
+                    lastVerified = lastVerified?.toLongOrNull()
                 )
             }
         }
@@ -90,6 +102,14 @@ class SemanticChunker {
             if(it.size<=n) t.trim() else it.take(n).joinToString(" ") }
         private fun generateChunkId(src: String, idx: Int) =
             "chunk_${src.hashCode().toString().takeLast(6)}_${idx.toString().padStart(4,'0')}"
+
+        private fun extractKeywords(text: String): String {
+            val words = text.lowercase().split(Regex("\\s+"))
+                .filter { it.length > 3 }
+                .distinct()
+                .take(20)
+            return words.joinToString(",")
+        }
     }
     private data class Section(val header: String?, val body: String)
     private data class RawChunk(val text: String, val sectionHeader: String?)

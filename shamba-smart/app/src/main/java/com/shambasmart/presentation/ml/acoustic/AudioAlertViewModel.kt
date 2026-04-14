@@ -214,7 +214,7 @@ class AudioAlertViewModel @Inject constructor(
 
         // Build notification
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_notification) // Assuming notification icon exists
+            .setSmallIcon(android.R.drawable.ic_dialog_alert)
             .setContentTitle("⚠️ Livestock Distress Detected")
             .setContentText("$soundClassDisplay (${(result.confidence * 100).toInt()}% confidence)")
             .setStyle(NotificationCompat.BigTextStyle()

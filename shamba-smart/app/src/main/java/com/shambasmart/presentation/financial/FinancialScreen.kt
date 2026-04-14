@@ -1,12 +1,12 @@
 package com.shambasmart.presentation.financial
 
-import com.shambasmart.maarifa.MaarifaViewModel
-import com.shambasmart.maarifa.ui.*
-
-import androidx.compose.animation.*
-import androidx.compose.foundation.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -18,11 +18,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.shambasmart.data.local.entity.Income
 import com.shambasmart.data.local.entity.Expense
+import com.shambasmart.data.local.entity.Loan
 import com.shambasmart.presentation.common.theme.*
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
@@ -34,292 +36,314 @@ import kotlinx.datetime.todayIn
 fun FinancialScreen(
     viewModel: FinancialViewModel = hiltViewModel()
 ) {
-    val income by viewModel.allIncome.collectAsStateWithLifecycle()
+    val incomes by viewModel.allIncomes.collectAsStateWithLifecycle()
     val expenses by viewModel.allExpenses.collectAsStateWithLifecycle()
-    var showIncomeDialog by remember { mutableStateOf(false) }
-    var showExpenseDialog by remember { mutableStateOf(false) }
-    var selectedTab by remember { mutableIntStateOf(0) }
+    val loans by viewModel.allLoans.collectAsStateWithLifecycle()
+    var selectedTab by remember { mutableStateOf("Overview") }
+    var showAddIncome by remember { mutableStateOf(false) }
+    var showAddExpense by remember { mutableStateOf(false) }
+    var showAddLoan by remember { mutableStateOf(false) }
 
-    val totalIncome = income.sumOf { it.amount }
-    val totalExpenses = expenses.sumOf { it.amount }
-    val balance = totalIncome - totalExpenses
-
-    Box(modifier = Modifier.fillMaxSize().background(SurfaceBase)) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(24.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp)
+    ) {
+        // Header
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            // Header
-            FinancialHeader()
+            Column {
+                Text(
+                    text = "Financial Management",
+                    style = MaterialTheme.typography.headlineLarge,
+                    color = Neutral950
+                )
+                Text(
+                    text = "Track income, expenses, loans, and profitability",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Neutral600
+                )
+            }
             
-            Spacer(modifier = Modifier.height(24.dp))
-            
-            // Financial Summary KPI Strip
-            FinancialKPIStrip(
-                totalIncome = totalIncome,
-                totalExpenses = totalExpenses,
-                balance = balance
-            )
-            
-            Spacer(modifier = Modifier.height(24.dp))
-            
-            // Tabs
-            FinancialTabs(
-                selectedTab = selectedTab,
-                onTabSelected = { selectedTab = it },
-                incomeCount = income.size,
-                expenseCount = expenses.size
-            )
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            // Tab Content
-            when (selectedTab) {
-                0 -> IncomeSection(income = income)
-                1 -> ExpensesSection(expenses = expenses)
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(
+                    onClick = { showAddIncome = true },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Green500,
+                        contentColor = Green50
+                    ),
+                    shape = RoundedCornerShape(10.dp),
+                    modifier = Modifier.height(40.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Add,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Income")
+                }
+                
+                Button(
+                    onClick = { showAddExpense = true },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Red500,
+                        contentColor = Red50
+                    ),
+                    shape = RoundedCornerShape(10.dp),
+                    modifier = Modifier.height(40.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.Remove,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Spacer(modifier = Modifier.width(4.dp))
+                    Text("Expense")
+                }
             }
         }
         
-        // Floating Action Buttons
-        Column(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+        Spacer(modifier = Modifier.height(20.dp))
+        
+        // Tabs
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            // Add Expense FAB
-            FloatingActionButton(
-                onClick = { showExpenseDialog = true },
-                containerColor = Red500,
-                contentColor = Color.White,
-                shape = RoundedCornerShape(14.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Remove,
-                    contentDescription = "Add Expense"
-                )
-            }
-            
-            // Add Income FAB
-            FloatingActionButton(
-                onClick = { showIncomeDialog = true },
-                containerColor = Green500,
-                contentColor = Green950,
-                shape = RoundedCornerShape(14.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.Outlined.Add,
-                    contentDescription = "Add Income"
+            listOf("Overview", "Loans", "P&L").forEach { tab ->
+                TabButton(
+                    text = tab,
+                    isSelected = selectedTab == tab,
+                    onClick = { selectedTab = tab }
                 )
             }
         }
+        
+        Spacer(modifier = Modifier.height(20.dp))
+        
+        // Tab Content
+        when (selectedTab) {
+            "Overview" -> OverviewTab(incomes = incomes, expenses = expenses)
+            "Loans" -> LoansTab(
+                loans = loans,
+                onAddLoan = { showAddLoan = true },
+                onDeleteLoan = { viewModel.deleteLoan(it) }
+            )
+            "P&L" -> ProfitLossTab(incomes = incomes, expenses = expenses)
+        }
     }
-
-    // Add Income Dialog
-    if (showIncomeDialog) {
+    
+    // Dialogs
+    if (showAddIncome) {
         AddIncomeDialog(
-            onDismiss = { showIncomeDialog = false },
-            onAdd = { income ->
+            onDismiss = { showAddIncome = false },
+            onSave = { income ->
                 viewModel.addIncome(income)
-                showIncomeDialog = false
+                showAddIncome = false
             }
         )
     }
-
-    // Add Expense Dialog
-    if (showExpenseDialog) {
+    
+    if (showAddExpense) {
         AddExpenseDialog(
-            onDismiss = { showExpenseDialog = false },
-            onAdd = { expense ->
+            onDismiss = { showAddExpense = false },
+            onSave = { expense ->
                 viewModel.addExpense(expense)
-                showExpenseDialog = false
+                showAddExpense = false
+            }
+        )
+    }
+    
+    if (showAddLoan) {
+        AddLoanDialog(
+            onDismiss = { showAddLoan = false },
+            onSave = { loan ->
+                viewModel.addLoan(loan)
+                showAddLoan = false
             }
         )
     }
 }
 
 @Composable
-private fun FinancialHeader() {
-    Column {
-        Text(
-            text = "Financial Management",
-            style = MaterialTheme.typography.headlineLarge,
-            color = Neutral950
-        )
-        Text(
-            text = "Track income, expenses, and farm profitability",
-            style = MaterialTheme.typography.bodyMedium,
-            color = Neutral600
-        )
-    }
-}
-
-@Composable
-private fun FinancialKPIStrip(
-    totalIncome: Double,
-    totalExpenses: Double,
-    balance: Double
+private fun TabButton(
+    text: String,
+    isSelected: Boolean,
+    onClick: () -> Unit
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = SurfaceRaised),
-        border = BorderStroke(1.dp, Neutral200),
-        shape = RoundedCornerShape(14.dp)
+    val backgroundColor = if (isSelected) Green800.copy(alpha = 0.2f) else Color.Transparent
+    val textColor = if (isSelected) Green300 else Neutral600
+    
+    Surface(
+        color = backgroundColor,
+        shape = RoundedCornerShape(8.dp),
+        modifier = Modifier.clickable { onClick() }
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            FinancialKPIItem(
-                icon = Icons.Outlined.TrendingUp,
-                label = "TOTAL INCOME",
-                value = "TZS ${String.format("%,.0f", totalIncome)}",
-                valueColor = Green400,
-                modifier = Modifier.weight(1f)
-            )
-            
-            VerticalDivider(
-                modifier = Modifier.height(48.dp),
-                color = Neutral200
-            )
-            
-            FinancialKPIItem(
-                icon = Icons.Outlined.TrendingDown,
-                label = "TOTAL EXPENSES",
-                value = "TZS ${String.format("%,.0f", totalExpenses)}",
-                valueColor = Red400,
-                modifier = Modifier.weight(1f)
-            )
-            
-            VerticalDivider(
-                modifier = Modifier.height(48.dp),
-                color = Neutral200
-            )
-            
-            FinancialKPIItem(
-                icon = Icons.Outlined.AccountBalance,
-                label = "BALANCE",
-                value = "TZS ${String.format("%,.0f", balance)}",
-                valueColor = if (balance >= 0) Green400 else Red400,
-                modifier = Modifier.weight(1f)
-            )
-        }
-    }
-}
-
-@Composable
-private fun FinancialKPIItem(
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    label: String,
-    value: String,
-    valueColor: Color,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            modifier = Modifier.size(16.dp),
-            tint = Neutral600
-        )
-        Spacer(modifier = Modifier.height(4.dp))
         Text(
-            text = label,
+            text = text,
             style = MaterialTheme.typography.labelSmall,
-            color = Neutral600
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = value,
-            style = MaterialTheme.typography.bodyMedium.copy(
-                fontFamily = GeistMonoFamily,
-                fontWeight = FontWeight.Medium
-            ),
-            color = valueColor
+            color = textColor,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
         )
     }
 }
 
 @Composable
-private fun FinancialTabs(
-    selectedTab: Int,
-    onTabSelected: (Int) -> Unit,
-    incomeCount: Int,
-    expenseCount: Int
+private fun OverviewTab(
+    incomes: List<Income>,
+    expenses: List<Expense>
 ) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = SurfaceRaised),
-        border = BorderStroke(1.dp, Neutral200),
-        shape = RoundedCornerShape(14.dp)
+    val totalIncome = incomes.sumOf { it.amount }
+    val totalExpenses = expenses.sumOf { it.amount }
+    val netProfit = totalIncome - totalExpenses
+    
+    Column(
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        // Summary Cards
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Income Tab
-            val incomeSelected = selectedTab == 0
-            Surface(
+            // Total Income
+            Card(
                 modifier = Modifier.weight(1f),
-                color = if (incomeSelected) Green800.copy(alpha = 0.2f) else Color.Transparent,
-                shape = RoundedCornerShape(10.dp)
+                colors = CardDefaults.cardColors(containerColor = SurfaceRaised),
+                border = BorderStroke(1.dp, Green800),
+                shape = RoundedCornerShape(14.dp)
             ) {
-                Row(
-                    modifier = Modifier
-                        .clickable { onTabSelected(0) }
-                        .padding(12.dp),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
+                Column(
+                    modifier = Modifier.padding(20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.TrendingUp,
                         contentDescription = null,
-                        modifier = Modifier.size(16.dp),
-                        tint = if (incomeSelected) Green300 else Neutral600
+                        tint = Green400,
+                        modifier = Modifier.size(24.dp)
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Income ($incomeCount)",
-                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                        color = if (incomeSelected) Green300 else Neutral600
+                        text = "Total Income",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Neutral600
+                    )
+                    Text(
+                        text = "TZS ${String.format("%,.0f", totalIncome)}",
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontFamily = GeistMonoFamily
+                        ),
+                        color = Green400
                     )
                 }
             }
             
-            // Expenses Tab
-            val expenseSelected = selectedTab == 1
-            Surface(
+            // Total Expenses
+            Card(
                 modifier = Modifier.weight(1f),
-                color = if (expenseSelected) Red600.copy(alpha = 0.2f) else Color.Transparent,
-                shape = RoundedCornerShape(10.dp)
+                colors = CardDefaults.cardColors(containerColor = SurfaceRaised),
+                border = BorderStroke(1.dp, Red800),
+                shape = RoundedCornerShape(14.dp)
             ) {
-                Row(
-                    modifier = Modifier
-                        .clickable { onTabSelected(1) }
-                        .padding(12.dp),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
+                Column(
+                    modifier = Modifier.padding(20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     Icon(
                         imageVector = Icons.Outlined.TrendingDown,
                         contentDescription = null,
-                        modifier = Modifier.size(16.dp),
-                        tint = if (expenseSelected) Red300 else Neutral600
+                        tint = Red400,
+                        modifier = Modifier.size(24.dp)
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Expenses ($expenseCount)",
-                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                        color = if (expenseSelected) Red300 else Neutral600
+                        text = "Total Expenses",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Neutral600
                     )
+                    Text(
+                        text = "TZS ${String.format("%,.0f", totalExpenses)}",
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontFamily = GeistMonoFamily
+                        ),
+                        color = Red400
+                    )
+                }
+            }
+            
+            // Net Profit
+            Card(
+                modifier = Modifier.weight(1f),
+                colors = CardDefaults.cardColors(containerColor = SurfaceRaised),
+                border = BorderStroke(1.dp, if (netProfit >= 0) Green800 else Red800),
+                shape = RoundedCornerShape(14.dp)
+            ) {
+                Column(
+                    modifier = Modifier.padding(20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        imageVector = if (netProfit >= 0) Icons.Outlined.ArrowUpward else Icons.Outlined.ArrowDownward,
+                        contentDescription = null,
+                        tint = if (netProfit >= 0) Green400 else Red400,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = "Net Profit",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Neutral600
+                    )
+                    Text(
+                        text = "TZS ${String.format("%,.0f", netProfit)}",
+                        style = MaterialTheme.typography.headlineMedium.copy(
+                            fontFamily = GeistMonoFamily
+                        ),
+                        color = if (netProfit >= 0) Green400 else Red400
+                    )
+                }
+            }
+        }
+        
+        // Recent Transactions
+        Text(
+            text = "RECENT TRANSACTIONS",
+            style = MaterialTheme.typography.labelSmall,
+            color = Neutral600
+        )
+        
+        val allTransactions = (incomes.map { it to "income" } + expenses.map { it to "expense" })
+            .sortedByDescending { 
+                when (it.first) {
+                    is Income -> (it.first as Income).date
+                    is Expense -> (it.first as Expense).date
+                    else -> LocalDate.fromEpochDays(0)
+                }
+            }
+            .take(10)
+        
+        if (allTransactions.isEmpty()) {
+            EmptyStateCard(
+                icon = Icons.Outlined.Receipt,
+                title = "No Transactions",
+                description = "Start recording income and expenses to track your finances."
+            )
+        } else {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = SurfaceRaised),
+                border = BorderStroke(1.dp, Neutral200),
+                shape = RoundedCornerShape(14.dp)
+            ) {
+                Column {
+                    allTransactions.forEach { (transaction, type) ->
+                        TransactionRow(transaction = transaction, type = type)
+                        HorizontalDivider(color = Neutral100, thickness = 0.5.dp)
+                    }
                 }
             }
         }
@@ -327,48 +351,384 @@ private fun FinancialTabs(
 }
 
 @Composable
-private fun IncomeSection(income: List<Income>) {
-    if (income.isEmpty()) {
-        EmptyFinancialState(
-            icon = Icons.Outlined.TrendingUp,
-            title = "No income records",
-            subtitle = "Start tracking your farm income to monitor profitability"
+private fun TransactionRow(transaction: Any, type: String) {
+    val amount = when (transaction) {
+        is Income -> transaction.amount
+        is Expense -> transaction.amount
+        else -> 0.0
+    }
+    val category = when (transaction) {
+        is Income -> transaction.category
+        is Expense -> transaction.category
+        else -> ""
+    }
+    val description = when (transaction) {
+        is Income -> transaction.description
+        is Expense -> transaction.description
+        else -> ""
+    }
+    val date = when (transaction) {
+        is Income -> transaction.date
+        is Expense -> transaction.date
+        else -> LocalDate.fromEpochDays(0)
+    }
+    
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(modifier = Modifier.weight(2f)) {
+            Text(
+                text = description ?: category,
+                style = MaterialTheme.typography.bodyMedium,
+                color = Neutral950
+            )
+            Text(
+                text = category,
+                style = MaterialTheme.typography.bodySmall,
+                color = Neutral600
+            )
+        }
+        
+        Text(
+            text = date.toString(),
+            style = MaterialTheme.typography.bodySmall,
+            color = Neutral600,
+            modifier = Modifier.weight(1f)
         )
-    } else {
-        LazyColumn(
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+        
+        Text(
+            text = "${if (type == "income") "+" else "-"} TZS ${String.format("%,.0f", amount)}",
+            style = MaterialTheme.typography.bodyMedium.copy(
+                fontFamily = GeistMonoFamily,
+                fontWeight = FontWeight.Medium
+            ),
+            color = if (type == "income") Green400 else Red400,
+            modifier = Modifier.weight(1f),
+            textAlign = TextAlign.End
+        )
+    }
+}
+
+@Composable
+private fun LoansTab(
+    loans: List<Loan>,
+    onAddLoan: () -> Unit,
+    onDeleteLoan: (Loan) -> Unit
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            items(income) { item ->
-                IncomeCard(income = item)
+            Text(
+                text = "LOANS",
+                style = MaterialTheme.typography.labelSmall,
+                color = Neutral600
+            )
+            
+            Button(
+                onClick = onAddLoan,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Green500,
+                    contentColor = Green50
+                ),
+                shape = RoundedCornerShape(8.dp),
+                modifier = Modifier.height(32.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.Add,
+                    contentDescription = null,
+                    modifier = Modifier.size(14.dp)
+                )
+                Spacer(modifier = Modifier.width(4.dp))
+                Text("Add Loan")
+            }
+        }
+        
+        if (loans.isEmpty()) {
+            EmptyStateCard(
+                icon = Icons.Outlined.AccountBalance,
+                title = "No Loans Recorded",
+                description = "Track loans and repayment schedules here."
+            )
+        } else {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                items(loans) { loan ->
+                    LoanCard(loan = loan, onDelete = { onDeleteLoan(loan) })
+                }
             }
         }
     }
 }
 
 @Composable
-private fun ExpensesSection(expenses: List<Expense>) {
-    if (expenses.isEmpty()) {
-        EmptyFinancialState(
-            icon = Icons.Outlined.TrendingDown,
-            title = "No expense records",
-            subtitle = "Track your farm expenses to manage costs effectively"
-        )
-    } else {
-        LazyColumn(
+private fun LoanCard(loan: Loan, onDelete: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = SurfaceRaised),
+        border = BorderStroke(1.dp, Neutral200),
+        shape = RoundedCornerShape(14.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            items(expenses) { item ->
-                ExpenseCard(expense = item)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column {
+                    Text(
+                        text = loan.lenderName,
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = Neutral950
+                    )
+                    Text(
+                        text = loan.notes ?: "General",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = Neutral600
+                    )
+                }
+                
+                IconButton(onClick = onDelete) {
+                    Icon(
+                        imageVector = Icons.Outlined.Delete,
+                        contentDescription = "Delete",
+                        tint = Neutral600
+                    )
+                }
+            }
+            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column {
+                    Text(
+                        text = "Amount",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Neutral600
+                    )
+                    Text(
+                        text = "TZS ${String.format("%,.0f", loan.amount)}",
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontFamily = GeistMonoFamily
+                        ),
+                        color = Neutral950
+                    )
+                }
+                
+                Column {
+                    Text(
+                        text = "Interest Rate",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Neutral600
+                    )
+                    Text(
+                        text = "${loan.interestRate ?: 0.0}%",
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontFamily = GeistMonoFamily
+                        ),
+                        color = Neutral950
+                    )
+                }
+                
+                Column {
+                    Text(
+                        text = "Balance",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Neutral600
+                    )
+                    Text(
+                        text = "TZS ${String.format("%,.0f", loan.balance)}",
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontFamily = GeistMonoFamily
+                        ),
+                        color = if (loan.balance > 0) Amber400 else Green400
+                    )
+                }
+            }
+            
+            // Status
+            StatusChip(status = loan.status)
+        }
+    }
+}
+
+@Composable
+private fun ProfitLossTab(
+    incomes: List<Income>,
+    expenses: List<Expense>
+) {
+    // Group by enterprise/category
+    val incomeByCategory = incomes.groupBy { it.category }
+    val expenseByCategory = expenses.groupBy { it.category }
+    val allCategories = (incomeByCategory.keys + expenseByCategory.keys).distinct()
+    
+    Column(
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Text(
+            text = "ENTERPRISE P&L",
+            style = MaterialTheme.typography.labelSmall,
+            color = Neutral600
+        )
+        
+        if (allCategories.isEmpty()) {
+            EmptyStateCard(
+                icon = Icons.Outlined.Analytics,
+                title = "No Data Available",
+                description = "Record income and expenses to see enterprise profitability."
+            )
+        } else {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = SurfaceRaised),
+                border = BorderStroke(1.dp, Neutral200),
+                shape = RoundedCornerShape(14.dp)
+            ) {
+                Column {
+                    // Table Header
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(Neutral100.copy(alpha = 0.3f))
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "ENTERPRISE",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Neutral400,
+                            modifier = Modifier.weight(2f)
+                        )
+                        Text(
+                            text = "INCOME",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Neutral400,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Text(
+                            text = "EXPENSES",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Neutral400,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Text(
+                            text = "P&L",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = Neutral400,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    
+                    // Table Rows
+                    allCategories.forEach { category ->
+                        val categoryIncome = incomeByCategory[category]?.sumOf { it.amount } ?: 0.0
+                        val categoryExpense = expenseByCategory[category]?.sumOf { it.amount } ?: 0.0
+                        val profit = categoryIncome - categoryExpense
+                        
+                        PLRow(
+                            category = category,
+                            income = categoryIncome,
+                            expense = categoryExpense,
+                            profit = profit
+                        )
+                        HorizontalDivider(color = Neutral100, thickness = 0.5.dp)
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-private fun EmptyFinancialState(
+private fun PLRow(
+    category: String,
+    income: Double,
+    expense: Double,
+    profit: Double
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = category,
+            style = MaterialTheme.typography.bodyMedium,
+            color = Neutral950,
+            modifier = Modifier.weight(2f)
+        )
+        
+        Text(
+            text = "TZS ${String.format("%,.0f", income)}",
+            style = MaterialTheme.typography.bodyMedium.copy(
+                fontFamily = GeistMonoFamily
+            ),
+            color = Green400,
+            modifier = Modifier.weight(1f)
+        )
+        
+        Text(
+            text = "TZS ${String.format("%,.0f", expense)}",
+            style = MaterialTheme.typography.bodyMedium.copy(
+                fontFamily = GeistMonoFamily
+            ),
+            color = Red400,
+            modifier = Modifier.weight(1f)
+        )
+        
+        Text(
+            text = "TZS ${String.format("%,.0f", profit)}",
+            style = MaterialTheme.typography.bodyMedium.copy(
+                fontFamily = GeistMonoFamily,
+                fontWeight = FontWeight.Medium
+            ),
+            color = if (profit >= 0) Green400 else Red400,
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+private fun StatusChip(status: String) {
+    val (backgroundColor, textColor) = when (status) {
+        "active" -> Pair(Amber800.copy(alpha = 0.3f), Amber300)
+        "paid" -> Pair(Green800.copy(alpha = 0.3f), Green300)
+        else -> Pair(Neutral800.copy(alpha = 0.3f), Neutral300)
+    }
+    
+    Surface(
+        color = backgroundColor,
+        shape = RoundedCornerShape(4.dp)
+    ) {
+        Text(
+            text = status.uppercase(),
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.SemiBold),
+            color = textColor,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+        )
+    }
+}
+
+@Composable
+private fun EmptyStateCard(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     title: String,
-    subtitle: String
+    description: String
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -379,12 +739,12 @@ private fun EmptyFinancialState(
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(200.dp),
+                .padding(48.dp),
             contentAlignment = Alignment.Center
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
+                verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Icon(
                     imageVector = icon,
@@ -395,198 +755,16 @@ private fun EmptyFinancialState(
                 Text(
                     text = title,
                     style = MaterialTheme.typography.headlineMedium,
-                    color = Neutral600
+                    color = Neutral800,
+                    textAlign = TextAlign.Center
                 )
                 Text(
-                    text = subtitle,
+                    text = description,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Neutral400
+                    color = Neutral600,
+                    textAlign = TextAlign.Center
                 )
             }
-        }
-    }
-}
-
-@Composable
-private fun IncomeCard(income: Income) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = SurfaceRaised),
-        border = BorderStroke(1.dp, Neutral200),
-        shape = RoundedCornerShape(14.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Category Icon
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .background(Green800.copy(alpha = 0.2f), RoundedCornerShape(12.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = getCategoryIcon(income.category, isIncome = true),
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                    tint = Green400
-                )
-            }
-            
-            Spacer(modifier = Modifier.width(16.dp))
-            
-            Column(modifier = Modifier.weight(1f)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = income.category.replaceFirstChar { it.uppercase() },
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = Neutral950
-                    )
-                    Text(
-                        text = "TZS ${String.format("%,.0f", income.amount)}",
-                        style = MaterialTheme.typography.headlineMedium.copy(
-                            fontFamily = GeistMonoFamily
-                        ),
-                        color = Green400
-                    )
-                }
-                
-                Spacer(modifier = Modifier.height(4.dp))
-                
-                Text(
-                    text = income.description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Neutral800
-                )
-                
-                Spacer(modifier = Modifier.height(8.dp))
-                
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Text(
-                        text = income.date.toString(),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Neutral600
-                    )
-                    income.buyerName?.let {
-                        Text(
-                            text = "Buyer: $it",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Neutral600
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun ExpenseCard(expense: Expense) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = SurfaceRaised),
-        border = BorderStroke(1.dp, Neutral200),
-        shape = RoundedCornerShape(14.dp)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Category Icon
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .background(Red600.copy(alpha = 0.2f), RoundedCornerShape(12.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = getCategoryIcon(expense.category, isIncome = false),
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp),
-                    tint = Red400
-                )
-            }
-            
-            Spacer(modifier = Modifier.width(16.dp))
-            
-            Column(modifier = Modifier.weight(1f)) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = expense.category.replaceFirstChar { it.uppercase() },
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = Neutral950
-                    )
-                    Text(
-                        text = "TZS ${String.format("%,.0f", expense.amount)}",
-                        style = MaterialTheme.typography.headlineMedium.copy(
-                            fontFamily = GeistMonoFamily
-                        ),
-                        color = Red400
-                    )
-                }
-                
-                Spacer(modifier = Modifier.height(4.dp))
-                
-                Text(
-                    text = expense.description,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Neutral800
-                )
-                
-                Spacer(modifier = Modifier.height(8.dp))
-                
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Text(
-                        text = expense.date.toString(),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Neutral600
-                    )
-                    expense.supplier?.let {
-                        Text(
-                            text = "Supplier: $it",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Neutral600
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-private fun getCategoryIcon(category: String, isIncome: Boolean): androidx.compose.ui.graphics.vector.ImageVector {
-    return when {
-        isIncome -> when (category) {
-            "milk" -> Icons.Outlined.WaterDrop
-            "cheese" -> Icons.Outlined.LunchDining
-            "animals" -> Icons.Outlined.Pets
-            "crops" -> Icons.Outlined.Grass
-            "manure" -> Icons.Outlined.Eco
-            else -> Icons.Outlined.AttachMoney
-        }
-        else -> when (category) {
-            "feed" -> Icons.Outlined.Restaurant
-            "labour" -> Icons.Outlined.People
-            "vet" -> Icons.Outlined.MedicalServices
-            "medicine" -> Icons.Outlined.Healing
-            "seeds" -> Icons.Outlined.Eco
-            "fertilizer" -> Icons.Outlined.Science
-            else -> Icons.Outlined.ShoppingCart
         }
     }
 }
@@ -594,13 +772,12 @@ private fun getCategoryIcon(category: String, isIncome: Boolean): androidx.compo
 @Composable
 private fun AddIncomeDialog(
     onDismiss: () -> Unit,
-    onAdd: (Income) -> Unit
+    onSave: (Income) -> Unit
 ) {
-    var date by remember { mutableStateOf(Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()) }
-    var category by remember { mutableStateOf("milk") }
-    var description by remember { mutableStateOf("") }
     var amount by remember { mutableStateOf("") }
-    var buyerName by remember { mutableStateOf("") }
+    var category by remember { mutableStateOf("Milk") }
+    var description by remember { mutableStateOf("") }
+    val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -614,50 +791,28 @@ private fun AddIncomeDialog(
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 OutlinedTextField(
-                    value = date,
-                    onValueChange = { date = it },
-                    label = { Text("Date (YYYY-MM-DD)") },
+                    value = amount,
+                    onValueChange = { amount = it },
+                    label = { Text("Amount (TZS)") },
                     modifier = Modifier.fillMaxWidth(),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Green500,
-                        unfocusedBorderColor = Neutral200,
-                        focusedContainerColor = SurfaceSunken,
-                        unfocusedContainerColor = SurfaceSunken
+                        unfocusedBorderColor = Neutral200
                     ),
                     shape = RoundedCornerShape(10.dp)
                 )
                 
-                // Category Selector
-                Column {
-                    Text(
-                        text = "Category",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = Neutral600
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        listOf("milk", "cheese", "animals", "crops").forEach { cat ->
-                            FilterChip(
-                                selected = category == cat,
-                                onClick = { category = cat },
-                                label = {
-                                    Text(
-                                        text = cat.replaceFirstChar { it.uppercase() },
-                                        style = MaterialTheme.typography.labelSmall
-                                    )
-                                },
-                                modifier = Modifier.weight(1f),
-                                colors = FilterChipDefaults.filterChipColors(
-                                    containerColor = SurfaceSunken,
-                                    selectedContainerColor = Green800.copy(alpha = 0.3f),
-                                    labelColor = Neutral800,
-                                    selectedLabelColor = Green300
-                                )
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    items(listOf("Milk", "Cheese", "Livestock", "Crops", "Other")) { cat ->
+                        FilterChip(
+                            selected = category == cat,
+                            onClick = { category = cat },
+                            label = { Text(cat) },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = Green800.copy(alpha = 0.3f),
+                                selectedLabelColor = Green300
                             )
-                        }
+                        )
                     }
                 }
                 
@@ -668,37 +823,7 @@ private fun AddIncomeDialog(
                     modifier = Modifier.fillMaxWidth(),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Green500,
-                        unfocusedBorderColor = Neutral200,
-                        focusedContainerColor = SurfaceSunken,
-                        unfocusedContainerColor = SurfaceSunken
-                    ),
-                    shape = RoundedCornerShape(10.dp)
-                )
-                
-                OutlinedTextField(
-                    value = amount,
-                    onValueChange = { amount = it },
-                    label = { Text("Amount (TZS)") },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Green500,
-                        unfocusedBorderColor = Neutral200,
-                        focusedContainerColor = SurfaceSunken,
-                        unfocusedContainerColor = SurfaceSunken
-                    ),
-                    shape = RoundedCornerShape(10.dp)
-                )
-                
-                OutlinedTextField(
-                    value = buyerName,
-                    onValueChange = { buyerName = it },
-                    label = { Text("Buyer Name (optional)") },
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Green500,
-                        unfocusedBorderColor = Neutral200,
-                        focusedContainerColor = SurfaceSunken,
-                        unfocusedContainerColor = SurfaceSunken
+                        unfocusedBorderColor = Neutral200
                     ),
                     shape = RoundedCornerShape(10.dp)
                 )
@@ -707,31 +832,25 @@ private fun AddIncomeDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    onAdd(
+                    onSave(
                         Income(
-                            date = LocalDate.parse(date),
-                            category = category,
-                            description = description,
                             amount = amount.toDoubleOrNull() ?: 0.0,
-                            buyerName = buyerName.ifBlank { null }
+                            category = category,
+                            description = description.ifBlank { "" },
+                            date = today
                         )
                     )
                 },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Green500,
-                    contentColor = Green950
-                ),
+                enabled = amount.isNotBlank(),
+                colors = ButtonDefaults.buttonColors(containerColor = Green500),
                 shape = RoundedCornerShape(10.dp)
             ) {
-                Text("Add Income")
+                Text("Save")
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(
-                    text = "Cancel",
-                    color = Neutral600
-                )
+                Text("Cancel", color = Neutral600)
             }
         },
         containerColor = SurfaceElevated,
@@ -742,13 +861,12 @@ private fun AddIncomeDialog(
 @Composable
 private fun AddExpenseDialog(
     onDismiss: () -> Unit,
-    onAdd: (Expense) -> Unit
+    onSave: (Expense) -> Unit
 ) {
-    var date by remember { mutableStateOf(Clock.System.todayIn(TimeZone.currentSystemDefault()).toString()) }
-    var category by remember { mutableStateOf("feed") }
-    var description by remember { mutableStateOf("") }
     var amount by remember { mutableStateOf("") }
-    var supplier by remember { mutableStateOf("") }
+    var category by remember { mutableStateOf("Feed") }
+    var description by remember { mutableStateOf("") }
+    val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -762,50 +880,28 @@ private fun AddExpenseDialog(
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 OutlinedTextField(
-                    value = date,
-                    onValueChange = { date = it },
-                    label = { Text("Date (YYYY-MM-DD)") },
+                    value = amount,
+                    onValueChange = { amount = it },
+                    label = { Text("Amount (TZS)") },
                     modifier = Modifier.fillMaxWidth(),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Red500,
-                        unfocusedBorderColor = Neutral200,
-                        focusedContainerColor = SurfaceSunken,
-                        unfocusedContainerColor = SurfaceSunken
+                        unfocusedBorderColor = Neutral200
                     ),
                     shape = RoundedCornerShape(10.dp)
                 )
                 
-                // Category Selector
-                Column {
-                    Text(
-                        text = "Category",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = Neutral600
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        listOf("feed", "labour", "vet", "medicine").forEach { cat ->
-                            FilterChip(
-                                selected = category == cat,
-                                onClick = { category = cat },
-                                label = {
-                                    Text(
-                                        text = cat.replaceFirstChar { it.uppercase() },
-                                        style = MaterialTheme.typography.labelSmall
-                                    )
-                                },
-                                modifier = Modifier.weight(1f),
-                                colors = FilterChipDefaults.filterChipColors(
-                                    containerColor = SurfaceSunken,
-                                    selectedContainerColor = Red600.copy(alpha = 0.3f),
-                                    labelColor = Neutral800,
-                                    selectedLabelColor = Red300
-                                )
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    items(listOf("Feed", "Labour", "Medicine", "Equipment", "Utilities", "Other")) { cat ->
+                        FilterChip(
+                            selected = category == cat,
+                            onClick = { category = cat },
+                            label = { Text(cat) },
+                            colors = FilterChipDefaults.filterChipColors(
+                                selectedContainerColor = Red800.copy(alpha = 0.3f),
+                                selectedLabelColor = Red300
                             )
-                        }
+                        )
                     }
                 }
                 
@@ -816,9 +912,71 @@ private fun AddExpenseDialog(
                     modifier = Modifier.fillMaxWidth(),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Red500,
-                        unfocusedBorderColor = Neutral200,
-                        focusedContainerColor = SurfaceSunken,
-                        unfocusedContainerColor = SurfaceSunken
+                        unfocusedBorderColor = Neutral200
+                    ),
+                    shape = RoundedCornerShape(10.dp)
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    onSave(
+                        Expense(
+                            amount = amount.toDoubleOrNull() ?: 0.0,
+                            category = category,
+                            description = description.ifBlank { "" },
+                            date = today
+                        )
+                    )
+                },
+                enabled = amount.isNotBlank(),
+                colors = ButtonDefaults.buttonColors(containerColor = Red500),
+                shape = RoundedCornerShape(10.dp)
+            ) {
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel", color = Neutral600)
+            }
+        },
+        containerColor = SurfaceElevated,
+        shape = RoundedCornerShape(20.dp)
+    )
+}
+
+@Composable
+private fun AddLoanDialog(
+    onDismiss: () -> Unit,
+    onSave: (Loan) -> Unit
+) {
+    var lenderName by remember { mutableStateOf("") }
+    var amount by remember { mutableStateOf("") }
+    var interestRate by remember { mutableStateOf("") }
+    var notes by remember { mutableStateOf("") }
+    val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "Add Loan",
+                style = MaterialTheme.typography.headlineMedium,
+                color = Neutral950
+            )
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                OutlinedTextField(
+                    value = lenderName,
+                    onValueChange = { lenderName = it },
+                    label = { Text("Lender Name") },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Green500,
+                        unfocusedBorderColor = Neutral200
                     ),
                     shape = RoundedCornerShape(10.dp)
                 )
@@ -829,24 +987,32 @@ private fun AddExpenseDialog(
                     label = { Text("Amount (TZS)") },
                     modifier = Modifier.fillMaxWidth(),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Red500,
-                        unfocusedBorderColor = Neutral200,
-                        focusedContainerColor = SurfaceSunken,
-                        unfocusedContainerColor = SurfaceSunken
+                        focusedBorderColor = Green500,
+                        unfocusedBorderColor = Neutral200
                     ),
                     shape = RoundedCornerShape(10.dp)
                 )
                 
                 OutlinedTextField(
-                    value = supplier,
-                    onValueChange = { supplier = it },
-                    label = { Text("Supplier (optional)") },
+                    value = interestRate,
+                    onValueChange = { interestRate = it },
+                    label = { Text("Interest Rate (%)") },
                     modifier = Modifier.fillMaxWidth(),
                     colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Red500,
-                        unfocusedBorderColor = Neutral200,
-                        focusedContainerColor = SurfaceSunken,
-                        unfocusedContainerColor = SurfaceSunken
+                        focusedBorderColor = Green500,
+                        unfocusedBorderColor = Neutral200
+                    ),
+                    shape = RoundedCornerShape(10.dp)
+                )
+                
+                OutlinedTextField(
+                    value = notes,
+                    onValueChange = { notes = it },
+                    label = { Text("Notes") },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = Green500,
+                        unfocusedBorderColor = Neutral200
                     ),
                     shape = RoundedCornerShape(10.dp)
                 )
@@ -855,31 +1021,29 @@ private fun AddExpenseDialog(
         confirmButton = {
             Button(
                 onClick = {
-                    onAdd(
-                        Expense(
-                            date = LocalDate.parse(date),
-                            category = category,
-                            description = description,
-                            amount = amount.toDoubleOrNull() ?: 0.0,
-                            supplier = supplier.ifBlank { null }
+                    val loanAmount = amount.toDoubleOrNull() ?: 0.0
+                    val rate = interestRate.toDoubleOrNull()
+                    onSave(
+                        Loan(
+                            lenderName = lenderName,
+                            amount = loanAmount,
+                            disbursementDate = today,
+                            interestRate = rate,
+                            balance = loanAmount,
+                            notes = notes.ifBlank { null }
                         )
                     )
                 },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Red500,
-                    contentColor = Color.White
-                ),
+                enabled = lenderName.isNotBlank() && amount.isNotBlank(),
+                colors = ButtonDefaults.buttonColors(containerColor = Green500),
                 shape = RoundedCornerShape(10.dp)
             ) {
-                Text("Add Expense")
+                Text("Save")
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text(
-                    text = "Cancel",
-                    color = Neutral600
-                )
+                Text("Cancel", color = Neutral600)
             }
         },
         containerColor = SurfaceElevated,

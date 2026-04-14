@@ -35,7 +35,15 @@ data class GPSBoundaryUiState(
     val areaAcres: Double = 0.0,
     val perimeterMeters: Double = 0.0,
     val errorMessage: String? = null,
-    val successMessage: String? = null
+    val successMessage: String? = null,
+    // Multi-constellation GNSS data
+    val isMultiConstellationActive: Boolean = false,
+    val totalSatellites: Int = 0,
+    val usedSatellites: Int = 0,
+    val hdop: Double = 0.0,
+    val qualityScore: Int = 0,
+    val constellationInfo: String = "",
+    val qualityLabel: String = ""
 )
 
 @HiltViewModel
@@ -98,34 +106,73 @@ class GPSBoundaryViewModel @Inject constructor(
     private fun startLocationUpdates() {
         viewModelScope.launch {
             try {
-                locationProvider.getLocationUpdates(intervalMs = 1000L)
-                    .collect { location ->
-                        // Apply Kalman filter
-                        val (smoothedLat, smoothedLng) = kalmanFilter.update(
-                            location.latitude,
-                            location.longitude,
-                            location.accuracy.toDouble()
-                        )
+                // Check if multi-constellation is available
+                if (locationProvider.isMultiConstellationAvailable()) {
+                    // Use multi-constellation updates
+                    locationProvider.getConstellationLocationUpdates(intervalMs = 1000L)
+                        .collect { result ->
+                            // Apply Kalman filter with constellation data
+                            val (smoothedLat, smoothedLng) = kalmanFilter.updateWithConstellation(result)
 
-                        lastLocation = location
+                            lastLocation = result.location
 
-                        _uiState.update {
-                            it.copy(
-                                currentLatitude = smoothedLat,
-                                currentLongitude = smoothedLng,
-                                currentAccuracy = location.accuracy.toDouble(),
-                                isGPSEnabled = true,
-                                errorMessage = null
-                            )
-                        }
-
-                        // If recording, add to recorded locations
-                        if (uiState.value.isRecording) {
+                            // Update UI with constellation info
                             _uiState.update {
-                                it.copy(recordedLocations = it.recordedLocations + location)
+                                it.copy(
+                                    currentLatitude = smoothedLat,
+                                    currentLongitude = smoothedLng,
+                                    currentAccuracy = result.location.accuracy.toDouble(),
+                                    isGPSEnabled = true,
+                                    isMultiConstellationActive = true,
+                                    totalSatellites = result.totalSatellites,
+                                    usedSatellites = result.usedSatellites,
+                                    hdop = result.hdop,
+                                    qualityScore = result.qualityScore,
+                                    constellationInfo = result.formatConstellationInfo(),
+                                    qualityLabel = result.getAccuracyLabel(),
+                                    errorMessage = null
+                                )
+                            }
+
+                            // If recording, add to recorded locations
+                            if (uiState.value.isRecording) {
+                                _uiState.update {
+                                    it.copy(recordedLocations = it.recordedLocations + result.location)
+                                }
                             }
                         }
-                    }
+                } else {
+                    // Fall back to standard location updates
+                    locationProvider.getLocationUpdates(intervalMs = 1000L)
+                        .collect { location ->
+                            // Apply Kalman filter
+                            val (smoothedLat, smoothedLng) = kalmanFilter.update(
+                                location.latitude,
+                                location.longitude,
+                                location.accuracy.toDouble()
+                            )
+
+                            lastLocation = location
+
+                            _uiState.update {
+                                it.copy(
+                                    currentLatitude = smoothedLat,
+                                    currentLongitude = smoothedLng,
+                                    currentAccuracy = location.accuracy.toDouble(),
+                                    isGPSEnabled = true,
+                                    isMultiConstellationActive = false,
+                                    errorMessage = null
+                                )
+                            }
+
+                            // If recording, add to recorded locations
+                            if (uiState.value.isRecording) {
+                                _uiState.update {
+                                    it.copy(recordedLocations = it.recordedLocations + location)
+                                }
+                            }
+                        }
+                }
             } catch (e: SecurityException) {
                 _uiState.update { it.copy(errorMessage = "GPS permission denied") }
             }
@@ -134,6 +181,7 @@ class GPSBoundaryViewModel @Inject constructor(
 
     /**
      * Mark boundary point with multi-sampling for better accuracy
+     * Uses multi-constellation averaging when available for enhanced precision
      */
     fun markBoundaryPoint() {
         val currentState = uiState.value
@@ -143,7 +191,15 @@ class GPSBoundaryViewModel @Inject constructor(
             return
         }
 
-        if (currentState.currentAccuracy > 15.0) {
+        // Adjust accuracy threshold based on constellation quality
+        val accuracyThreshold = if (currentState.isMultiConstellationActive) {
+            // Allow higher threshold with multi-constellation (better geometry can compensate)
+            20.0
+        } else {
+            15.0
+        }
+
+        if (currentState.currentAccuracy > accuracyThreshold) {
             _uiState.update { 
                 it.copy(errorMessage = "GPS accuracy too low (${currentState.currentAccuracy.toInt()}m). Move to open area and wait.") 
             }
@@ -153,42 +209,77 @@ class GPSBoundaryViewModel @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isMarking = true, errorMessage = null) }
 
-            // Multi-sampling: Collect 15 readings over ~5 seconds
-            val result = locationProvider.getAveragedLocation(
-                sampleCount = 15,
-                intervalMs = 300L
-            )
-
-            if (result.success) {
-                pointCounter++
-                val newPoint = BoundaryPoint(
-                    id = pointCounter,
-                    latitude = result.latitude,
-                    longitude = result.longitude,
-                    accuracy = result.accuracy,
-                    timestamp = System.currentTimeMillis()
+            // Use constellation-averaged location if multi-constellation is active
+            if (currentState.isMultiConstellationActive && locationProvider.isMultiConstellationAvailable()) {
+                val result = locationProvider.getConstellationAveragedLocation(
+                    sampleCount = 15,
+                    intervalMs = 300L
                 )
 
-                _uiState.update {
-                    it.copy(
-                        boundaryPoints = it.boundaryPoints + newPoint,
-                        isMarking = false,
-                        errorMessage = null,
-                        successMessage = "Point #$pointCounter marked (${result.sampleCount} samples, ${String.format("%.1f", result.accuracy)}m accuracy)"
+                if (result.success) {
+                    pointCounter++
+                    val newPoint = BoundaryPoint(
+                        id = pointCounter,
+                        latitude = result.latitude,
+                        longitude = result.longitude,
+                        accuracy = result.accuracy,
+                        timestamp = System.currentTimeMillis()
                     )
-                }
 
-                // Calculate area if we have 3+ points
-                if (uiState.value.boundaryPoints.size >= 3) {
-                    updateAreaCalculation()
+                    _uiState.update {
+                        it.copy(
+                            boundaryPoints = it.boundaryPoints + newPoint,
+                            isMarking = false,
+                            errorMessage = null,
+                            successMessage = "Point #$pointCounter marked (${result.sampleCount} samples, ${String.format("%.1f", result.accuracy)}m, ${result.qualityLabel} quality, ${result.formatConstellationInfo()})"
+                        )
+                    }
+                } else {
+                    _uiState.update {
+                        it.copy(
+                            isMarking = false,
+                            errorMessage = "Failed to get GPS reading. Try again."
+                        )
+                    }
                 }
             } else {
-                _uiState.update {
-                    it.copy(
-                        isMarking = false,
-                        errorMessage = "Failed to get GPS reading. Try again."
+                // Fall back to standard multi-sampling
+                val result = locationProvider.getAveragedLocation(
+                    sampleCount = 15,
+                    intervalMs = 300L
+                )
+
+                if (result.success) {
+                    pointCounter++
+                    val newPoint = BoundaryPoint(
+                        id = pointCounter,
+                        latitude = result.latitude,
+                        longitude = result.longitude,
+                        accuracy = result.accuracy,
+                        timestamp = System.currentTimeMillis()
                     )
+
+                    _uiState.update {
+                        it.copy(
+                            boundaryPoints = it.boundaryPoints + newPoint,
+                            isMarking = false,
+                            errorMessage = null,
+                            successMessage = "Point #$pointCounter marked (${result.sampleCount} samples, ${String.format("%.1f", result.accuracy)}m accuracy)"
+                        )
+                    }
+                } else {
+                    _uiState.update {
+                        it.copy(
+                            isMarking = false,
+                            errorMessage = "Failed to get GPS reading. Try again."
+                        )
+                    }
                 }
+            }
+
+            // Calculate area if we have 3+ points
+            if (uiState.value.boundaryPoints.size >= 3) {
+                updateAreaCalculation()
             }
         }
     }

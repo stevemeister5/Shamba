@@ -3,6 +3,7 @@ package com.shambasmart.maarifa.retrieval
 import android.content.Context
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.shambasmart.maarifa.MaarifaDomains
 import dagger.hilt.android.qualifiers.ApplicationContext
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -82,6 +83,7 @@ class PestKnowledgeMapper @Inject constructor(
         return PestProtocol(
             pestClass = pestClass,
             displayName = pestClass.replace("_", " ").replaceFirstChar { it.uppercase() },
+            domainTag = MaarifaDomains.PESTS,
             description = "Pest detected in field. Consult local extension officer for specific management protocols.",
             lowManagement = "Monitor closely. Document occurrence and location. Continue regular scouting.",
             moderateManagement = "Increase scouting frequency. Consider spot treatment. Consult Maize Research Institute recommendations.",
@@ -102,6 +104,7 @@ class PestKnowledgeMapper @Inject constructor(
 data class PestProtocol(
     val pestClass: String,
     val displayName: String,
+    val domainTag: String = MaarifaDomains.PESTS,
     val description: String,
     val lowManagement: String,
     val moderateManagement: String,

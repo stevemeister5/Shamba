@@ -15,7 +15,7 @@ interface WorkerDao {
     @Query("SELECT * FROM workers WHERE id = :id")
     suspend fun getWorkerById(id: Long): Worker?
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insertWorker(worker: Worker): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
@@ -36,6 +36,9 @@ interface WorkerDao {
 
     @Query("SELECT * FROM attendance_records WHERE date = :date")
     suspend fun getAttendanceByDate(date: LocalDate): List<AttendanceRecord>
+
+    @Query("SELECT * FROM attendance_records WHERE date = :date")
+    fun getAttendanceByDateFlow(date: LocalDate): Flow<List<AttendanceRecord>>
 
     @Query("SELECT COUNT(*) FROM attendance_records WHERE workerId = :workerId AND status = 'present' AND date >= :startDate AND date <= :endDate")
     suspend fun getDaysWorked(workerId: Long, startDate: LocalDate, endDate: LocalDate): Int

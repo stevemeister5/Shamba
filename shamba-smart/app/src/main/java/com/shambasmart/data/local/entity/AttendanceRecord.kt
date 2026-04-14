@@ -27,6 +27,11 @@ data class AttendanceRecord(
     val date: LocalDate,
     val status: String,
     val reason: String? = null,
+    @ColumnInfo(name = "daily_rate_snapshot")
+    val dailyRateSnapshot: Long = 0L,  // TZS rate at time of work
+    @ColumnInfo(name = "overtime_rate_snapshot")
+    val overtimeRateSnapshot: Long = 0L,  // overtime rate at time of work
+    val notes: String? = null,
     val createdAt: Long = System.currentTimeMillis(),
     val isSynced: Boolean = false,
     // Revision-based delta sync fields

@@ -2,9 +2,11 @@ package com.shambasmart.ml.vision
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.ImageFormat
 import android.graphics.Matrix
 import android.graphics.YuvImage
+import android.util.Size
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
@@ -60,7 +62,7 @@ class EnhancedCameraManager @Inject constructor(
 
     data class CameraConfig(
         val lensFacing: Int = CameraSelector.LENS_FACING_BACK,
-        val targetResolution: android.util.Size = android.util.Size(640, 480),
+        val targetResolution: Size = Size(640, 480),
         val inferenceFps: Int = 2,
         val enableFlash: Boolean = false,
         val enableStabilization: Boolean = true,
@@ -244,22 +246,27 @@ class EnhancedCameraManager @Inject constructor(
             null
         )
 
-        val out = ByteArrayOutputStream()
+        // Use a smaller initial buffer and lower quality to save memory
+        val out = ByteArrayOutputStream(1024 * 128)
         yuvImage.compressToJpeg(
             android.graphics.Rect(0, 0, image.width, image.height),
-            90,
+            80, // Reduced quality from 90 to 80
             out
         )
 
         val imageBytes = out.toByteArray()
-        val bitmap = android.graphics.BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+        val bitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
 
         // Rotate bitmap based on image rotation
         val rotationDegrees = image.imageInfo.rotationDegrees
         return if (rotationDegrees != 0) {
             val matrix = Matrix()
             matrix.postRotate(rotationDegrees.toFloat())
-            Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+            val rotatedBitmap = Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height, matrix, true)
+            if (rotatedBitmap != bitmap) {
+                bitmap.recycle() // Free the intermediate bitmap
+            }
+            rotatedBitmap
         } else {
             bitmap
         }

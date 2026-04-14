@@ -4,9 +4,11 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import com.shambasmart.data.local.dao.*
+import com.shambasmart.data.local.dao.maarifa.IngestedDocumentDao
 import com.shambasmart.data.local.dao.maarifa.KnowledgeChunkDao
 import com.shambasmart.data.local.dao.maarifa.OperationalRuleDao
 import com.shambasmart.data.local.entity.*
+import com.shambasmart.data.local.entity.maarifa.IngestedDocument
 import com.shambasmart.data.local.entity.maarifa.KnowledgeChunk
 import com.shambasmart.data.local.entity.maarifa.OperationalRule
 import com.shambasmart.data.local.converter.Converters
@@ -42,6 +44,7 @@ import com.shambasmart.data.local.view.LivestockDashboardView
         AudioEvent::class,
         MaintenanceTask::class,
         // Maarifa Knowledge Engine entities
+        IngestedDocument::class,
         KnowledgeChunk::class,
         OperationalRule::class,
         // GPS Boundary entities
@@ -58,7 +61,7 @@ import com.shambasmart.data.local.view.LivestockDashboardView
         PlotAnalyticsView::class,
         LivestockDashboardView::class
     ],
-    version = 11,
+    version = 12,
     exportSchema = false
 )
 @TypeConverters(Converters::class)
@@ -86,6 +89,7 @@ abstract class ShambaDatabase : RoomDatabase() {
     abstract fun audioEventDao(): AudioEventDao
     abstract fun maintenanceTaskDao(): MaintenanceTaskDao
     // Maarifa DAOs
+    abstract fun ingestedDocumentDao(): IngestedDocumentDao
     abstract fun knowledgeChunkDao(): KnowledgeChunkDao
     abstract fun operationalRuleDao(): OperationalRuleDao
     // GPS Boundary DAO

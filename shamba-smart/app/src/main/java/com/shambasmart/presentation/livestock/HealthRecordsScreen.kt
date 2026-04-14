@@ -12,8 +12,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.shambasmart.data.local.entity.HealthRecord
 import com.shambasmart.data.local.entity.Animal
+import com.shambasmart.data.local.entity.HealthRecord
+import kotlinx.coroutines.flow.*
 import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
@@ -32,11 +33,9 @@ fun HealthRecordsScreen(
 
     // Get health records for selected animal
     val healthRecords by remember(selectedAnimal?.id) {
-        derivedStateOf {
-            selectedAnimal?.id?.let { animalId ->
-                viewModel.getHealthRecordsByAnimal(animalId)
-            } ?: flowOf(emptyList())
-        }
+        selectedAnimal?.id?.let { animalId ->
+            viewModel.getHealthRecordsByAnimal(animalId)
+        } ?: flowOf(emptyList())
     }.collectAsStateWithLifecycle(emptyList())
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {

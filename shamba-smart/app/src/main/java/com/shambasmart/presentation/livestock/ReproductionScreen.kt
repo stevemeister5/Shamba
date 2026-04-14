@@ -14,7 +14,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.shambasmart.data.local.entity.ReproductionRecord
 import com.shambasmart.data.local.entity.Animal
+import kotlinx.coroutines.flow.*
+import kotlinx.datetime.Clock
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.todayIn
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,11 +34,9 @@ fun ReproductionScreen(
 
     // Get reproduction records for selected dam
     val reproductionRecords by remember(selectedDam?.id) {
-        derivedStateOf {
-            selectedDam?.id?.let { damId ->
-                viewModel.getReproductionRecordsByDam(damId)
-            } ?: flowOf(emptyList())
-        }
+        selectedDam?.id?.let { damId ->
+            viewModel.getReproductionRecordsByDam(damId)
+        } ?: flowOf(emptyList())
     }.collectAsStateWithLifecycle(emptyList())
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {

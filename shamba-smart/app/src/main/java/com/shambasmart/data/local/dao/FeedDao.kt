@@ -15,6 +15,9 @@ interface FeedDao {
     @Query("SELECT * FROM feed_inventory WHERE stockLevel <= reorderThreshold")
     suspend fun getLowStockFeed(): List<FeedInventory>
 
+    @Query("SELECT COUNT(*) FROM feed_inventory WHERE stockLevel <= reorderThreshold")
+    suspend fun getLowStockCountSync(): Int
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(feed: FeedInventory): Long
 

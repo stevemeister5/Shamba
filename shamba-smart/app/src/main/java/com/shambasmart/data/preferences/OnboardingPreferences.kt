@@ -16,6 +16,7 @@ class OnboardingPreferences @Inject constructor(
     companion object {
         private val ONBOARDING_COMPLETED = booleanPreferencesKey("onboarding_completed")
         private val PERMISSIONS_GRANTED = booleanPreferencesKey("permissions_granted")
+        private val LAUNCH_CHOICE_MADE = booleanPreferencesKey("launch_choice_made")
     }
 
     val isOnboardingCompleted: Flow<Boolean> = dataStore.data.map { preferences ->
@@ -24,6 +25,10 @@ class OnboardingPreferences @Inject constructor(
 
     val arePermissionsGranted: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[PERMISSIONS_GRANTED] ?: false
+    }
+
+    val isLaunchChoiceMade: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[LAUNCH_CHOICE_MADE] ?: false
     }
 
     suspend fun completeOnboarding() {
@@ -38,10 +43,17 @@ class OnboardingPreferences @Inject constructor(
         }
     }
 
+    suspend fun setLaunchChoiceMade() {
+        dataStore.edit { preferences ->
+            preferences[LAUNCH_CHOICE_MADE] = true
+        }
+    }
+
     suspend fun resetOnboarding() {
         dataStore.edit { preferences ->
             preferences[ONBOARDING_COMPLETED] = false
             preferences[PERMISSIONS_GRANTED] = false
+            preferences[LAUNCH_CHOICE_MADE] = false
         }
     }
 }

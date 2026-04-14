@@ -42,4 +42,32 @@ interface DashboardViewDao {
     
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertOrUpdateLivestockDashboard(data: LivestockDashboardView)
+
+    // Manual Refresh Logic (can be called from WorkManager or ViewModels)
+    @Transaction
+    suspend fun refreshDashboardKpis(
+        herdSize: Int,
+        goatCount: Int,
+        sheepCount: Int,
+        todayMilk: Double,
+        cheeseStock: Int,
+        pendingTasks: Int,
+        overdueTasks: Int,
+        lowFeed: Int,
+        pests: Int
+    ) {
+        val current = getDashboardDataSync() ?: DashboardView(id = 1)
+        insertOrUpdateDashboard(current.copy(
+            herdSize = herdSize,
+            goatCount = goatCount,
+            sheepCount = sheepCount,
+            todayMilkYield = todayMilk,
+            cheeseBatchesInAging = cheeseStock,
+            pendingTasks = pendingTasks,
+            overdueTasks = overdueTasks,
+            lowFeedAlerts = lowFeed,
+            criticalPestAlerts = pests,
+            lastUpdated = System.currentTimeMillis()
+        ))
+    }
 }

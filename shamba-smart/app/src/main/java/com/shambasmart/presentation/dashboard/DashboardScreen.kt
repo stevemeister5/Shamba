@@ -34,9 +34,7 @@ import com.shambasmart.presentation.common.theme.*
 @Composable
 fun DashboardScreen(
     viewModel: DashboardViewModel = hiltViewModel(),
-    maarifaViewModel: MaarifaViewModel = hiltViewModel(),
-    onNavigateToEggProduction: () -> Unit = {},
-    onNavigateToFlockManagement: () -> Unit = {}
+    maarifaViewModel: MaarifaViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val herdSize by viewModel.herdSize.collectAsStateWithLifecycle()
@@ -51,6 +49,18 @@ fun DashboardScreen(
     
     // Maarifa state
     val maarifaUiState by maarifaViewModel.uiState.collectAsStateWithLifecycle()
+    
+    // Generate Maarifa briefing
+    val briefingResult = remember(dashboardData, herdSize) {
+        MaarifaBriefingGenerator.generateMorningBriefing(
+            animals = emptyList(),
+            milkToday = dashboardData?.todayMilkYield ?: 0.0,
+            herdSize = herdSize,
+            pendingTasks = dashboardData?.pendingTasks ?: 0,
+            lowFeedAlerts = dashboardData?.lowFeedAlerts ?: 0,
+            upcomingEvents = emptyList()
+        )
+    }
 
     Box(modifier = Modifier.fillMaxSize().background(SurfaceBase)) {
         // Main Content Area
@@ -68,12 +78,11 @@ fun DashboardScreen(
                 
                 Spacer(modifier = Modifier.height(24.dp))
                 
-                // KPI Strip (5 horizontal KPIs)
+                // KPI Strip (4 horizontal KPIs)
                 KPIStrip(
                     herdSize = herdSize,
                     milkToday = dashboardData?.todayMilkYield ?: 0.0,
                     cheeseStock = dashboardData?.cheeseBatchesInAging ?: 0,
-                    monthRevenue = 0.0, // Not available in DashboardView
                     openTasks = dashboardData?.pendingTasks ?: 0
                 )
                 
@@ -87,7 +96,7 @@ fun DashboardScreen(
                     // Left Column (4/12) - Maarifa Briefing & Weather
                     Column(modifier = Modifier.weight(4f)) {
                         // Morning Briefing Card
-                        MorningBriefingCard()
+                        MorningBriefingCard(briefingResult = briefingResult)
                         
                         Spacer(modifier = Modifier.height(16.dp))
                         
@@ -98,7 +107,12 @@ fun DashboardScreen(
                     // Center Column (5/12) - Milk Production & Alerts
                     Column(modifier = Modifier.weight(5f)) {
                         // Milk Production Card
-                        MilkProductionCard()
+                        MilkProductionCard(
+                            todayYield = dashboardData?.todayMilkYield ?: 0.0,
+                            goatCount = goatCount,
+                            sheepCount = sheepCount,
+                            cattleCount = cattleCount
+                        )
                         
                         Spacer(modifier = Modifier.height(16.dp))
                         
@@ -106,7 +120,8 @@ fun DashboardScreen(
                         AlertsPanel(
                             hasAlerts = uiState.hasAlerts,
                             pendingTasks = dashboardData?.pendingTasks ?: 0,
-                            lowFeedAlerts = dashboardData?.lowFeedAlerts ?: 0
+                            lowFeedAlerts = dashboardData?.lowFeedAlerts ?: 0,
+                            criticalPestAlerts = dashboardData?.criticalPestAlerts ?: 0
                         )
                     }
                     
@@ -118,25 +133,13 @@ fun DashboardScreen(
                         Spacer(modifier = Modifier.height(16.dp))
                         
                         // Cheese Inventory Summary
-                        CheeseInventoryCard()
+                        CheeseInventoryCard(
+                            activeBatches = dashboardData?.cheeseBatchesInAging ?: 0
+                        )
                     }
                 }
             }
         }
-        
-        // Maarifa Side Panel
-        MaarifaSidePanel(
-            isOpen = maarifaUiState.isPanelOpen,
-            selectedTab = maarifaUiState.selectedTab,
-            onTabSelected = { maarifaViewModel.selectTab(it) },
-            onClose = { maarifaViewModel.closePanel() },
-            viewModel = maarifaViewModel
-        )
-        
-        // Maarifa Floating Tab
-        MaarifaFloatingTab(
-            onClick = { maarifaViewModel.togglePanel() }
-        )
     }
 }
 
@@ -214,7 +217,6 @@ private fun KPIStrip(
     herdSize: Int,
     milkToday: Double,
     cheeseStock: Int,
-    monthRevenue: Double,
     openTasks: Int
 ) {
     Card(
@@ -258,19 +260,6 @@ private fun KPIStrip(
                 icon = Icons.Outlined.Inventory,
                 label = "CHEESE STOCK",
                 value = "$cheeseStock kg",
-                modifier = Modifier.weight(1f)
-            )
-            
-            VerticalDivider(
-                modifier = Modifier.height(48.dp),
-                color = Neutral200
-            )
-            
-            KPIItem(
-                icon = Icons.Outlined.AttachMoney,
-                label = "MONTH REVENUE",
-                value = "TZS ${String.format("%,.0f", monthRevenue)}",
-                valueColor = Green400,
                 modifier = Modifier.weight(1f)
             )
             
@@ -330,7 +319,7 @@ private fun KPIItem(
 }
 
 @Composable
-private fun MorningBriefingCard() {
+private fun MorningBriefingCard(briefingResult: BriefingResult) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -374,7 +363,7 @@ private fun MorningBriefingCard() {
                 Spacer(modifier = Modifier.height(12.dp))
                 
                 Text(
-                    text = "Your herd is performing well today. Milk production is up 12% from yesterday. Consider checking the grazing area in Plot 3 - soil moisture levels indicate optimal conditions for planting.",
+                    text = briefingResult.text,
                     style = MaterialTheme.typography.bodyLarge,
                     color = Neutral950,
                     lineHeight = 22.sp
@@ -394,7 +383,7 @@ private fun MorningBriefingCard() {
                             .background(Green500, RoundedCornerShape(2.dp))
                     )
                     Text(
-                        text = "Rule-governed",
+                        text = briefingResult.confidenceLabel,
                         style = MaterialTheme.typography.bodySmall,
                         color = Neutral600
                     )
@@ -498,7 +487,12 @@ private fun WeatherDayItem(day: WeatherDay) {
 }
 
 @Composable
-private fun MilkProductionCard() {
+private fun MilkProductionCard(
+    todayYield: Double,
+    goatCount: Int,
+    sheepCount: Int,
+    cattleCount: Int
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -522,105 +516,76 @@ private fun MilkProductionCard() {
                         color = Neutral600
                     )
                     Text(
-                        text = "7-Day Overview",
+                        text = "Today's Yield",
                         style = MaterialTheme.typography.headlineMedium,
                         color = Neutral950
                     )
                 }
                 
-                // Mini chart
-                MiniBarChart()
+                // Today's total
+                Text(
+                    text = "${String.format("%.1f", todayYield)}L",
+                    style = MaterialTheme.typography.displayMedium.copy(
+                        fontFamily = GeistMonoFamily,
+                        fontWeight = FontWeight.Light
+                    ),
+                    color = Teal400
+                )
             }
             
             Spacer(modifier = Modifier.height(20.dp))
             
-            // Per-doe breakdown
+            // Species breakdown
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                DoeProductionBar("Doe 001", 4.2f, 5.0f)
-                DoeProductionBar("Doe 002", 3.8f, 5.0f)
-                DoeProductionBar("Doe 003", 4.5f, 5.0f)
-                DoeProductionBar("Doe 004", 2.1f, 5.0f)
+                if (goatCount > 0) {
+                    SpeciesRow("Goats", goatCount, todayYield)
+                }
+                if (sheepCount > 0) {
+                    SpeciesRow("Sheep", sheepCount, 0.0)
+                }
+                if (cattleCount > 0) {
+                    SpeciesRow("Cattle", cattleCount, 0.0)
+                }
             }
         }
     }
 }
 
 @Composable
-private fun MiniBarChart() {
-    val barData = listOf(0.8f, 0.9f, 0.7f, 1.0f, 0.85f, 0.95f, 1.0f)
-    
-    Row(
-        modifier = Modifier
-            .width(120.dp)
-            .height(40.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        verticalAlignment = Alignment.Bottom
-    ) {
-        barData.forEachIndexed { index, value ->
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight(value)
-                    .background(
-                        color = if (index == barData.size - 1) Green400 else Green800,
-                        shape = RoundedCornerShape(topStart = 3.dp, topEnd = 3.dp)
-                    )
-            )
-        }
-    }
-}
-
-@Composable
-private fun DoeProductionBar(name: String, current: Float, max: Float) {
-    val progress = current / max
-    val barColor = when {
-        progress > 0.8f -> Teal400
-        progress > 0.5f -> Green400
-        else -> Amber400
-    }
-    
+private fun SpeciesRow(species: String, count: Int, yield: Double) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(
-            text = name,
-            style = MaterialTheme.typography.bodySmall.copy(
-                fontFamily = GeistMonoFamily
-            ),
-            color = Neutral600,
-            modifier = Modifier.width(56.dp)
-        )
-        
-        Spacer(modifier = Modifier.width(8.dp))
-        
-        // Progress bar
-        Box(
-            modifier = Modifier
-                .weight(1f)
-                .height(6.dp)
-                .background(SurfaceSunken, RoundedCornerShape(3.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(progress)
-                    .fillMaxHeight()
-                    .background(barColor, RoundedCornerShape(3.dp))
+            Text(
+                text = species,
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontFamily = GeistMonoFamily
+                ),
+                color = Neutral800
+            )
+            Text(
+                text = "($count)",
+                style = MaterialTheme.typography.bodySmall,
+                color = Neutral600
             )
         }
-        
-        Spacer(modifier = Modifier.width(8.dp))
-        
-        Text(
-            text = "${String.format("%.1f", current)}L",
-            style = MaterialTheme.typography.bodySmall.copy(
-                fontFamily = GeistMonoFamily
-            ),
-            color = Neutral950,
-            modifier = Modifier.width(44.dp)
-        )
+        if (yield > 0) {
+            Text(
+                text = "${String.format("%.1f", yield)}L",
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontFamily = GeistMonoFamily
+                ),
+                color = Teal400
+            )
+        }
     }
 }
 
@@ -628,7 +593,8 @@ private fun DoeProductionBar(name: String, current: Float, max: Float) {
 private fun AlertsPanel(
     hasAlerts: Boolean,
     pendingTasks: Int,
-    lowFeedAlerts: Int
+    lowFeedAlerts: Int,
+    criticalPestAlerts: Int
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -650,13 +616,14 @@ private fun AlertsPanel(
                     color = Neutral600
                 )
                 
-                if (hasAlerts) {
+                val totalAlerts = pendingTasks + lowFeedAlerts + criticalPestAlerts
+                if (hasAlerts && totalAlerts > 0) {
                     Surface(
                         color = Red400.copy(alpha = 0.15f),
                         shape = RoundedCornerShape(9999.dp)
                     ) {
                         Text(
-                            text = "${pendingTasks + lowFeedAlerts}",
+                            text = "$totalAlerts",
                             style = MaterialTheme.typography.labelSmall,
                             color = Red300,
                             modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
@@ -680,11 +647,20 @@ private fun AlertsPanel(
                         text = "$pendingTasks pending task(s)",
                         type = AlertType.WARNING
                     )
+                    Spacer(modifier = Modifier.height(8.dp))
                 }
                 if (lowFeedAlerts > 0) {
                     AlertItem(
                         icon = Icons.Outlined.Inventory,
                         text = "$lowFeedAlerts low feed stock alert(s)",
+                        type = AlertType.CRITICAL
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+                if (criticalPestAlerts > 0) {
+                    AlertItem(
+                        icon = Icons.Outlined.BugReport,
+                        text = "$criticalPestAlerts pest alert(s)",
                         type = AlertType.CRITICAL
                     )
                 }
@@ -784,40 +760,20 @@ private fun TodaysTasksCard(pendingTasks: Int) {
                     color = Neutral800
                 )
             } else {
-                // Sample tasks
-                TaskItem("Morning milking", true)
-                TaskItem("Check Plot 3 irrigation", false)
-                TaskItem("Feed inventory check", false)
+                Text(
+                    text = "You have $pendingTasks task(s) to complete today.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Neutral800
+                )
             }
         }
     }
 }
 
 @Composable
-private fun TaskItem(text: String, completed: Boolean) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        Checkbox(
-            checked = completed,
-            onCheckedChange = null,
-            colors = CheckboxDefaults.colors(
-                checkedColor = Green500,
-                uncheckedColor = Neutral400,
-                checkmarkColor = Green950
-            )
-        )
-        Text(
-            text = text,
-            style = MaterialTheme.typography.bodyMedium,
-            color = if (completed) Neutral600 else Neutral950
-        )
-    }
-}
-
-@Composable
-private fun CheeseInventoryCard() {
+private fun CheeseInventoryCard(
+    activeBatches: Int
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = SurfaceRaised),
@@ -835,19 +791,34 @@ private fun CheeseInventoryCard() {
             
             Spacer(modifier = Modifier.height(12.dp))
             
-            Text(
-                text = "0 active batches",
-                style = MaterialTheme.typography.bodyMedium,
-                color = Neutral800
-            )
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            Text(
-                text = "Start your first cheese batch to begin tracking aging progress.",
-                style = MaterialTheme.typography.bodySmall,
-                color = Neutral600
-            )
+            if (activeBatches == 0) {
+                Text(
+                    text = "0 active batches",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Neutral800
+                )
+                
+                Spacer(modifier = Modifier.height(8.dp))
+                
+                Text(
+                    text = "Start your first cheese batch to begin tracking aging progress.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Neutral600
+                )
+            } else {
+                Column {
+                    Text(
+                        text = "Aging",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Neutral600
+                    )
+                    Text(
+                        text = "$activeBatches",
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = Neutral950
+                    )
+                }
+            }
         }
     }
 }

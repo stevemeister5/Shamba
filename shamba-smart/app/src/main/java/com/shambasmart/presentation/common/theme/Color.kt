@@ -34,28 +34,34 @@ val Earth200 = Color(0xFFF8D4A8)   // Light warm
 val Earth100 = Color(0xFFFDF0E0)   // Warmest tint
 
 // Teal — Data and Milk
+val Teal800 = Color(0xFF0A5454)
 val Teal600 = Color(0xFF0D6B62)
 val Teal500 = Color(0xFF0E8F82)
 val Teal400 = Color(0xFF12B5A5)
 val Teal300 = Color(0xFF3DCEC0)
 val Teal200 = Color(0xFF87E4DC)
 val Teal100 = Color(0xFFC8F5F1)
+val Teal50 = Color(0xFFF0FDFC)
 
 // Amber — Warnings and Gold
+val Amber800 = Color(0xFF78420D)
 val Amber600 = Color(0xFF92600A)
 val Amber500 = Color(0xFFC4820E)
 val Amber400 = Color(0xFFF0A820)
 val Amber300 = Color(0xFFF7C55A)
 val Amber200 = Color(0xFFFADA96)
 val Amber100 = Color(0xFFFEF3D0)
+val Amber50 = Color(0xFFFFFBEB)
 
 // Red — Alerts and Danger
+val Red800 = Color(0xFF6B1515)
 val Red600 = Color(0xFF8B1C1C)
 val Red500 = Color(0xFFB52626)
 val Red400 = Color(0xFFDE3535)
 val Red300 = Color(0xFFF06666)
 val Red200 = Color(0xFFF8AAAA)
 val Red100 = Color(0xFFFDDEDE)
+val Red50 = Color(0xFFFEF2F2)
 
 // Neutral — Text and Structure
 val Neutral950 = Color(0xFFF8FAF9)   // Primary text (warm white, not pure)
@@ -110,6 +116,15 @@ val GreenGray99 = Neutral950
 
 val DarkGreenGray10 = SurfaceBase
 val DarkGreenGray90 = Neutral800
+
+// Blue — Sky and Water
+val Blue600 = Color(0xFF1E88E5)
+val Blue800 = Color(0xFF1565C0)
+val Blue300 = Color(0xFF64B5F6)
+
+// Purple — Premium Features
+val Purple800 = Color(0xFF6A1B9A)
+val Purple300 = Color(0xFFCE93D8)
 
 // Farm-themed colors (updated to match new palette)
 val MilkWhite = Color(0xFFFFF8F0)

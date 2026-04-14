@@ -30,28 +30,23 @@ fun AnimalDetailScreen(
     onNavigateBack: () -> Unit,
     viewModel: LivestockViewModel = hiltViewModel()
 ) {
-    // In a real app, the ID would be retrieved from SavedStateHandle in the ViewModel
-    // For now, we'll assume the ViewModel has a way to get the current animal
-    // Based on the NavGraph, we passed animalId. Let's look at how LivestockViewModel handles it.
-    
-    // We'll need to update LivestockViewModel to accept an ID or use a StateFlow for the selected animal
-    // For this implementation, I'll assume we might need to fetch it.
-    
-    val allAnimals by viewModel.allAnimals.collectAsStateWithLifecycle()
-    // Simplified logic: find animal in list. In production, use a dedicated DAO query.
-    val animal = allAnimals.firstOrNull() // Placeholder, should be based on ID
+    val animal by viewModel.selectedAnimal.collectAsStateWithLifecycle()
     
     var selectedTab by remember { mutableStateOf("Overview") }
     var showAddHealthDialog by remember { mutableStateOf(false) }
 
     if (animal == null) {
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator(color = Green500)
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                CircularProgressIndicator(color = Green500)
+                Spacer(modifier = Modifier.height(16.dp))
+                Text("Loading animal details...", color = Neutral600)
+            }
         }
         return
     }
 
-    val healthRecords by viewModel.getHealthRecordsByAnimal(animal.id)
+    val healthRecords by viewModel.getHealthRecordsByAnimal(animal!!.id)
         .collectAsStateWithLifecycle(initialValue = emptyList())
 
     Column(
@@ -73,12 +68,12 @@ fun AnimalDetailScreen(
                 Spacer(modifier = Modifier.width(8.dp))
                 Column {
                     Text(
-                        text = animal.tagId ?: "No Tag",
+                        text = animal!!.tagId ?: "No Tag",
                         style = MaterialTheme.typography.headlineLarge,
                         color = Neutral950
                     )
                     Text(
-                        text = "${animal.species} • ${animal.breed ?: "Unknown"}",
+                        text = "${animal!!.species} • ${animal!!.breed ?: "Unknown"}",
                         style = MaterialTheme.typography.bodyMedium,
                         color = Neutral600
                     )
@@ -120,21 +115,21 @@ fun AnimalDetailScreen(
         // Tab Content
         Box(modifier = Modifier.weight(1f)) {
             when (selectedTab) {
-                "Overview" -> OverviewTab(animal)
+                "Overview" -> OverviewTab(animal!!)
                 "Health" -> HealthTab(
                     healthRecords = healthRecords,
                     onAddRecord = { showAddHealthDialog = true },
                     onDeleteRecord = { viewModel.deleteHealthRecord(it) }
                 )
-                "Milk" -> MilkTab(animal)
-                "Reproduction" -> ReproductionTab(animal)
+                "Milk" -> MilkTab(animal!!)
+                "Reproduction" -> ReproductionTab(animal!!)
             }
         }
     }
 
     if (showAddHealthDialog) {
         AddHealthRecordDialog(
-            animalId = animal.id,
+            animalId = animal!!.id,
             onDismiss = { showAddHealthDialog = false },
             onSave = { record ->
                 viewModel.addHealthRecord(record)

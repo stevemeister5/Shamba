@@ -15,6 +15,10 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -49,6 +53,20 @@ class DemoModeManager @Inject constructor(
 
     companion object {
         val DEMO_MODE_KEY = booleanPreferencesKey("demo_mode_active")
+        
+        fun fromAppContext(context: Context): DemoModeManager {
+            val entryPoint = EntryPointAccessors.fromApplication(
+                context.applicationContext,
+                DemoModeEntryPoint::class.java
+            )
+            return entryPoint.demoModeManager()
+        }
+        
+        @EntryPoint
+        @InstallIn(SingletonComponent::class)
+        interface DemoModeEntryPoint {
+            fun demoModeManager(): DemoModeManager
+        }
     }
 
     /**
@@ -57,7 +75,7 @@ class DemoModeManager @Inject constructor(
      */
     fun initialize() {
         coroutineScope.launch(Dispatchers.IO) {
-            val preferences = dataStore.first()
+            val preferences = dataStore.data.first()
             val isActive = preferences[DEMO_MODE_KEY] ?: false
             _isDemoMode.value = isActive
             

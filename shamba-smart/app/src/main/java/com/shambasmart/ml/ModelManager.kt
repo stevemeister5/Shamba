@@ -269,6 +269,7 @@ class ModelManager @Inject constructor(
      * Downloads a model update from remote.
      * Returns false if download fails or offline.
      */
+    @Suppress("UNUSED_PARAMETER")
     suspend fun downloadModelUpdate(modelName: String, url: String): Boolean = withContext(Dispatchers.IO) {
         try {
             // Check network connectivity

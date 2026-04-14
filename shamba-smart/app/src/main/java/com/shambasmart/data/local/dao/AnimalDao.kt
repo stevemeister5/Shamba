@@ -12,6 +12,9 @@ interface AnimalDao {
     @Query("SELECT * FROM animals WHERE id = :id")
     suspend fun getAnimalById(id: Long): Animal?
 
+    @Query("SELECT * FROM animals WHERE id = :id")
+    fun getAnimalByIdFlow(id: Long): Flow<Animal?>
+
     @Query("SELECT * FROM animals WHERE tagId = :tagId")
     suspend fun getAnimalByTagId(tagId: String): Animal?
 

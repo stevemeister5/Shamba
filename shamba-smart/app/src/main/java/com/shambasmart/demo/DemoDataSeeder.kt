@@ -3,10 +3,7 @@ package com.shambasmart.demo
 import com.shambasmart.data.local.ShambaDatabase
 import com.shambasmart.data.local.entity.*
 import com.shambasmart.data.local.entity.maarifa.*
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.Clock
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.todayIn
+import kotlinx.datetime.*
 import kotlin.random.Random
 
 /**
@@ -46,7 +43,6 @@ object DemoDataSeeder {
         seedOperationalRules(db)
         seedMilkCollections(db)
         seedHarvestRecords(db)
-        seedCropInputs(db)
     }
 
     private suspend fun seedAnimals(db: ShambaDatabase) {
@@ -64,38 +60,38 @@ object DemoDataSeeder {
         
         // Named does - lactating
         val lactatingDoes = listOf(
-            Animal(species = "Goat", breed = "Toggenburg", sex = "Female", dateOfBirth = today.minusYears(3), weight = 42.0, status = "active"),
-            Animal(species = "Goat", breed = "Saanen", sex = "Female", dateOfBirth = today.minusYears(3), weight = 44.0, status = "active"),
-            Animal(species = "Goat", breed = "Alpine", sex = "Female", dateOfBirth = today.minusYears(4), weight = 46.0, status = "active"),
-            Animal(species = "Goat", breed = "Nubian", sex = "Female", dateOfBirth = today.minusYears(2), weight = 38.0, status = "active"),
-            Animal(species = "Goat", breed = "Toggenburg", sex = "Female", dateOfBirth = today.minusYears(3), weight = 41.0, status = "active"),
+            Animal(species = "Goat", breed = "Toggenburg", sex = "Female", dateOfBirth = today.minus(DatePeriod(years = 3)), weight = 42.0, status = "active"),
+            Animal(species = "Goat", breed = "Saanen", sex = "Female", dateOfBirth = today.minus(DatePeriod(years = 3)), weight = 44.0, status = "active"),
+            Animal(species = "Goat", breed = "Alpine", sex = "Female", dateOfBirth = today.minus(DatePeriod(years = 4)), weight = 46.0, status = "active"),
+            Animal(species = "Goat", breed = "Nubian", sex = "Female", dateOfBirth = today.minus(DatePeriod(years = 2)), weight = 38.0, status = "active"),
+            Animal(species = "Goat", breed = "Toggenburg", sex = "Female", dateOfBirth = today.minus(DatePeriod(years = 3)), weight = 41.0, status = "active"),
         )
         lactatingDoes.forEach { animalDao.insertAnimal(it) }
         
         // Pregnant doe
         animalDao.insertAnimal(
-            Animal(species = "Goat", breed = "Alpine", sex = "Female", dateOfBirth = today.minusYears(4), weight = 52.0, status = "active")
+            Animal(species = "Goat", breed = "Alpine", sex = "Female", dateOfBirth = today.minus(DatePeriod(years = 4)), weight = 52.0, status = "active")
         )
         
         // Sick doe
         animalDao.insertAnimal(
-            Animal(species = "Goat", breed = "Boer", sex = "Female", dateOfBirth = today.minusYears(2), weight = 34.0, status = "active")
+            Animal(species = "Goat", breed = "Boer", sex = "Female", dateOfBirth = today.minus(DatePeriod(years = 2)), weight = 34.0, status = "active")
         )
         
         // Dry doe
         animalDao.insertAnimal(
-            Animal(species = "Goat", breed = "Nubian", sex = "Female", dateOfBirth = today.minusYears(5), weight = 50.0, status = "active")
+            Animal(species = "Goat", breed = "Nubian", sex = "Female", dateOfBirth = today.minus(DatePeriod(years = 5)), weight = 50.0, status = "active")
         )
         
         // Doe in withdrawal
         animalDao.insertAnimal(
-            Animal(species = "Goat", breed = "Saanen", sex = "Female", dateOfBirth = today.minusYears(3), weight = 43.0, status = "active")
+            Animal(species = "Goat", breed = "Saanen", sex = "Female", dateOfBirth = today.minus(DatePeriod(years = 3)), weight = 43.0, status = "active")
         )
         
         // Bucks
         repeat(3) { i ->
             animalDao.insertAnimal(
-                Animal(species = "Goat", breed = goatBreeds[i % goatBreeds.size], sex = "Male", dateOfBirth = today.minusYears(4), weight = 68.0, status = "active")
+                Animal(species = "Goat", breed = goatBreeds[i % goatBreeds.size], sex = "Male", dateOfBirth = today.minus(DatePeriod(years = 4)), weight = 68.0, status = "active")
             )
         }
         
@@ -106,7 +102,7 @@ object DemoDataSeeder {
             val breed = goatBreeds.random()
             val weight = if (sex == "Female") 35.0 + Random.nextDouble() * 15.0 else 55.0 + Random.nextDouble() * 20.0
             animalDao.insertAnimal(
-                Animal(species = "Goat", breed = breed, sex = sex, dateOfBirth = today.minusDays(ageMonths * 30), weight = weight, status = "active")
+                Animal(species = "Goat", breed = breed, sex = sex, dateOfBirth = today.minus(DatePeriod(days = ageMonths * 30)), weight = weight, status = "active")
             )
         }
         
@@ -118,7 +114,7 @@ object DemoDataSeeder {
             val breed = sheepBreeds.random()
             val weight = if (sex == "Female") 30.0 + Random.nextDouble() * 15.0 else 45.0 + Random.nextDouble() * 20.0
             animalDao.insertAnimal(
-                Animal(species = "Sheep", breed = breed, sex = sex, dateOfBirth = today.minusDays(ageMonths * 30), weight = weight, status = "active")
+                Animal(species = "Sheep", breed = breed, sex = sex, dateOfBirth = today.minus(DatePeriod(days = ageMonths * 30)), weight = weight, status = "active")
             )
         }
     }
@@ -135,7 +131,7 @@ object DemoDataSeeder {
             Plot(name = "Plot G", sizeAcres = 1.0, latitude = -5.152, longitude = 38.485, soilType = "Sandy loam", currentUse = "Crop"),
             Plot(name = "Plot H", sizeAcres = 2.5, latitude = -5.146, longitude = 38.480, soilType = "Clay", currentUse = "Pasture"),
         )
-        plots.forEach { plotDao.insertPlot(it) }
+        plots.forEach { plotDao.insert(it) }
     }
 
     private suspend fun seedCropPlantings(db: ShambaDatabase) {
@@ -144,15 +140,15 @@ object DemoDataSeeder {
         
         // Get plot IDs (1-8 based on insertion order)
         val plantings = listOf(
-            CropPlanting(plotId = 1, cropType = "Maize", variety = "SEEDCO SC403", plantingDate = today.minusDays(55), status = "growing"),
-            CropPlanting(plotId = 2, cropType = "Napier Grass", variety = "Clone 13", plantingDate = today.minusDays(60), status = "growing"),
-            CropPlanting(plotId = 3, cropType = "Beans", variety = "Lyamungu 85", plantingDate = today.minusDays(45), status = "growing"),
-            CropPlanting(plotId = 4, cropType = "Tomatoes", variety = "Cal-J", plantingDate = today.minusDays(75), status = "growing"),
-            CropPlanting(plotId = 5, cropType = "Kale", variety = "Sukuma Wiki", plantingDate = today.minusDays(55), status = "growing"),
-            CropPlanting(plotId = 6, cropType = "Cassava", variety = "Kiroba", plantingDate = today.minusDays(30), status = "growing"),
-            CropPlanting(plotId = 7, cropType = "Onion", variety = "Red Pinoy", plantingDate = today.minusDays(14), status = "growing"),
+            CropPlanting(plotId = 1, cropType = "Maize", variety = "SEEDCO SC403", plantingDate = today.minus(DatePeriod(days = 55)), status = "growing"),
+            CropPlanting(plotId = 2, cropType = "Napier Grass", variety = "Clone 13", plantingDate = today.minus(DatePeriod(days = 60)), status = "growing"),
+            CropPlanting(plotId = 3, cropType = "Beans", variety = "Lyamungu 85", plantingDate = today.minus(DatePeriod(days = 45)), status = "growing"),
+            CropPlanting(plotId = 4, cropType = "Tomatoes", variety = "Cal-J", plantingDate = today.minus(DatePeriod(days = 75)), status = "growing"),
+            CropPlanting(plotId = 5, cropType = "Kale", variety = "Sukuma Wiki", plantingDate = today.minus(DatePeriod(days = 55)), status = "growing"),
+            CropPlanting(plotId = 6, cropType = "Cassava", variety = "Kiroba", plantingDate = today.minus(DatePeriod(days = 30)), status = "growing"),
+            CropPlanting(plotId = 7, cropType = "Onion", variety = "Red Pinoy", plantingDate = today.minus(DatePeriod(days = 14)), status = "growing"),
         )
-        plantings.forEach { cropDao.insertCropPlanting(it) }
+        plantings.forEach { cropDao.insert(it) }
     }
 
     private suspend fun seedHealthRecords(db: ShambaDatabase) {
@@ -160,24 +156,24 @@ object DemoDataSeeder {
         val healthDao = db.healthRecordDao()
         
         // Vaccination due in 3 days (animal 1)
-        healthDao.insertHealthRecord(
-            HealthRecord(animalId = 1, type = "Vaccination", date = today.minusDays(180), vaccineName = "PPR Vaccine", nextDueDate = today.plusDays(3), notes = "Annual booster")
+        healthDao.insert(
+            HealthRecord(animalId = 1, type = "Vaccination", date = today.minus(DatePeriod(days = 180)), vaccineName = "PPR Vaccine", nextDueDate = today.plus(DatePeriod(days = 3)), notes = "Annual booster")
         )
         // Vaccination overdue (animal 7)
-        healthDao.insertHealthRecord(
-            HealthRecord(animalId = 7, type = "Vaccination", date = today.minusDays(185), vaccineName = "Brucellosis", nextDueDate = today.minusDays(5))
+        healthDao.insert(
+            HealthRecord(animalId = 7, type = "Vaccination", date = today.minus(DatePeriod(days = 185)), vaccineName = "Brucellosis", nextDueDate = today.minus(DatePeriod(days = 5)))
         )
         // Treatment with withdrawal (animal 9)
-        healthDao.insertHealthRecord(
-            HealthRecord(animalId = 9, type = "Treatment", date = today.minusDays(4), description = "Oxytetracycline LA 8ml IM", notes = "Milk withdrawal 7 days")
+        healthDao.insert(
+            HealthRecord(animalId = 9, type = "Treatment", date = today.minus(DatePeriod(days = 4)), description = "Oxytetracycline LA 8ml IM", notes = "Milk withdrawal 7 days")
         )
         // Illness record (animal 7)
-        healthDao.insertHealthRecord(
-            HealthRecord(animalId = 7, type = "Illness", date = today.minusDays(2), description = "Suspected CCPP — nasal discharge, reduced appetite", notes = "Isolated. Pending vet confirmation.")
+        healthDao.insert(
+            HealthRecord(animalId = 7, type = "Illness", date = today.minus(DatePeriod(days = 2)), description = "Suspected CCPP — nasal discharge, reduced appetite", notes = "Isolated. Pending vet confirmation.")
         )
-        // Deworming for flock
-        healthDao.insertHealthRecord(
-            HealthRecord(animalId = 0, type = "Deworming", date = today.minusDays(45), description = "Whole flock — Albendazole", notes = "Flock-wide deworming. Next due in 45 days.")
+        // Deworming for flock - assigned to first animal to satisfy foreign key
+        healthDao.insert(
+            HealthRecord(animalId = 1, type = "Deworming", date = today.minus(DatePeriod(days = 45)), description = "Whole flock — Albendazole", notes = "Flock-wide deworming. Next due in 45 days.")
         )
     }
 
@@ -186,16 +182,16 @@ object DemoDataSeeder {
         val reproDao = db.reproductionDao()
         
         // Pregnant doe - due in 5 days
-        reproDao.insertReproductionRecord(
-            ReproductionRecord(damId = 6, sireId = 11, type = "Pregnancy", matingDate = today.minusDays(145), pregnancyConfirmed = true, expectedDueDate = today.plusDays(5))
+        reproDao.insert(
+            ReproductionRecord(damId = 6, sireId = 11, type = "Pregnancy", matingDate = today.minus(DatePeriod(days = 145)), pregnancyConfirmed = true, expectedDueDate = today.plus(DatePeriod(days = 5)))
         )
         // Recent birth
-        reproDao.insertReproductionRecord(
-            ReproductionRecord(damId = 3, sireId = 11, type = "Birth", actualBirthDate = today.minusDays(60), numberOfKids = 2, numberOfAlive = 2, numberOfStillborn = 0)
+        reproDao.insert(
+            ReproductionRecord(damId = 3, sireId = 11, type = "Birth", actualBirthDate = today.minus(DatePeriod(days = 60)), numberOfKids = 2, numberOfAlive = 2, numberOfStillborn = 0)
         )
         // Heat detection yesterday
-        reproDao.insertReproductionRecord(
-            ReproductionRecord(damId = 5, type = "HeatDetection", matingDate = today.minusDays(1), notes = "Standing heat observed. Buck introduced.")
+        reproDao.insert(
+            ReproductionRecord(damId = 5, type = "HeatDetection", matingDate = today.minus(DatePeriod(days = 1)), notes = "Standing heat observed. Buck introduced.")
         )
     }
 
@@ -205,27 +201,27 @@ object DemoDataSeeder {
         
         // 30 days of milk data for lactating does (IDs 1-5)
         for (daysAgo in 0..30) {
-            val date = today.minusDays(daysAgo.toLong())
+            val date = today.minus(DatePeriod(days = daysAgo))
             
             // G-1: Peak yields ~4.6L/day
-            milkDao.insertMilkProduction(
+            milkDao.insert(
                 MilkProduction(animalId = 1, date = date, morningYield = 2.4 + Random.nextDouble() * 0.4, eveningYield = 2.1 + Random.nextDouble() * 0.3, totalYield = 4.6)
             )
             // G-2: Steady ~3.8L/day
-            milkDao.insertMilkProduction(
+            milkDao.insert(
                 MilkProduction(animalId = 2, date = date, morningYield = 2.0 + Random.nextDouble() * 0.3, eveningYield = 1.7 + Random.nextDouble() * 0.3, totalYield = 3.8)
             )
             // G-3: Declining last 5 days
             val neemaYield = if (daysAgo < 5) 2.8 else (3.8 - daysAgo * 0.03)
-            milkDao.insertMilkProduction(
+            milkDao.insert(
                 MilkProduction(animalId = 3, date = date, morningYield = neemaYield / 2, eveningYield = neemaYield / 2, totalYield = neemaYield)
             )
             // G-4: New lactation, moderate
-            milkDao.insertMilkProduction(
+            milkDao.insert(
                 MilkProduction(animalId = 4, date = date, morningYield = 1.8 + Random.nextDouble() * 0.3, eveningYield = 1.6 + Random.nextDouble() * 0.3, totalYield = 3.5)
             )
             // G-5: Good yield
-            milkDao.insertMilkProduction(
+            milkDao.insert(
                 MilkProduction(animalId = 5, date = date, morningYield = 2.2 + Random.nextDouble() * 0.3, eveningYield = 2.0 + Random.nextDouble() * 0.3, totalYield = 4.3)
             )
         }
@@ -239,10 +235,10 @@ object DemoDataSeeder {
         val keyAnimals = listOf(1L, 2L, 3L, 4L, 5L, 6L, 7L)
         for (animalId in keyAnimals) {
             for (i in 0..5) {
-                val date = today.minusDays(i.toLong() * 30)
+                val date = today.minus(DatePeriod(days = i * 30))
                 val baseWeight = 35.0 + Random.nextDouble() * 20.0
                 val trend = if (animalId == 7L && i < 3) -1.0 else 0.0 // G-14 declining
-                weightDao.insertWeightEntry(
+                weightDao.insert(
                     WeightEntry(animalId = animalId, date = date, weight = baseWeight + i * trend)
                 )
             }
@@ -253,10 +249,10 @@ object DemoDataSeeder {
         val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
         val silageDao = db.silageDao()
         
-        silageDao.insertSilageInventory(
+        silageDao.insert(
             SilageInventory(
                 pitId = "Pit-1",
-                fillDate = today.minusDays(90),
+                fillDate = today.minus(DatePeriod(days = 90)),
                 cropType = "Maize Silage",
                 estimatedTonnage = 12.0,
                 currentTonnage = 4.2,
@@ -271,14 +267,14 @@ object DemoDataSeeder {
         val cheeseDao = db.cheeseDao()
         
         // Batch 1 - Aging, 5 of 7 days
-        cheeseDao.insertCheeseBatch(
+        cheeseDao.insertBatch(
             CheeseBatch(
                 batchId = "CB-07",
-                productionDate = today.minusDays(5),
+                productionDate = today.minus(DatePeriod(days = 5)),
                 milkVolumeUsed = 20.0,
                 cheeseType = "Fresh Chèvre",
                 yieldKg = 3.8,
-                agingStartDate = today.minusDays(5),
+                agingStartDate = today.minus(DatePeriod(days = 5)),
                 status = "aging",
                 milkCostTzs = 16000L,
                 cultureCostTzs = 1200L,
@@ -288,14 +284,14 @@ object DemoDataSeeder {
             )
         )
         // Batch 2 - Aging semi-hard, 12 of 21 days
-        cheeseDao.insertCheeseBatch(
+        cheeseDao.insertBatch(
             CheeseBatch(
                 batchId = "CB-06",
-                productionDate = today.minusDays(12),
+                productionDate = today.minus(DatePeriod(days = 12)),
                 milkVolumeUsed = 30.0,
                 cheeseType = "Feta-style",
                 yieldKg = 5.2,
-                agingStartDate = today.minusDays(12),
+                agingStartDate = today.minus(DatePeriod(days = 12)),
                 status = "aging",
                 milkCostTzs = 24000L,
                 cultureCostTzs = 2000L,
@@ -305,14 +301,14 @@ object DemoDataSeeder {
             )
         )
         // Batch 3 - Ready to package
-        cheeseDao.insertCheeseBatch(
+        cheeseDao.insertBatch(
             CheeseBatch(
                 batchId = "CB-05",
-                productionDate = today.minusDays(8),
+                productionDate = today.minus(DatePeriod(days = 8)),
                 milkVolumeUsed = 25.0,
                 cheeseType = "Fresh Chèvre",
                 yieldKg = 4.8,
-                agingStartDate = today.minusDays(8),
+                agingStartDate = today.minus(DatePeriod(days = 8)),
                 packagingDate = today,
                 status = "ready",
                 milkCostTzs = 20000L,
@@ -323,18 +319,18 @@ object DemoDataSeeder {
             )
         )
         // Batch 4 - Sold
-        cheeseDao.insertCheeseBatch(
+        cheeseDao.insertBatch(
             CheeseBatch(
                 batchId = "CB-04",
-                productionDate = today.minusDays(20),
+                productionDate = today.minus(DatePeriod(days = 20)),
                 milkVolumeUsed = 18.0,
                 cheeseType = "Fresh Chèvre",
                 yieldKg = 3.4,
-                agingStartDate = today.minusDays(20),
+                agingStartDate = today.minus(DatePeriod(days = 20)),
                 status = "sold",
                 salePriceTzsPerKg = 15000L,
                 quantitySoldKg = 3.4f,
-                saleDate = today.minusDays(12).toEpochDays().toLong() * 86400000L,
+                saleDate = today.minus(DatePeriod(days = 12)).toEpochDays().toLong() * 86400000L,
                 milkCostTzs = 14400L,
                 cultureCostTzs = 1000L,
                 rennetCostTzs = 700L,
@@ -348,22 +344,22 @@ object DemoDataSeeder {
         val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
         val feedDao = db.feedDao()
         
-        feedDao.insertFeedInventory(
+        feedDao.insert(
             FeedInventory(feedType = "Silage (Maize)", stockLevel = 4200.0, unit = "kg", reorderThreshold = 6000.0, costPerUnit = 0.0)
         )
-        feedDao.insertFeedInventory(
+        feedDao.insert(
             FeedInventory(feedType = "Napier Grass (Fresh)", stockLevel = 680.0, unit = "kg", reorderThreshold = 200.0, costPerUnit = 0.0)
         )
-        feedDao.insertFeedInventory(
+        feedDao.insert(
             FeedInventory(feedType = "Dairy Meal (Concentrate)", stockLevel = 120.0, unit = "kg", reorderThreshold = 50.0, costPerUnit = 850.0)
         )
-        feedDao.insertFeedInventory(
+        feedDao.insert(
             FeedInventory(feedType = "Mineral Supplement", stockLevel = 25.0, unit = "kg", reorderThreshold = 10.0, costPerUnit = 4500.0)
         )
-        feedDao.insertFeedInventory(
+        feedDao.insert(
             FeedInventory(feedType = "Hay (Backup)", stockLevel = 40.0, unit = "kg", reorderThreshold = 100.0, costPerUnit = 200.0)
         )
-        feedDao.insertFeedInventory(
+        feedDao.insert(
             FeedInventory(feedType = "Salt Lick Blocks", stockLevel = 4.0, unit = "blocks", reorderThreshold = 2.0, costPerUnit = 3500.0)
         )
     }
@@ -371,19 +367,19 @@ object DemoDataSeeder {
     private suspend fun seedStoreItems(db: ShambaDatabase) {
         val storeDao = db.storeDao()
         
-        storeDao.insertStoreItem(
+        storeDao.insert(
             StoreItem(name = "Cheese packaging", category = "Packaging", quantity = 45.0, unit = "units", costPerUnit = 300.0)
         )
-        storeDao.insertStoreItem(
+        storeDao.insert(
             StoreItem(name = "Oxytetracycline LA", category = "Veterinary", quantity = 2.0, unit = "bottles", costPerUnit = 11000.0)
         )
-        storeDao.insertStoreItem(
+        storeDao.insert(
             StoreItem(name = "DAP Fertilizer", category = "Crop inputs", quantity = 30.0, unit = "kg", costPerUnit = 370.0)
         )
-        storeDao.insertStoreItem(
+        storeDao.insert(
             StoreItem(name = "CAN Fertilizer", category = "Crop inputs", quantity = 20.0, unit = "kg", costPerUnit = 450.0)
         )
-        storeDao.insertStoreItem(
+        storeDao.insert(
             StoreItem(name = "Dithane M-45", category = "Pesticide", quantity = 3.0, unit = "kg", costPerUnit = 5000.0)
         )
     }
@@ -393,16 +389,16 @@ object DemoDataSeeder {
         val financialDao = db.financialDao()
         
         // Current month income
-        financialDao.insertIncome(Income(date = today.minusDays(2), category = "Cheese sales", description = "4 batches — Fresh Chèvre to Korogwe market", amount = 184000.0))
-        financialDao.insertIncome(Income(date = today.minusDays(5), category = "Milk sales", description = "Surplus milk — 120L to Tanga Dairy Co-op", amount = 96000.0))
-        financialDao.insertIncome(Income(date = today.minusDays(8), category = "Live animal sales", description = "2 male goats — Korogwe livestock market", amount = 80000.0))
-        financialDao.insertIncome(Income(date = today.minusDays(12), category = "Vegetable sales", description = "Kale harvest — 180kg to Korogwe market", amount = 38000.0))
-        financialDao.insertIncome(Income(date = today.minusDays(15), category = "Manure sales", description = "2 truck loads — local vegetable farmers", amount = 14000.0))
+        financialDao.insertIncome(Income(date = today.minus(DatePeriod(days = 2)), category = "Cheese sales", description = "4 batches — Fresh Chèvre to Korogwe market", amount = 184000.0))
+        financialDao.insertIncome(Income(date = today.minus(DatePeriod(days = 5)), category = "Milk sales", description = "Surplus milk — 120L to Tanga Dairy Co-op", amount = 96000.0))
+        financialDao.insertIncome(Income(date = today.minus(DatePeriod(days = 8)), category = "Live animal sales", description = "2 male goats — Korogwe livestock market", amount = 80000.0))
+        financialDao.insertIncome(Income(date = today.minus(DatePeriod(days = 12)), category = "Vegetable sales", description = "Kale harvest — 180kg to Korogwe market", amount = 38000.0))
+        financialDao.insertIncome(Income(date = today.minus(DatePeriod(days = 15)), category = "Manure sales", description = "2 truck loads — local vegetable farmers", amount = 14000.0))
         
         // Previous month
-        financialDao.insertIncome(Income(date = today.minusDays(35), category = "Milk sales", description = "150L to Tanga Dairy Co-op", amount = 120000.0))
-        financialDao.insertIncome(Income(date = today.minusDays(40), category = "Cheese sales", description = "3 batches", amount = 135000.0))
-        financialDao.insertIncome(Income(date = today.minusDays(45), category = "Vegetable sales", description = "Tomatoes", amount = 45000.0))
+        financialDao.insertIncome(Income(date = today.minus(DatePeriod(days = 35)), category = "Milk sales", description = "150L to Tanga Dairy Co-op", amount = 120000.0))
+        financialDao.insertIncome(Income(date = today.minus(DatePeriod(days = 40)), category = "Cheese sales", description = "3 batches", amount = 135000.0))
+        financialDao.insertIncome(Income(date = today.minus(DatePeriod(days = 45)), category = "Vegetable sales", description = "Tomatoes", amount = 45000.0))
     }
 
     private suspend fun seedExpenses(db: ShambaDatabase) {
@@ -410,13 +406,13 @@ object DemoDataSeeder {
         val financialDao = db.financialDao()
         
         // Current month expenses
-        financialDao.insertExpense(Expense(date = today.minusDays(1), category = "Labour", description = "Monthly wages — 4 workers", amount = 80000.0))
-        financialDao.insertExpense(Expense(date = today.minusDays(3), category = "Feed", description = "Dairy meal 100kg — Korogwe Agrovet", amount = 85000.0))
-        financialDao.insertExpense(Expense(date = today.minusDays(6), category = "Veterinary & medicine", description = "Vet visit — G-14 consultation + Oxytetracycline", amount = 22000.0))
-        financialDao.insertExpense(Expense(date = today.minusDays(9), category = "Seeds & fertiliser", description = "DAP 50kg — Plot A top dressing", amount = 18500.0))
-        financialDao.insertExpense(Expense(date = today.minusDays(11), category = "Cheese inputs", description = "Rennet + mesophilic cultures", amount = 14000.0))
-        financialDao.insertExpense(Expense(date = today.minusDays(14), category = "Fuel & transport", description = "Market trips + generator fuel", amount = 9500.0))
-        financialDao.insertExpense(Expense(date = today.minusDays(18), category = "Packaging", description = "Cheese packaging materials — 50 units", amount = 7000.0))
+        financialDao.insertExpense(Expense(date = today.minus(DatePeriod(days = 1)), category = "Labour", description = "Monthly wages — 4 workers", amount = 80000.0))
+        financialDao.insertExpense(Expense(date = today.minus(DatePeriod(days = 3)), category = "Feed", description = "Dairy meal 100kg — Korogwe Agrovet", amount = 85000.0))
+        financialDao.insertExpense(Expense(date = today.minus(DatePeriod(days = 6)), category = "Veterinary & medicine", description = "Vet visit — G-14 consultation + Oxytetracycline", amount = 22000.0))
+        financialDao.insertExpense(Expense(date = today.minus(DatePeriod(days = 9)), category = "Seeds & fertiliser", description = "DAP 50kg — Plot A top dressing", amount = 18500.0))
+        financialDao.insertExpense(Expense(date = today.minus(DatePeriod(days = 11)), category = "Cheese inputs", description = "Rennet + mesophilic cultures", amount = 14000.0))
+        financialDao.insertExpense(Expense(date = today.minus(DatePeriod(days = 14)), category = "Fuel & transport", description = "Market trips + generator fuel", amount = 9500.0))
+        financialDao.insertExpense(Expense(date = today.minus(DatePeriod(days = 18)), category = "Packaging", description = "Cheese packaging materials — 50 units", amount = 7000.0))
     }
 
     private suspend fun seedLoans(db: ShambaDatabase) {
@@ -427,11 +423,11 @@ object DemoDataSeeder {
             Loan(
                 lenderName = "CRDB Bank Korogwe",
                 amount = 500000.0,
-                disbursementDate = today.minusMonths(6),
+                disbursementDate = today.minus(DatePeriod(months = 6)),
                 interestRate = 18.0,
                 totalRepaid = 250000.0,
                 balance = 250000.0,
-                dueDate = today.plusMonths(6),
+                dueDate = today.plus(DatePeriod(months = 6)),
                 status = "active"
             )
         )
@@ -441,10 +437,10 @@ object DemoDataSeeder {
         val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
         val workerDao = db.workerDao()
         
-        workerDao.insertWorker(Worker(name = "Amina Juma", role = "Milking & livestock", contact = "+255 712 345 678", hireDate = today.minusYears(2), dailyRate = 2500.0, status = "active"))
-        workerDao.insertWorker(Worker(name = "Joseph Mwanga", role = "Crops & fencing", contact = "+255 754 987 654", hireDate = today.minusYears(1), dailyRate = 2000.0, status = "active"))
-        workerDao.insertWorker(Worker(name = "Moses Kilima", role = "Crops & general", contact = "+255 768 111 222", hireDate = today.minusMonths(8), dailyRate = 2000.0, status = "active"))
-        workerDao.insertWorker(Worker(name = "Fatuma Said", role = "Casual — cheese room", contact = "+255 745 333 444", hireDate = today.minusDays(10), dailyRate = 2500.0, isSeasonal = true, status = "active"))
+        workerDao.insertWorker(Worker(name = "Amina Juma", role = "Milking & livestock", contact = "+255 712 345 678", hireDate = today.minus(DatePeriod(years = 2)), dailyRate = 2500.0, status = "active"))
+        workerDao.insertWorker(Worker(name = "Joseph Mwanga", role = "Crops & fencing", contact = "+255 754 987 654", hireDate = today.minus(DatePeriod(years = 1)), dailyRate = 2000.0, status = "active"))
+        workerDao.insertWorker(Worker(name = "Moses Kilima", role = "Crops & general", contact = "+255 768 111 222", hireDate = today.minus(DatePeriod(months = 8)), dailyRate = 2000.0, status = "active"))
+        workerDao.insertWorker(Worker(name = "Fatuma Said", role = "Casual — cheese room", contact = "+255 745 333 444", hireDate = today.minus(DatePeriod(days = 10)), dailyRate = 2500.0, isSeasonal = true, status = "active"))
     }
 
     private suspend fun seedAttendanceRecords(db: ShambaDatabase) {
@@ -457,36 +453,36 @@ object DemoDataSeeder {
         val taskDao = db.taskDao()
         
         // Completed today
-        taskDao.insertTask(Task(title = "Morning milk collection — all does", assignedTo = 1, dueDate = today, status = "completed"))
+        taskDao.insert(Task(title = "Morning milk collection — all does", assignedTo = 1, dueDate = today, status = "completed"))
         // Pending high priority
-        taskDao.insertTask(Task(title = "Deworm sheep flock (Group B)", assignedTo = 2, dueDate = today, status = "pending"))
+        taskDao.insert(Task(title = "Deworm sheep flock (Group B)", assignedTo = 2, dueDate = today, status = "pending"))
         // Pending medium
-        taskDao.insertTask(Task(title = "Apply CAN top dressing — Plot A maize", assignedTo = 3, dueDate = today, status = "pending"))
-        taskDao.insertTask(Task(title = "Record weights — newborn kid", assignedTo = 1, dueDate = today, status = "pending"))
-        taskDao.insertTask(Task(title = "Check east perimeter fence", assignedTo = 2, dueDate = today, status = "pending"))
+        taskDao.insert(Task(title = "Apply CAN top dressing — Plot A maize", assignedTo = 3, dueDate = today, status = "pending"))
+        taskDao.insert(Task(title = "Record weights — newborn kid", assignedTo = 1, dueDate = today, status = "pending"))
+        taskDao.insert(Task(title = "Check east perimeter fence", assignedTo = 2, dueDate = today, status = "pending"))
         // Evening
-        taskDao.insertTask(Task(title = "Evening milk collection + log yield", assignedTo = 1, dueDate = today, status = "pending"))
+        taskDao.insert(Task(title = "Evening milk collection + log yield", assignedTo = 1, dueDate = today, status = "pending"))
         // Tomorrow
-        taskDao.insertTask(Task(title = "Spray Plot D tomatoes — Dithane", assignedTo = 3, dueDate = today.plusDays(1), status = "pending"))
+        taskDao.insert(Task(title = "Spray Plot D tomatoes — Dithane", assignedTo = 3, dueDate = today.plus(DatePeriod(days = 1)), status = "pending"))
         // Kidding prep in 5 days
-        taskDao.insertTask(Task(title = "Prepare kidding pen — G-22 Tumaini due", assignedTo = 1, dueDate = today.plusDays(5), status = "pending"))
+        taskDao.insert(Task(title = "Prepare kidding pen — G-22 Tumaini due", assignedTo = 1, dueDate = today.plus(DatePeriod(days = 5)), status = "pending"))
         // Overdue
-        taskDao.insertTask(Task(title = "Log feed inventory — daily silage draw-down", assignedTo = 2, dueDate = today.minusDays(1), status = "pending"))
+        taskDao.insert(Task(title = "Log feed inventory — daily silage draw-down", assignedTo = 2, dueDate = today.minus(DatePeriod(days = 1)), status = "pending"))
     }
 
     private suspend fun seedCalendarEvents(db: ShambaDatabase) {
         val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
         val calendarDao = db.calendarDao()
         
-        calendarDao.insertCalendarEvent(CalendarEvent(title = "Maize planting — Plot A", date = today.minusDays(55), type = "Planting"))
-        calendarDao.insertCalendarEvent(CalendarEvent(title = "Cheese batch CB-06 started", date = today.minusDays(12), type = "Cheese"))
-        calendarDao.insertCalendarEvent(CalendarEvent(title = "Korogwe livestock market", date = today.plusDays(2), type = "Market"))
-        calendarDao.insertCalendarEvent(CalendarEvent(title = "G-22 Tumaini — expected to kid", date = today.plusDays(5), type = "Reproduction"))
-        calendarDao.insertCalendarEvent(CalendarEvent(title = "Sheep deworming — Group A due", date = today.plusDays(7), type = "Health"))
-        calendarDao.insertCalendarEvent(CalendarEvent(title = "Tomato harvest window opens", date = today.plusDays(8), type = "Harvest"))
-        calendarDao.insertCalendarEvent(CalendarEvent(title = "G-01 Zawadi — PPR vaccination due", date = today.plusDays(3), type = "Vaccination"))
-        calendarDao.insertCalendarEvent(CalendarEvent(title = "Kale harvest — Plot E", date = today, type = "Harvest"))
-        calendarDao.insertCalendarEvent(CalendarEvent(title = "CRDB loan repayment due", date = today.plusDays(15), type = "Finance"))
+        calendarDao.insert(CalendarEvent(title = "Maize planting — Plot A", date = today.minus(DatePeriod(days = 55)), type = "Planting"))
+        calendarDao.insert(CalendarEvent(title = "Cheese batch CB-06 started", date = today.minus(DatePeriod(days = 12)), type = "Cheese"))
+        calendarDao.insert(CalendarEvent(title = "Korogwe livestock market", date = today.plus(DatePeriod(days = 2)), type = "Market"))
+        calendarDao.insert(CalendarEvent(title = "G-22 Tumaini — expected to kid", date = today.plus(DatePeriod(days = 5)), type = "Reproduction"))
+        calendarDao.insert(CalendarEvent(title = "Sheep deworming — Group A due", date = today.plus(DatePeriod(days = 7)), type = "Health"))
+        calendarDao.insert(CalendarEvent(title = "Tomato harvest window opens", date = today.plus(DatePeriod(days = 8)), type = "Harvest"))
+        calendarDao.insert(CalendarEvent(title = "G-01 Zawadi — PPR vaccination due", date = today.plus(DatePeriod(days = 3)), type = "Vaccination"))
+        calendarDao.insert(CalendarEvent(title = "Kale harvest — Plot E", date = today, type = "Harvest"))
+        calendarDao.insert(CalendarEvent(title = "CRDB loan repayment due", date = today.plus(DatePeriod(days = 15)), type = "Finance"))
     }
 
     private suspend fun seedWeatherLogs(db: ShambaDatabase) {
@@ -494,13 +490,13 @@ object DemoDataSeeder {
         val weatherDao = db.weatherDao()
         
         for (daysAgo in 1..14) {
-            val date = today.minusDays(daysAgo.toLong())
+            val date = today.minus(DatePeriod(days = daysAgo))
             val rainfall = when {
                 daysAgo in 3..5 -> 18.0 + Random.nextDouble() * 8.0
                 daysAgo == 8 -> 34.0
                 else -> Random.nextDouble() * 4.0
             }
-            weatherDao.insertWeatherLog(
+            weatherDao.insert(
                 WeatherLog(
                     date = date,
                     rainfallMm = rainfall,
@@ -516,36 +512,36 @@ object DemoDataSeeder {
         val maintenanceDao = db.maintenanceTaskDao()
         
         // Overdue
-        maintenanceDao.insertMaintenanceTask(
+        maintenanceDao.insert(
             MaintenanceTask(
                 title = "Generator monthly service",
                 description = "Oil check and general service",
                 type = MaintenanceType.EQUIPMENT_SERVICING,
                 priority = MaintenancePriority.HIGH,
-                scheduledDate = today.minusDays(5).toEpochDays().toLong() * 86400000L,
+                scheduledDate = today.minus(DatePeriod(days = 5)).toEpochDays().toLong() * 86400000L,
                 status = MaintenanceStatus.OVERDUE
             )
         )
         // Due next week
-        maintenanceDao.insertMaintenanceTask(
+        maintenanceDao.insert(
             MaintenanceTask(
                 title = "Farm pickup oil change",
                 description = "Oil change and tyre pressure check",
                 type = MaintenanceType.VEHICLE_MAINTENANCE,
                 priority = MaintenancePriority.MEDIUM,
-                scheduledDate = today.plusDays(8).toEpochDays().toLong() * 86400000L,
+                scheduledDate = today.plus(DatePeriod(days = 8)).toEpochDays().toLong() * 86400000L,
                 status = MaintenanceStatus.SCHEDULED
             )
         )
         // Completed
-        maintenanceDao.insertMaintenanceTask(
+        maintenanceDao.insert(
             MaintenanceTask(
                 title = "Water pump inspection",
                 description = "Impeller inspection and belt replacement",
                 type = MaintenanceType.WATER_SYSTEM_MAINTENANCE,
                 priority = MaintenancePriority.MEDIUM,
-                scheduledDate = today.minusDays(15).toEpochDays().toLong() * 86400000L,
-                completedDate = today.minusDays(14).toEpochDays().toLong() * 86400000L,
+                scheduledDate = today.minus(DatePeriod(days = 15)).toEpochDays().toLong() * 86400000L,
+                completedDate = today.minus(DatePeriod(days = 14)).toEpochDays().toLong() * 86400000L,
                 status = MaintenanceStatus.COMPLETED
             )
         )
@@ -587,19 +583,19 @@ object DemoDataSeeder {
         
         // Critical FAW on Plot A
         scoutingDao.insertReport(
-            ScoutingReport(plotId = 1, pestType = "Fall Armyworm", severityScore = 5, gpsLatitude = -5.148, gpsLongitude = 38.479, notes = "Heavy infestation in whorl. Frass visible. ~40% of plants affected.", detectedAt = today.minusDays(1).toEpochDays().toLong() * 86400000L)
+            ScoutingReport(plotId = 1, pestType = "Fall Armyworm", severityScore = 5, gpsLatitude = -5.148, gpsLongitude = 38.479, notes = "Heavy infestation in whorl. Frass visible. ~40% of plants affected.", detectedAt = today.minus(DatePeriod(days = 1)).toEpochDays().toLong() * 86400000L)
         )
         // Moderate aphids on Plot C
         scoutingDao.insertReport(
-            ScoutingReport(plotId = 3, pestType = "Aphids", severityScore = 3, gpsLatitude = -5.153, gpsLongitude = 38.477, notes = "Aphid colonies on bean leaves. Moderate infestation.", detectedAt = today.minusDays(3).toEpochDays().toLong() * 86400000L)
+            ScoutingReport(plotId = 3, pestType = "Aphids", severityScore = 3, gpsLatitude = -5.153, gpsLongitude = 38.477, notes = "Aphid colonies on bean leaves. Moderate infestation.", detectedAt = today.minus(DatePeriod(days = 3)).toEpochDays().toLong() * 86400000L)
         )
         // Low stalk borer
         scoutingDao.insertReport(
-            ScoutingReport(plotId = 1, pestType = "Maize Stalk Borer", severityScore = 2, gpsLatitude = -5.148, gpsLongitude = 38.480, notes = "Few plants affected. Monitoring.", detectedAt = today.minusDays(14).toEpochDays().toLong() * 86400000L)
+            ScoutingReport(plotId = 1, pestType = "Maize Stalk Borer", severityScore = 2, gpsLatitude = -5.148, gpsLongitude = 38.480, notes = "Few plants affected. Monitoring.", detectedAt = today.minus(DatePeriod(days = 14)).toEpochDays().toLong() * 86400000L)
         )
         // Moderate leafminer on Plot D
         scoutingDao.insertReport(
-            ScoutingReport(plotId = 4, pestType = "Leafminer", severityScore = 3, gpsLatitude = -5.155, gpsLongitude = 38.481, notes = "Tunnels visible on tomato leaves.", detectedAt = today.minusDays(2).toEpochDays().toLong() * 86400000L)
+            ScoutingReport(plotId = 4, pestType = "Leafminer", severityScore = 3, gpsLatitude = -5.155, gpsLongitude = 38.481, notes = "Tunnels visible on tomato leaves.", detectedAt = today.minus(DatePeriod(days = 2)).toEpochDays().toLong() * 86400000L)
         )
     }
 
@@ -842,8 +838,8 @@ object DemoDataSeeder {
         
         // Recent milk collections for cheese production
         for (daysAgo in 1..10) {
-            val date = today.minusDays(daysAgo.toLong())
-            cheeseDao.insertMilkCollection(
+            val date = today.minus(DatePeriod(days = daysAgo))
+            cheeseDao.insertCollection(
                 MilkCollection(date = date, quantityLitres = 28.0 + Random.nextDouble() * 8.0, accepted = true, qualityCheck = "pass")
             )
         }
@@ -854,26 +850,12 @@ object DemoDataSeeder {
         val harvestDao = db.harvestDao()
         
         // Previous kale harvest from Plot E
-        harvestDao.insertHarvestRecord(
-            HarvestRecord(cropPlantingId = 5, harvestDate = today.minusDays(30), quantityKg = 180.0, qualityGrade = "A", destination = "Korogwe market", pricePerKg = 200.0)
+        harvestDao.insert(
+            HarvestRecord(cropPlantingId = 5, harvestDate = today.minus(DatePeriod(days = 30)), quantityKg = 180.0, qualityGrade = "A", destination = "Korogwe market", pricePerKg = 200.0)
         )
         // Previous maize harvest from Plot A
-        harvestDao.insertHarvestRecord(
-            HarvestRecord(cropPlantingId = 1, harvestDate = today.minusDays(120), quantityKg = 1200.0, qualityGrade = "A", destination = "Storage", pricePerKg = 0.0)
-        )
-    }
-
-    private suspend fun seedCropInputs(db: ShambaDatabase) {
-        val today = Clock.System.todayIn(TimeZone.currentSystemDefault())
-        val cropDao = db.cropDao()
-        
-        // DAP applied to Plot A
-        cropDao.insertCropInput(
-            CropInput(plantingId = 1, inputType = "Fertilizer", productName = "DAP", quantity = 50.0, unit = "kg", cost = 18500.0, date = today.minusDays(20))
-        )
-        // CAN top dressing
-        cropDao.insertCropInput(
-            CropInput(plantingId = 1, inputType = "Fertilizer", productName = "CAN", quantity = 30.0, unit = "kg", cost = 13500.0, date = today.minusDays(5))
+        harvestDao.insert(
+            HarvestRecord(cropPlantingId = 1, harvestDate = today.minus(DatePeriod(days = 120)), quantityKg = 1200.0, qualityGrade = "A", destination = "Storage", pricePerKg = 0.0)
         )
     }
 }

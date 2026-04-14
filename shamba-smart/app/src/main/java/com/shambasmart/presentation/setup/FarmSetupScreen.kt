@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -75,7 +76,7 @@ fun FarmSetupScreen(
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -100,7 +101,7 @@ fun FarmSetupScreen(
                             onClick = { viewModel.previousStep() },
                             modifier = Modifier.weight(1f)
                         ) {
-                            Icon(Icons.Default.ArrowBack, contentDescription = null)
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                             Spacer(modifier = Modifier.width(8.dp))
                             Text("Previous")
                         }
@@ -120,7 +121,7 @@ fun FarmSetupScreen(
                         Text(if (currentStep < setupSteps.size) "Next" else "Complete Setup")
                         Spacer(modifier = Modifier.width(8.dp))
                         Icon(
-                            if (currentStep < setupSteps.size) Icons.Default.ArrowForward else Icons.Default.Check,
+                            if (currentStep < setupSteps.size) Icons.AutoMirrored.Filled.ArrowForward else Icons.Default.Check,
                             contentDescription = null
                         )
                     }
@@ -573,7 +574,7 @@ private fun InductFlockStep(onNavigateToLivestock: () -> Unit) {
             onClick = onNavigateToLivestock,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Icon(Icons.Default.List, contentDescription = null)
+            Icon(Icons.AutoMirrored.Filled.List, contentDescription = null)
             Spacer(modifier = Modifier.width(8.dp))
             Text("Go to Livestock Hub")
         }

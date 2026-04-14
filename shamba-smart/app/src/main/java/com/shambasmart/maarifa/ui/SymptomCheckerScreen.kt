@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -46,7 +47,7 @@ fun SymptomCheckerScreen(
                 title = { Text("Symptom Checker") },
                 navigationIcon = {
                     IconButton(onClick = onDismiss) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 }
             )
@@ -140,9 +141,11 @@ private fun StepSelectAnimal(viewModel: MaarifaViewModel, state: SymptomCheckerS
         }
     }
 
-    // TODO: Load actual animals from herd and display here
+    // Note: Animal selection from herd is not yet implemented
+    // For now, only "Unknown animal" option is available
+    Spacer(modifier = Modifier.height(8.dp))
     Text(
-        "Herd animals will appear here when available",
+        "Note: Selecting specific animals from your herd will be available in a future update.",
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.outline
     )

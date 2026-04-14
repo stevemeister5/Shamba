@@ -11,6 +11,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.*
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -102,8 +103,8 @@ fun MaarifaSidePanel(
                             icon = {
                                 Icon(
                                     when (tab) {
-                                        MaarifaTab.ASK -> Icons.Default.Chat
-                                        MaarifaTab.BROWSE -> Icons.Default.MenuBook
+                                        MaarifaTab.ASK -> Icons.AutoMirrored.Filled.Chat
+                                        MaarifaTab.BROWSE -> Icons.AutoMirrored.Filled.MenuBook
                                         MaarifaTab.SAVED -> Icons.Default.Bookmark
                                     },
                                     contentDescription = null
@@ -205,7 +206,7 @@ private fun AskTabContent(
                 },
                 enabled = queryText.isNotBlank() && !uiState.isLoading
             ) {
-                Icon(Icons.Default.Send, contentDescription = "Send")
+                Icon(Icons.AutoMirrored.Filled.Send, contentDescription = "Send")
             }
         }
     }
@@ -345,7 +346,7 @@ private fun BrowseTabContent(
                                 fontWeight = FontWeight.Bold
                             )
                             Text(
-                                text = chunk.text.take(150) + if (chunk.text.length > 150) "..." else "",
+                                text = chunk.displayText.take(150) + if (chunk.displayText.length > 150) "..." else "",
                                 style = MaterialTheme.typography.bodySmall
                             )
                             Text(
@@ -462,14 +463,14 @@ private fun SavedTabContent(
                                 modifier = Modifier.weight(1f)
                             )
                             IconButton(
-                                onClick = { viewModel.removeBookmark(chunk.chunkId) },
+                                onClick = { viewModel.removeBookmark(chunk.id) },
                                 modifier = Modifier.size(24.dp)
                             ) {
                                 Icon(Icons.Default.BookmarkRemove, contentDescription = "Remove")
                             }
                         }
                         Text(
-                            text = chunk.text.take(120) + "...",
+                            text = chunk.displayText.take(120) + "...",
                             style = MaterialTheme.typography.bodySmall
                         )
                     }

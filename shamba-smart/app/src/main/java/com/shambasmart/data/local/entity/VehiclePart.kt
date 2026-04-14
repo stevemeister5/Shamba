@@ -2,10 +2,23 @@ package com.shambasmart.data.local.entity
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import java.util.UUID
 
-@Entity(tableName = "vehicle_parts")
+@Entity(
+    tableName = "vehicle_parts",
+    foreignKeys = [
+        ForeignKey(
+            entity = Vehicle::class,
+            parentColumns = ["id"],
+            childColumns = ["vehicleId"],
+            onDelete = ForeignKey.CASCADE
+        )
+    ],
+    indices = [Index("vehicleId")]
+)
 data class VehiclePart(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
